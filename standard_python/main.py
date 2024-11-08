@@ -46,22 +46,39 @@ def main():
     # 'streaming_reflect' functions.
     force_array = np.zeros((sim.t_steps)) #initialising the array which will store the force throughout the whole simulation
 
-    time_start = time.time()
-
     for t in range(1, sim.t_steps + 1):
         print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
         print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
         # Perform collision step, using the calculated density and velocity data.
+        time1_start = time.time()
         f = collision(sim, f, feq)
+        time1_end = time.time()
+        print('collision() time: ', time1_end - time1_start)
 
         # Streaming and reflection
+        time2_start = time.time()
         f, momentum_total = stream_and_reflect(sim, f, u)
+        time2_end = time.time()
+        print('stream_and_reflect() time: ', time2_end - time2_start)
+
         force_array[t-1] = momentum_total
+
         # Calculate density and velocity data, for next time around
+        time3_start = time.time()
         rho = fluid_density(sim, f)
+        time3_end = time.time()
+        print('fluid_density() time: ', time3_end - time3_start)
+
+        time4_start = time.time()
         u = fluid_velocity(sim, f, rho)
+        time4_end = time.time()
+        print('fluid_velocity() time: ', time4_end - time4_start)
+
+        time5_start = time.time()
         feq = equilibrium(sim, rho, u)
+        time5_end = time.time()
+        print('equilibrium() time: ', time5_end - time5_start)
         #print('reynolds number: ', sim.Re)
         
         # if (t % sim.t_plot == 0):
@@ -73,8 +90,6 @@ def main():
         #                   test_mask_dir=test_mask_dir,
         #                   )
 
-    time_end = time.time()
-    print('TIME CALCULATION: ', time_end - time_start)
     
     data_dir = 'Data'
     os.makedirs(data_dir, exist_ok=True) # Ensure output directory exists

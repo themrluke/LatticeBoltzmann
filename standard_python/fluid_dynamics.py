@@ -7,7 +7,7 @@ import numpy as np
 def equilibrium(sim, rho, u):
     # Function for evaluating the equilibrium distribution, across the entire
     # lattice, for a given input fluid density and velocity field.
-    num_x, num_y, num_v = sim.num_x, sim.num_y, len(sim.c)# num_v: Number of velocity directions
+    num_x, num_y, num_v = sim.num_x, sim.num_y, sim.num_v# num_v: Number of velocity directions
 
     feq = np.zeros((num_x, num_y, num_v), dtype=np.float64)
 
@@ -31,7 +31,7 @@ def fluid_density(sim, f):
 
     for i in range(num_x):
         for j in range(num_y):
-            if sim.mask[i, j]:
+            if sim.mask[i, j] == 1:
                 rho[i, j] = 0.0001 # was 0.0001
             else:
                 rho[i, j] = np.sum(f[i, j, :])
@@ -40,12 +40,12 @@ def fluid_density(sim, f):
 
 def fluid_velocity(sim, f, rho):
     # Calculate the fluid velocity from the distribution f and the fluid density rho
-    num_x, num_y, num_v = sim.num_x, sim.num_y, len(sim.c)
+    num_x, num_y, num_v = sim.num_x, sim.num_y, sim.num_v
     u = np.zeros((num_x, num_y, 2), dtype=np.float64)
 
     for i in range(num_x):
         for j in range(num_y):
-            if sim.mask[i, j]:
+            if sim.mask[i, j] == 1:
                 u[i, j, 0] = 0
                 u[i, j, 1] = 0
             else:
@@ -61,7 +61,7 @@ def fluid_velocity(sim, f, rho):
 def collision(sim, f, feq):
     # Perform the collision step, updating the distribution f, 
     # using the equilibrium distribution provided in feq
-    num_x, num_y, num_v = sim.num_x, sim.num_y, len(sim.c)
+    num_x, num_y, num_v = sim.num_x, sim.num_y, sim.num_v
     tau_inv = 1 / sim.tau
     f_new = np.zeros((num_x, num_y, num_v), dtype=np.float64)
 
@@ -74,19 +74,30 @@ def collision(sim, f, feq):
 
 def stream_and_reflect(sim, f, u):
     # Perform the streaming and boundary reflection step.
-    delta_t = 1
-    num_x, num_y, num_v = sim.num_x, sim.num_y, len(sim.c)
-    momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)
+    momentum_point = np.zeros((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    momentum_total = 0.0
 
-    for i in range(num_v):
-        for x in range(num_x):
-            for y in range(num_y):
-                if sim.mask2[x, y]:
+    for i in range(sim.num_v):
+        for x in range(sim.num_x):
+            for y in range(sim.num_y):
+
+                rolled_x = (x + sim.c[i, 0]) % sim.num_x
+                rolled_y = (y + sim.c[i, 1]) % sim.num_y
+                
+                if sim.mask[x, y] == 1:
+                    f[x, y, i] = 0.0
                     continue
-                rolled_x = (x + sim.c[i, 0]) % num_x
-                rolled_y = (y + sim.c[i, 1]) % num_y
 
-                if sim.mask2[rolled_x, rolled_y]:
-                    momentum_point[x, y, i] = u[x, y, 0] * (f[x, y, i] + f[x, y, sim.reflection[i]])
-                f[x, y, i] = f[rolled_x, rolled_y, sim.reflection[i]]
-    return f, np.sum(momentum_point)
+
+                if sim.mask[rolled_x, rolled_y] == 1:
+                    f[x, y, i] = f[x, y, sim.reflection[i]]
+                else:
+                    f[x, y, i] = f[rolled_x, rolled_y, i]
+                
+                if sim.mask2[x, y] == 0:
+                    if sim.mask2[rolled_x, rolled_y] == 1:
+                        momentum_point[x, y, i] = u[x, y, 0] * (f[x, y, i] + f[x, y, sim.reflection[i]])
+                
+                momentum_total += momentum_point[x, y, i]
+
+    return f, momentum_total

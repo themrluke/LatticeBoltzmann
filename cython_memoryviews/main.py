@@ -27,14 +27,6 @@ def main():
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim)
 
-    # Create the initial distribution by finding the equilibrium for the flow
-    # calculated above.
-    f = equilibrium(sim, initial_rho, initial_u)
-
-    # We could just copy initial_rho, initial_v and f into rho, v and feq.
-    rho = fluid_density(sim, f)
-    u = fluid_velocity(sim, f, rho)
-    feq = equilibrium(sim, rho, u)
     #vor = fluid_vorticity(sim, u)
 
     # plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
@@ -46,9 +38,8 @@ def main():
 
     # Finally evolve the distribution in time, using the 'collision' and
     # 'streaming_reflect' functions.
-  
     time_start = time.time()
-    force_array = timestep_loop(sim, f, u, feq)
+    force_array = timestep_loop(sim, initial_rho, initial_u)
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 

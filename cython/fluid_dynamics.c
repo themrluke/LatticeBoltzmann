@@ -1825,7 +1825,7 @@ struct __pyx_obj_10parameters_Parameters {
   PyObject_HEAD
   int num_x;
   int num_y;
-  int num_vel;
+  int num_v;
   int t_steps;
   int t_plot;
   double tau;
@@ -2781,8 +2781,6 @@ static const char __pyx_k_delta_t[] = "delta_t";
 static const char __pyx_k_float64[] = "float64";
 static const char __pyx_k_t_steps[] = "t_steps";
 static const char __pyx_k_tau_inv[] = "tau_inv";
-static const char __pyx_k_total_x[] = "total_x";
-static const char __pyx_k_total_y[] = "total_y";
 static const char __pyx_k_u_dot_c[] = "u_dot_c";
 static const char __pyx_k_u_dot_u[] = "u_dot_u";
 static const char __pyx_k_rolled_x[] = "rolled_x";
@@ -2971,8 +2969,6 @@ typedef struct {
   PyObject *__pyx_n_s_time5_start;
   PyObject *__pyx_n_s_timestep_loop;
   PyObject *__pyx_n_s_total;
-  PyObject *__pyx_n_s_total_x;
-  PyObject *__pyx_n_s_total_y;
   PyObject *__pyx_n_s_u;
   PyObject *__pyx_n_s_u_dot_c;
   PyObject *__pyx_n_s_u_dot_u;
@@ -3133,8 +3129,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_time5_start);
   Py_CLEAR(clear_module_state->__pyx_n_s_timestep_loop);
   Py_CLEAR(clear_module_state->__pyx_n_s_total);
-  Py_CLEAR(clear_module_state->__pyx_n_s_total_x);
-  Py_CLEAR(clear_module_state->__pyx_n_s_total_y);
   Py_CLEAR(clear_module_state->__pyx_n_s_u);
   Py_CLEAR(clear_module_state->__pyx_n_s_u_dot_c);
   Py_CLEAR(clear_module_state->__pyx_n_s_u_dot_u);
@@ -3273,8 +3267,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_time5_start);
   Py_VISIT(traverse_module_state->__pyx_n_s_timestep_loop);
   Py_VISIT(traverse_module_state->__pyx_n_s_total);
-  Py_VISIT(traverse_module_state->__pyx_n_s_total_x);
-  Py_VISIT(traverse_module_state->__pyx_n_s_total_y);
   Py_VISIT(traverse_module_state->__pyx_n_s_u);
   Py_VISIT(traverse_module_state->__pyx_n_s_u_dot_c);
   Py_VISIT(traverse_module_state->__pyx_n_s_u_dot_u);
@@ -3443,8 +3435,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_time5_start __pyx_mstate_global->__pyx_n_s_time5_start
 #define __pyx_n_s_timestep_loop __pyx_mstate_global->__pyx_n_s_timestep_loop
 #define __pyx_n_s_total __pyx_mstate_global->__pyx_n_s_total
-#define __pyx_n_s_total_x __pyx_mstate_global->__pyx_n_s_total_x
-#define __pyx_n_s_total_y __pyx_mstate_global->__pyx_n_s_total_y
 #define __pyx_n_s_u __pyx_mstate_global->__pyx_n_s_u
 #define __pyx_n_s_u_dot_c __pyx_mstate_global->__pyx_n_s_u_dot_c
 #define __pyx_n_s_u_dot_u __pyx_mstate_global->__pyx_n_s_u_dot_u
@@ -6394,7 +6384,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_2equilibrium(CYTHON_UNUSED PyObject *
  *     """
  *     cdef int num_x = sim.num_x             # <<<<<<<<<<<<<<
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  */
   __pyx_t_1 = __pyx_v_sim->num_x;
   __pyx_v_num_x = __pyx_t_1;
@@ -6403,7 +6393,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_2equilibrium(CYTHON_UNUSED PyObject *
  *     """
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y             # <<<<<<<<<<<<<<
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=1] w = sim.w
  */
   __pyx_t_1 = __pyx_v_sim->num_y;
@@ -6412,16 +6402,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_2equilibrium(CYTHON_UNUSED PyObject *
   /* "fluid_dynamics.pyx":72
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel             # <<<<<<<<<<<<<<
+ *     cdef int num_v = sim.num_v             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=1] w = sim.w
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  */
-  __pyx_t_1 = __pyx_v_sim->num_vel;
+  __pyx_t_1 = __pyx_v_sim->num_v;
   __pyx_v_num_v = __pyx_t_1;
 
   /* "fluid_dynamics.pyx":73
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=1] w = sim.w             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef double cs2 = sim.cs**2
@@ -6441,7 +6431,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_2equilibrium(CYTHON_UNUSED PyObject *
   __pyx_t_2 = 0;
 
   /* "fluid_dynamics.pyx":74
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=1] w = sim.w
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c             # <<<<<<<<<<<<<<
  *     cdef double cs2 = sim.cs**2
@@ -7063,7 +7053,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject
  *     """
  *     cdef int num_x = sim.num_x             # <<<<<<<<<<<<<<
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  */
   __pyx_t_1 = __pyx_v_sim->num_x;
   __pyx_v_num_x = __pyx_t_1;
@@ -7072,7 +7062,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject
  *     """
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y             # <<<<<<<<<<<<<<
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=2] rho = np.zeros((num_x, num_y), dtype=np.float64)
  */
   __pyx_t_1 = __pyx_v_sim->num_y;
@@ -7081,16 +7071,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject
   /* "fluid_dynamics.pyx":99
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel             # <<<<<<<<<<<<<<
+ *     cdef int num_v = sim.num_v             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=2] rho = np.zeros((num_x, num_y), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
  */
-  __pyx_t_1 = __pyx_v_sim->num_vel;
+  __pyx_t_1 = __pyx_v_sim->num_v;
   __pyx_v_num_v = __pyx_t_1;
 
   /* "fluid_dynamics.pyx":100
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=2] rho = np.zeros((num_x, num_y), dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
  *     cdef int i, j, v
@@ -7146,7 +7136,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject
   __pyx_t_6 = 0;
 
   /* "fluid_dynamics.pyx":101
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=2] rho = np.zeros((num_x, num_y), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask             # <<<<<<<<<<<<<<
  *     cdef int i, j, v
@@ -7531,8 +7521,6 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   int __pyx_v_x;
   int __pyx_v_y;
   int __pyx_v_v;
-  double __pyx_v_total_x;
-  double __pyx_v_total_y;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_c;
   __Pyx_Buffer __pyx_pybuffer_c;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_f;
@@ -7567,7 +7555,9 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   int __pyx_t_20;
   Py_ssize_t __pyx_t_21;
   Py_ssize_t __pyx_t_22;
-  __pyx_t_5numpy_float64_t __pyx_t_23;
+  Py_ssize_t __pyx_t_23;
+  Py_ssize_t __pyx_t_24;
+  Py_ssize_t __pyx_t_25;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -7608,7 +7598,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
  *     """
  *     cdef int num_x = sim.num_x             # <<<<<<<<<<<<<<
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  */
   __pyx_t_1 = __pyx_v_sim->num_x;
   __pyx_v_num_x = __pyx_t_1;
@@ -7617,7 +7607,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
  *     """
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y             # <<<<<<<<<<<<<<
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  */
   __pyx_t_1 = __pyx_v_sim->num_y;
@@ -7626,16 +7616,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   /* "fluid_dynamics.pyx":125
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel             # <<<<<<<<<<<<<<
+ *     cdef int num_v = sim.num_v             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.float64_t, ndim=3] u = np.zeros((num_x, num_y, 2), dtype=np.float64)
  */
-  __pyx_t_1 = __pyx_v_sim->num_vel;
+  __pyx_t_1 = __pyx_v_sim->num_v;
   __pyx_v_num_v = __pyx_t_1;
 
   /* "fluid_dynamics.pyx":126
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=3] u = np.zeros((num_x, num_y, 2), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
@@ -7655,11 +7645,11 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   __pyx_t_2 = 0;
 
   /* "fluid_dynamics.pyx":127
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.float64_t, ndim=3] u = np.zeros((num_x, num_y, 2), dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
- * 
+ *     cdef int x, y, v
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -7718,7 +7708,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.float64_t, ndim=3] u = np.zeros((num_x, num_y, 2), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask             # <<<<<<<<<<<<<<
- * 
+ *     cdef int x, y, v
  * 
  */
   if (!(likely(((__pyx_v_sim->mask) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->mask, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 128, __pyx_L1_error)
@@ -7735,8 +7725,8 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   __pyx_v_mask = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "fluid_dynamics.pyx":134
- *     cdef double total_x, total_y
+  /* "fluid_dynamics.pyx":131
+ *     cdef int x, y, v
  * 
  *     for x in range(num_x):             # <<<<<<<<<<<<<<
  *         for y in range(num_y):
@@ -7747,7 +7737,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_x = __pyx_t_9;
 
-    /* "fluid_dynamics.pyx":135
+    /* "fluid_dynamics.pyx":132
  * 
  *     for x in range(num_x):
  *         for y in range(num_y):             # <<<<<<<<<<<<<<
@@ -7759,7 +7749,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
     for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
       __pyx_v_y = __pyx_t_12;
 
-      /* "fluid_dynamics.pyx":136
+      /* "fluid_dynamics.pyx":133
  *     for x in range(num_x):
  *         for y in range(num_y):
  *             if mask[x, y] == 1:             # <<<<<<<<<<<<<<
@@ -7779,17 +7769,17 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
       } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_mask.diminfo[1].shape)) __pyx_t_15 = 1;
       if (unlikely(__pyx_t_15 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_15);
-        __PYX_ERR(0, 136, __pyx_L1_error)
+        __PYX_ERR(0, 133, __pyx_L1_error)
       }
       __pyx_t_16 = ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_mask.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_mask.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_mask.diminfo[1].strides)) == 1);
       if (__pyx_t_16) {
 
-        /* "fluid_dynamics.pyx":137
+        /* "fluid_dynamics.pyx":134
  *         for y in range(num_y):
  *             if mask[x, y] == 1:
  *                 u[x, y, 0] = 0.0             # <<<<<<<<<<<<<<
  *                 u[x, y, 1] = 0.0
- *             else:
+ *                 for v in range(num_v):
  */
         __pyx_t_14 = __pyx_v_x;
         __pyx_t_13 = __pyx_v_y;
@@ -7809,16 +7799,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
         } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 137, __pyx_L1_error)
+          __PYX_ERR(0, 134, __pyx_L1_error)
         }
         *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_u.diminfo[2].strides) = 0.0;
 
-        /* "fluid_dynamics.pyx":138
+        /* "fluid_dynamics.pyx":135
  *             if mask[x, y] == 1:
  *                 u[x, y, 0] = 0.0
  *                 u[x, y, 1] = 0.0             # <<<<<<<<<<<<<<
- *             else:
- *                 total_x = 0
+ *                 for v in range(num_v):
+ *                     u[x, y, 0] += f[x, y, v] * c[v, 0]
  */
         __pyx_t_17 = __pyx_v_x;
         __pyx_t_13 = __pyx_v_y;
@@ -7838,57 +7828,28 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
         } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 138, __pyx_L1_error)
+          __PYX_ERR(0, 135, __pyx_L1_error)
         }
         *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_14, __pyx_pybuffernd_u.diminfo[2].strides) = 0.0;
 
         /* "fluid_dynamics.pyx":136
- *     for x in range(num_x):
- *         for y in range(num_y):
- *             if mask[x, y] == 1:             # <<<<<<<<<<<<<<
  *                 u[x, y, 0] = 0.0
  *                 u[x, y, 1] = 0.0
- */
-        goto __pyx_L7;
-      }
-
-      /* "fluid_dynamics.pyx":140
- *                 u[x, y, 1] = 0.0
- *             else:
- *                 total_x = 0             # <<<<<<<<<<<<<<
- *                 total_y = 0
- *                 for v in range(num_v):
- */
-      /*else*/ {
-        __pyx_v_total_x = 0.0;
-
-        /* "fluid_dynamics.pyx":141
- *             else:
- *                 total_x = 0
- *                 total_y = 0             # <<<<<<<<<<<<<<
- *                 for v in range(num_v):
- *                     total_x += f[x, y, v] * c[v, 0]
- */
-        __pyx_v_total_y = 0.0;
-
-        /* "fluid_dynamics.pyx":142
- *                 total_x = 0
- *                 total_y = 0
  *                 for v in range(num_v):             # <<<<<<<<<<<<<<
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]
+ *                     u[x, y, 0] += f[x, y, v] * c[v, 0]
+ *                     u[x, y, 1] += f[x, y, v] * c[v, 1]
  */
         __pyx_t_15 = __pyx_v_num_v;
         __pyx_t_18 = __pyx_t_15;
         for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
           __pyx_v_v = __pyx_t_19;
 
-          /* "fluid_dynamics.pyx":143
- *                 total_y = 0
+          /* "fluid_dynamics.pyx":137
+ *                 u[x, y, 1] = 0.0
  *                 for v in range(num_v):
- *                     total_x += f[x, y, v] * c[v, 0]             # <<<<<<<<<<<<<<
- *                     total_y += f[x, y, v] * c[v, 1]
- *                 u[x, y, 0] = total_x / rho[x, y]
+ *                     u[x, y, 0] += f[x, y, v] * c[v, 0]             # <<<<<<<<<<<<<<
+ *                     u[x, y, 1] += f[x, y, v] * c[v, 1]
+ *                 u[x, y, 0] /= rho[x, y]
  */
           __pyx_t_14 = __pyx_v_x;
           __pyx_t_13 = __pyx_v_y;
@@ -7908,7 +7869,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
           } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_20 = 2;
           if (unlikely(__pyx_t_20 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_20);
-            __PYX_ERR(0, 143, __pyx_L1_error)
+            __PYX_ERR(0, 137, __pyx_L1_error)
           }
           __pyx_t_21 = __pyx_v_v;
           __pyx_t_22 = 0;
@@ -7923,16 +7884,36 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_c.diminfo[1].shape)) __pyx_t_20 = 1;
           if (unlikely(__pyx_t_20 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_20);
-            __PYX_ERR(0, 143, __pyx_L1_error)
+            __PYX_ERR(0, 137, __pyx_L1_error)
           }
-          __pyx_v_total_x = (__pyx_v_total_x + ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_f.diminfo[2].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_c.diminfo[1].strides))));
+          __pyx_t_23 = __pyx_v_x;
+          __pyx_t_24 = __pyx_v_y;
+          __pyx_t_25 = 0;
+          __pyx_t_20 = -1;
+          if (__pyx_t_23 < 0) {
+            __pyx_t_23 += __pyx_pybuffernd_u.diminfo[0].shape;
+            if (unlikely(__pyx_t_23 < 0)) __pyx_t_20 = 0;
+          } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_20 = 0;
+          if (__pyx_t_24 < 0) {
+            __pyx_t_24 += __pyx_pybuffernd_u.diminfo[1].shape;
+            if (unlikely(__pyx_t_24 < 0)) __pyx_t_20 = 1;
+          } else if (unlikely(__pyx_t_24 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_20 = 1;
+          if (__pyx_t_25 < 0) {
+            __pyx_t_25 += __pyx_pybuffernd_u.diminfo[2].shape;
+            if (unlikely(__pyx_t_25 < 0)) __pyx_t_20 = 2;
+          } else if (unlikely(__pyx_t_25 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_20 = 2;
+          if (unlikely(__pyx_t_20 != -1)) {
+            __Pyx_RaiseBufferIndexError(__pyx_t_20);
+            __PYX_ERR(0, 137, __pyx_L1_error)
+          }
+          *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_25, __pyx_pybuffernd_u.diminfo[2].strides) += ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_f.diminfo[2].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_c.diminfo[1].strides)));
 
-          /* "fluid_dynamics.pyx":144
+          /* "fluid_dynamics.pyx":138
  *                 for v in range(num_v):
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]             # <<<<<<<<<<<<<<
- *                 u[x, y, 0] = total_x / rho[x, y]
- *                 u[x, y, 1] = total_y / rho[x, y]
+ *                     u[x, y, 0] += f[x, y, v] * c[v, 0]
+ *                     u[x, y, 1] += f[x, y, v] * c[v, 1]             # <<<<<<<<<<<<<<
+ *                 u[x, y, 0] /= rho[x, y]
+ *                 u[x, y, 1] /= rho[x, y]
  */
           __pyx_t_22 = __pyx_v_x;
           __pyx_t_21 = __pyx_v_y;
@@ -7952,7 +7933,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
           } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_20 = 2;
           if (unlikely(__pyx_t_20 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_20);
-            __PYX_ERR(0, 144, __pyx_L1_error)
+            __PYX_ERR(0, 138, __pyx_L1_error)
           }
           __pyx_t_13 = __pyx_v_v;
           __pyx_t_14 = 1;
@@ -7967,16 +7948,36 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
           } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_c.diminfo[1].shape)) __pyx_t_20 = 1;
           if (unlikely(__pyx_t_20 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_20);
-            __PYX_ERR(0, 144, __pyx_L1_error)
+            __PYX_ERR(0, 138, __pyx_L1_error)
           }
-          __pyx_v_total_y = (__pyx_v_total_y + ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_f.diminfo[2].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_c.diminfo[1].strides))));
+          __pyx_t_25 = __pyx_v_x;
+          __pyx_t_24 = __pyx_v_y;
+          __pyx_t_23 = 1;
+          __pyx_t_20 = -1;
+          if (__pyx_t_25 < 0) {
+            __pyx_t_25 += __pyx_pybuffernd_u.diminfo[0].shape;
+            if (unlikely(__pyx_t_25 < 0)) __pyx_t_20 = 0;
+          } else if (unlikely(__pyx_t_25 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_20 = 0;
+          if (__pyx_t_24 < 0) {
+            __pyx_t_24 += __pyx_pybuffernd_u.diminfo[1].shape;
+            if (unlikely(__pyx_t_24 < 0)) __pyx_t_20 = 1;
+          } else if (unlikely(__pyx_t_24 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_20 = 1;
+          if (__pyx_t_23 < 0) {
+            __pyx_t_23 += __pyx_pybuffernd_u.diminfo[2].shape;
+            if (unlikely(__pyx_t_23 < 0)) __pyx_t_20 = 2;
+          } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_20 = 2;
+          if (unlikely(__pyx_t_20 != -1)) {
+            __Pyx_RaiseBufferIndexError(__pyx_t_20);
+            __PYX_ERR(0, 138, __pyx_L1_error)
+          }
+          *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_23, __pyx_pybuffernd_u.diminfo[2].strides) += ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_f.diminfo[2].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_c.diminfo[1].strides)));
         }
 
-        /* "fluid_dynamics.pyx":145
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]
- *                 u[x, y, 0] = total_x / rho[x, y]             # <<<<<<<<<<<<<<
- *                 u[x, y, 1] = total_y / rho[x, y]
+        /* "fluid_dynamics.pyx":139
+ *                     u[x, y, 0] += f[x, y, v] * c[v, 0]
+ *                     u[x, y, 1] += f[x, y, v] * c[v, 1]
+ *                 u[x, y, 0] /= rho[x, y]             # <<<<<<<<<<<<<<
+ *                 u[x, y, 1] /= rho[x, y]
  *     return u
  */
         __pyx_t_14 = __pyx_v_x;
@@ -7992,91 +7993,88 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
         } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_rho.diminfo[1].shape)) __pyx_t_15 = 1;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 145, __pyx_L1_error)
+          __PYX_ERR(0, 139, __pyx_L1_error)
         }
-        __pyx_t_23 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_rho.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_rho.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_rho.diminfo[1].strides));
-        if (unlikely(__pyx_t_23 == 0)) {
-          PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-          __PYX_ERR(0, 145, __pyx_L1_error)
-        }
-        __pyx_t_13 = __pyx_v_x;
-        __pyx_t_14 = __pyx_v_y;
-        __pyx_t_17 = 0;
+        __pyx_t_17 = __pyx_v_x;
+        __pyx_t_21 = __pyx_v_y;
+        __pyx_t_22 = 0;
         __pyx_t_15 = -1;
-        if (__pyx_t_13 < 0) {
-          __pyx_t_13 += __pyx_pybuffernd_u.diminfo[0].shape;
-          if (unlikely(__pyx_t_13 < 0)) __pyx_t_15 = 0;
-        } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_15 = 0;
-        if (__pyx_t_14 < 0) {
-          __pyx_t_14 += __pyx_pybuffernd_u.diminfo[1].shape;
-          if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 1;
-        } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_15 = 1;
         if (__pyx_t_17 < 0) {
-          __pyx_t_17 += __pyx_pybuffernd_u.diminfo[2].shape;
-          if (unlikely(__pyx_t_17 < 0)) __pyx_t_15 = 2;
-        } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
+          __pyx_t_17 += __pyx_pybuffernd_u.diminfo[0].shape;
+          if (unlikely(__pyx_t_17 < 0)) __pyx_t_15 = 0;
+        } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_15 = 0;
+        if (__pyx_t_21 < 0) {
+          __pyx_t_21 += __pyx_pybuffernd_u.diminfo[1].shape;
+          if (unlikely(__pyx_t_21 < 0)) __pyx_t_15 = 1;
+        } else if (unlikely(__pyx_t_21 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_15 = 1;
+        if (__pyx_t_22 < 0) {
+          __pyx_t_22 += __pyx_pybuffernd_u.diminfo[2].shape;
+          if (unlikely(__pyx_t_22 < 0)) __pyx_t_15 = 2;
+        } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 145, __pyx_L1_error)
+          __PYX_ERR(0, 139, __pyx_L1_error)
         }
-        *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_u.diminfo[2].strides) = (((__pyx_t_5numpy_float64_t)__pyx_v_total_x) / __pyx_t_23);
+        *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_u.diminfo[2].strides) /= (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_rho.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_rho.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_rho.diminfo[1].strides));
 
-        /* "fluid_dynamics.pyx":146
- *                     total_y += f[x, y, v] * c[v, 1]
- *                 u[x, y, 0] = total_x / rho[x, y]
- *                 u[x, y, 1] = total_y / rho[x, y]             # <<<<<<<<<<<<<<
+        /* "fluid_dynamics.pyx":140
+ *                     u[x, y, 1] += f[x, y, v] * c[v, 1]
+ *                 u[x, y, 0] /= rho[x, y]
+ *                 u[x, y, 1] /= rho[x, y]             # <<<<<<<<<<<<<<
  *     return u
  * 
  */
-        __pyx_t_17 = __pyx_v_x;
+        __pyx_t_13 = __pyx_v_x;
         __pyx_t_14 = __pyx_v_y;
         __pyx_t_15 = -1;
-        if (__pyx_t_17 < 0) {
-          __pyx_t_17 += __pyx_pybuffernd_rho.diminfo[0].shape;
-          if (unlikely(__pyx_t_17 < 0)) __pyx_t_15 = 0;
-        } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_rho.diminfo[0].shape)) __pyx_t_15 = 0;
+        if (__pyx_t_13 < 0) {
+          __pyx_t_13 += __pyx_pybuffernd_rho.diminfo[0].shape;
+          if (unlikely(__pyx_t_13 < 0)) __pyx_t_15 = 0;
+        } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_rho.diminfo[0].shape)) __pyx_t_15 = 0;
         if (__pyx_t_14 < 0) {
           __pyx_t_14 += __pyx_pybuffernd_rho.diminfo[1].shape;
           if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 1;
         } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_rho.diminfo[1].shape)) __pyx_t_15 = 1;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 146, __pyx_L1_error)
+          __PYX_ERR(0, 140, __pyx_L1_error)
         }
-        __pyx_t_23 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_rho.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_rho.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_rho.diminfo[1].strides));
-        if (unlikely(__pyx_t_23 == 0)) {
-          PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-          __PYX_ERR(0, 146, __pyx_L1_error)
-        }
-        __pyx_t_14 = __pyx_v_x;
-        __pyx_t_17 = __pyx_v_y;
-        __pyx_t_13 = 1;
+        __pyx_t_22 = __pyx_v_x;
+        __pyx_t_21 = __pyx_v_y;
+        __pyx_t_17 = 1;
         __pyx_t_15 = -1;
-        if (__pyx_t_14 < 0) {
-          __pyx_t_14 += __pyx_pybuffernd_u.diminfo[0].shape;
-          if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 0;
-        } else if (unlikely(__pyx_t_14 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_15 = 0;
+        if (__pyx_t_22 < 0) {
+          __pyx_t_22 += __pyx_pybuffernd_u.diminfo[0].shape;
+          if (unlikely(__pyx_t_22 < 0)) __pyx_t_15 = 0;
+        } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_u.diminfo[0].shape)) __pyx_t_15 = 0;
+        if (__pyx_t_21 < 0) {
+          __pyx_t_21 += __pyx_pybuffernd_u.diminfo[1].shape;
+          if (unlikely(__pyx_t_21 < 0)) __pyx_t_15 = 1;
+        } else if (unlikely(__pyx_t_21 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_15 = 1;
         if (__pyx_t_17 < 0) {
-          __pyx_t_17 += __pyx_pybuffernd_u.diminfo[1].shape;
-          if (unlikely(__pyx_t_17 < 0)) __pyx_t_15 = 1;
-        } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[1].shape)) __pyx_t_15 = 1;
-        if (__pyx_t_13 < 0) {
-          __pyx_t_13 += __pyx_pybuffernd_u.diminfo[2].shape;
-          if (unlikely(__pyx_t_13 < 0)) __pyx_t_15 = 2;
-        } else if (unlikely(__pyx_t_13 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
+          __pyx_t_17 += __pyx_pybuffernd_u.diminfo[2].shape;
+          if (unlikely(__pyx_t_17 < 0)) __pyx_t_15 = 2;
+        } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_15 = 2;
         if (unlikely(__pyx_t_15 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_15);
-          __PYX_ERR(0, 146, __pyx_L1_error)
+          __PYX_ERR(0, 140, __pyx_L1_error)
         }
-        *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_14, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_13, __pyx_pybuffernd_u.diminfo[2].strides) = (((__pyx_t_5numpy_float64_t)__pyx_v_total_y) / __pyx_t_23);
+        *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_u.diminfo[2].strides) /= (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_rho.rcbuffer->pybuffer.buf, __pyx_t_13, __pyx_pybuffernd_rho.diminfo[0].strides, __pyx_t_14, __pyx_pybuffernd_rho.diminfo[1].strides));
+
+        /* "fluid_dynamics.pyx":133
+ *     for x in range(num_x):
+ *         for y in range(num_y):
+ *             if mask[x, y] == 1:             # <<<<<<<<<<<<<<
+ *                 u[x, y, 0] = 0.0
+ *                 u[x, y, 1] = 0.0
+ */
       }
-      __pyx_L7:;
     }
   }
 
-  /* "fluid_dynamics.pyx":147
- *                 u[x, y, 0] = total_x / rho[x, y]
- *                 u[x, y, 1] = total_y / rho[x, y]
+  /* "fluid_dynamics.pyx":141
+ *                 u[x, y, 0] /= rho[x, y]
+ *                 u[x, y, 1] /= rho[x, y]
  *     return u             # <<<<<<<<<<<<<<
  * 
  * def collision(Parameters sim,
@@ -8129,7 +8127,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   return __pyx_r;
 }
 
-/* "fluid_dynamics.pyx":149
+/* "fluid_dynamics.pyx":143
  *     return u
  * 
  * def collision(Parameters sim,             # <<<<<<<<<<<<<<
@@ -8197,7 +8195,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -8205,9 +8203,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, 1); __PYX_ERR(0, 149, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, 1); __PYX_ERR(0, 143, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -8215,14 +8213,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, 2); __PYX_ERR(0, 149, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, 2); __PYX_ERR(0, 143, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "collision") < 0)) __PYX_ERR(0, 149, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "collision") < 0)) __PYX_ERR(0, 143, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -8237,7 +8235,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 149, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("collision", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 143, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -8251,9 +8249,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sim), __pyx_ptype_10parameters_Parameters, 1, "sim", 0))) __PYX_ERR(0, 149, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_f), __pyx_ptype_5numpy_ndarray, 1, "f", 0))) __PYX_ERR(0, 150, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_feq), __pyx_ptype_5numpy_ndarray, 1, "feq", 0))) __PYX_ERR(0, 151, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sim), __pyx_ptype_10parameters_Parameters, 1, "sim", 0))) __PYX_ERR(0, 143, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_f), __pyx_ptype_5numpy_ndarray, 1, "f", 0))) __PYX_ERR(0, 144, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_feq), __pyx_ptype_5numpy_ndarray, 1, "feq", 0))) __PYX_ERR(0, 145, __pyx_L1_error)
   __pyx_r = __pyx_pf_14fluid_dynamics_8collision(__pyx_self, __pyx_v_sim, __pyx_v_f, __pyx_v_feq);
 
   /* function exit code */
@@ -8332,48 +8330,48 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   __pyx_pybuffernd_feq.rcbuffer = &__pyx_pybuffer_feq;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_f.rcbuffer->pybuffer, (PyObject*)__pyx_v_f, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 149, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_f.rcbuffer->pybuffer, (PyObject*)__pyx_v_f, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 143, __pyx_L1_error)
   }
   __pyx_pybuffernd_f.diminfo[0].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_f.diminfo[0].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_f.diminfo[1].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_f.diminfo[1].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_f.diminfo[2].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_f.diminfo[2].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[2];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_feq.rcbuffer->pybuffer, (PyObject*)__pyx_v_feq, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 149, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_feq.rcbuffer->pybuffer, (PyObject*)__pyx_v_feq, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 143, __pyx_L1_error)
   }
   __pyx_pybuffernd_feq.diminfo[0].strides = __pyx_pybuffernd_feq.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_feq.diminfo[0].shape = __pyx_pybuffernd_feq.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_feq.diminfo[1].strides = __pyx_pybuffernd_feq.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_feq.diminfo[1].shape = __pyx_pybuffernd_feq.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_feq.diminfo[2].strides = __pyx_pybuffernd_feq.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_feq.diminfo[2].shape = __pyx_pybuffernd_feq.rcbuffer->pybuffer.shape[2];
 
-  /* "fluid_dynamics.pyx":155
+  /* "fluid_dynamics.pyx":149
  *     Perform the collision step, updating the distribution f using feq.
  *     """
  *     cdef int num_x = sim.num_x             # <<<<<<<<<<<<<<
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  */
   __pyx_t_1 = __pyx_v_sim->num_x;
   __pyx_v_num_x = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":156
+  /* "fluid_dynamics.pyx":150
  *     """
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y             # <<<<<<<<<<<<<<
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef double tau_inv = sim.inv_tau
  */
   __pyx_t_1 = __pyx_v_sim->num_y;
   __pyx_v_num_y = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":157
+  /* "fluid_dynamics.pyx":151
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel             # <<<<<<<<<<<<<<
+ *     cdef int num_v = sim.num_v             # <<<<<<<<<<<<<<
  *     cdef double tau_inv = sim.inv_tau
  *     cdef np.ndarray[np.float64_t, ndim=3] f_new = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  */
-  __pyx_t_1 = __pyx_v_sim->num_vel;
+  __pyx_t_1 = __pyx_v_sim->num_v;
   __pyx_v_num_v = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":158
+  /* "fluid_dynamics.pyx":152
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef double tau_inv = sim.inv_tau             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=3] f_new = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  *     cdef int i, j, v
@@ -8381,61 +8379,61 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   __pyx_t_2 = __pyx_v_sim->inv_tau;
   __pyx_v_tau_inv = __pyx_t_2;
 
-  /* "fluid_dynamics.pyx":159
- *     cdef int num_v = sim.num_vel
+  /* "fluid_dynamics.pyx":153
+ *     cdef int num_v = sim.num_v
  *     cdef double tau_inv = sim.inv_tau
  *     cdef np.ndarray[np.float64_t, ndim=3] f_new = np.zeros((num_x, num_y, num_v), dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef int i, j, v
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_num_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_num_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_num_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_num_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_num_v); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_num_v); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_5)) __PYX_ERR(0, 159, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_5)) __PYX_ERR(0, 153, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_6);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_t_6)) __PYX_ERR(0, 159, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_t_6)) __PYX_ERR(0, 153, __pyx_L1_error);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
   __pyx_t_6 = 0;
-  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_7);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7)) __PYX_ERR(0, 159, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7)) __PYX_ERR(0, 153, __pyx_L1_error);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_float64); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 159, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 159, __pyx_L1_error)
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 153, __pyx_L1_error)
   __pyx_t_8 = ((PyArrayObject *)__pyx_t_3);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_f_new.rcbuffer->pybuffer, (PyObject*)__pyx_t_8, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 3, 0, __pyx_stack) == -1)) {
       __pyx_v_f_new = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_f_new.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 159, __pyx_L1_error)
+      __PYX_ERR(0, 153, __pyx_L1_error)
     } else {__pyx_pybuffernd_f_new.diminfo[0].strides = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_f_new.diminfo[0].shape = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_f_new.diminfo[1].strides = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_f_new.diminfo[1].shape = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_f_new.diminfo[2].strides = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_f_new.diminfo[2].shape = __pyx_pybuffernd_f_new.rcbuffer->pybuffer.shape[2];
     }
   }
@@ -8443,7 +8441,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   __pyx_v_f_new = ((PyArrayObject *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "fluid_dynamics.pyx":162
+  /* "fluid_dynamics.pyx":156
  *     cdef int i, j, v
  * 
  *     for i in range(num_x):             # <<<<<<<<<<<<<<
@@ -8455,7 +8453,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
     __pyx_v_i = __pyx_t_10;
 
-    /* "fluid_dynamics.pyx":163
+    /* "fluid_dynamics.pyx":157
  * 
  *     for i in range(num_x):
  *         for j in range(num_y):             # <<<<<<<<<<<<<<
@@ -8467,7 +8465,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
     for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
       __pyx_v_j = __pyx_t_13;
 
-      /* "fluid_dynamics.pyx":164
+      /* "fluid_dynamics.pyx":158
  *     for i in range(num_x):
  *         for j in range(num_y):
  *             for v in range(num_v):             # <<<<<<<<<<<<<<
@@ -8479,7 +8477,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
       for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
         __pyx_v_v = __pyx_t_16;
 
-        /* "fluid_dynamics.pyx":165
+        /* "fluid_dynamics.pyx":159
  *         for j in range(num_y):
  *             for v in range(num_v):
  *                 f_new[i, j, v] = f[i, j, v] * (1 - tau_inv) + feq[i, j, v] * tau_inv             # <<<<<<<<<<<<<<
@@ -8504,7 +8502,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
         } else if (unlikely(__pyx_t_19 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_20 = 2;
         if (unlikely(__pyx_t_20 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_20);
-          __PYX_ERR(0, 165, __pyx_L1_error)
+          __PYX_ERR(0, 159, __pyx_L1_error)
         }
         __pyx_t_21 = __pyx_v_i;
         __pyx_t_22 = __pyx_v_j;
@@ -8524,7 +8522,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
         } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_feq.diminfo[2].shape)) __pyx_t_20 = 2;
         if (unlikely(__pyx_t_20 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_20);
-          __PYX_ERR(0, 165, __pyx_L1_error)
+          __PYX_ERR(0, 159, __pyx_L1_error)
         }
         __pyx_t_24 = __pyx_v_i;
         __pyx_t_25 = __pyx_v_j;
@@ -8544,14 +8542,14 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
         } else if (unlikely(__pyx_t_26 >= __pyx_pybuffernd_f_new.diminfo[2].shape)) __pyx_t_20 = 2;
         if (unlikely(__pyx_t_20 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_20);
-          __PYX_ERR(0, 165, __pyx_L1_error)
+          __PYX_ERR(0, 159, __pyx_L1_error)
         }
         *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f_new.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_f_new.diminfo[0].strides, __pyx_t_25, __pyx_pybuffernd_f_new.diminfo[1].strides, __pyx_t_26, __pyx_pybuffernd_f_new.diminfo[2].strides) = (((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_18, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_19, __pyx_pybuffernd_f.diminfo[2].strides)) * (1.0 - __pyx_v_tau_inv)) + ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_feq.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_feq.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_feq.diminfo[1].strides, __pyx_t_23, __pyx_pybuffernd_feq.diminfo[2].strides)) * __pyx_v_tau_inv));
       }
     }
   }
 
-  /* "fluid_dynamics.pyx":166
+  /* "fluid_dynamics.pyx":160
  *             for v in range(num_v):
  *                 f_new[i, j, v] = f[i, j, v] * (1 - tau_inv) + feq[i, j, v] * tau_inv
  *     return f_new             # <<<<<<<<<<<<<<
@@ -8563,7 +8561,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   __pyx_r = ((PyObject *)__pyx_v_f_new);
   goto __pyx_L0;
 
-  /* "fluid_dynamics.pyx":149
+  /* "fluid_dynamics.pyx":143
  *     return u
  * 
  * def collision(Parameters sim,             # <<<<<<<<<<<<<<
@@ -8600,7 +8598,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__
   return __pyx_r;
 }
 
-/* "fluid_dynamics.pyx":169
+/* "fluid_dynamics.pyx":163
  * 
  * 
  * def stream_and_reflect(Parameters sim,             # <<<<<<<<<<<<<<
@@ -8668,7 +8666,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -8676,9 +8674,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, 1); __PYX_ERR(0, 169, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, 1); __PYX_ERR(0, 163, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -8686,14 +8684,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, 2); __PYX_ERR(0, 169, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, 2); __PYX_ERR(0, 163, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "stream_and_reflect") < 0)) __PYX_ERR(0, 169, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "stream_and_reflect") < 0)) __PYX_ERR(0, 163, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -8708,7 +8706,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 169, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("stream_and_reflect", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 163, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -8722,9 +8720,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sim), __pyx_ptype_10parameters_Parameters, 1, "sim", 0))) __PYX_ERR(0, 169, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_f), __pyx_ptype_5numpy_ndarray, 1, "f", 0))) __PYX_ERR(0, 170, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_u), __pyx_ptype_5numpy_ndarray, 1, "u", 0))) __PYX_ERR(0, 171, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sim), __pyx_ptype_10parameters_Parameters, 1, "sim", 0))) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_f), __pyx_ptype_5numpy_ndarray, 1, "f", 0))) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_u), __pyx_ptype_5numpy_ndarray, 1, "u", 0))) __PYX_ERR(0, 165, __pyx_L1_error)
   __pyx_r = __pyx_pf_14fluid_dynamics_10stream_and_reflect(__pyx_self, __pyx_v_sim, __pyx_v_f, __pyx_v_u);
 
   /* function exit code */
@@ -8840,16 +8838,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
   __pyx_pybuffernd_u.rcbuffer = &__pyx_pybuffer_u;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_f.rcbuffer->pybuffer, (PyObject*)__pyx_v_f, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 169, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_f.rcbuffer->pybuffer, (PyObject*)__pyx_v_f, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 163, __pyx_L1_error)
   }
   __pyx_pybuffernd_f.diminfo[0].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_f.diminfo[0].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_f.diminfo[1].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_f.diminfo[1].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_f.diminfo[2].strides = __pyx_pybuffernd_f.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_f.diminfo[2].shape = __pyx_pybuffernd_f.rcbuffer->pybuffer.shape[2];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_u.rcbuffer->pybuffer, (PyObject*)__pyx_v_u, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 169, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_u.rcbuffer->pybuffer, (PyObject*)__pyx_v_u, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 163, __pyx_L1_error)
   }
   __pyx_pybuffernd_u.diminfo[0].strides = __pyx_pybuffernd_u.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_u.diminfo[0].shape = __pyx_pybuffernd_u.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_u.diminfo[1].strides = __pyx_pybuffernd_u.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_u.diminfo[1].shape = __pyx_pybuffernd_u.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_u.diminfo[2].strides = __pyx_pybuffernd_u.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_u.diminfo[2].shape = __pyx_pybuffernd_u.rcbuffer->pybuffer.shape[2];
 
-  /* "fluid_dynamics.pyx":175
+  /* "fluid_dynamics.pyx":169
  *     Perform the streaming and boundary reflection step.
  *     """
  *     cdef int delta_t = 1             # <<<<<<<<<<<<<<
@@ -8858,91 +8856,91 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
   __pyx_v_delta_t = 1;
 
-  /* "fluid_dynamics.pyx":176
+  /* "fluid_dynamics.pyx":170
  *     """
  *     cdef int delta_t = 1
  *     cdef int num_x = sim.num_x             # <<<<<<<<<<<<<<
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  */
   __pyx_t_1 = __pyx_v_sim->num_x;
   __pyx_v_num_x = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":177
+  /* "fluid_dynamics.pyx":171
  *     cdef int delta_t = 1
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y             # <<<<<<<<<<<<<<
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=3] momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  */
   __pyx_t_1 = __pyx_v_sim->num_y;
   __pyx_v_num_y = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":178
+  /* "fluid_dynamics.pyx":172
  *     cdef int num_x = sim.num_x
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel             # <<<<<<<<<<<<<<
+ *     cdef int num_v = sim.num_v             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float64_t, ndim=3] momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  */
-  __pyx_t_1 = __pyx_v_sim->num_vel;
+  __pyx_t_1 = __pyx_v_sim->num_v;
   __pyx_v_num_v = __pyx_t_1;
 
-  /* "fluid_dynamics.pyx":179
+  /* "fluid_dynamics.pyx":173
  *     cdef int num_y = sim.num_y
- *     cdef int num_v = sim.num_vel
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=3] momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.int32_t, ndim=1] reflection = sim.reflection
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_num_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_num_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_num_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_num_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_num_v); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_num_v); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_2);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_4);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_4)) __PYX_ERR(0, 179, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_4)) __PYX_ERR(0, 173, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_5)) __PYX_ERR(0, 179, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_5)) __PYX_ERR(0, 173, __pyx_L1_error);
   __pyx_t_2 = 0;
   __pyx_t_4 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6)) __PYX_ERR(0, 179, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6)) __PYX_ERR(0, 173, __pyx_L1_error);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_t_2) < 0) __PYX_ERR(0, 179, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_t_2) < 0) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 179, __pyx_L1_error)
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 173, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_momentum_point.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 3, 0, __pyx_stack) == -1)) {
       __pyx_v_momentum_point = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 179, __pyx_L1_error)
+      __PYX_ERR(0, 173, __pyx_L1_error)
     } else {__pyx_pybuffernd_momentum_point.diminfo[0].strides = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_momentum_point.diminfo[0].shape = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_momentum_point.diminfo[1].strides = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_momentum_point.diminfo[1].shape = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_momentum_point.diminfo[2].strides = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_momentum_point.diminfo[2].shape = __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.shape[2];
     }
   }
@@ -8950,91 +8948,91 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
   __pyx_v_momentum_point = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":180
- *     cdef int num_v = sim.num_vel
+  /* "fluid_dynamics.pyx":174
+ *     cdef int num_v = sim.num_v
  *     cdef np.ndarray[np.float64_t, ndim=3] momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=1] reflection = sim.reflection
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
  */
-  if (!(likely(((__pyx_v_sim->c) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->c, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 180, __pyx_L1_error)
+  if (!(likely(((__pyx_v_sim->c) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->c, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 174, __pyx_L1_error)
   __pyx_t_2 = __pyx_v_sim->c;
   __Pyx_INCREF(__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_c.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_c = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_c.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 180, __pyx_L1_error)
+      __PYX_ERR(0, 174, __pyx_L1_error)
     } else {__pyx_pybuffernd_c.diminfo[0].strides = __pyx_pybuffernd_c.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_c.diminfo[0].shape = __pyx_pybuffernd_c.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_c.diminfo[1].strides = __pyx_pybuffernd_c.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_c.diminfo[1].shape = __pyx_pybuffernd_c.rcbuffer->pybuffer.shape[1];
     }
   }
   __pyx_v_c = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":181
+  /* "fluid_dynamics.pyx":175
  *     cdef np.ndarray[np.float64_t, ndim=3] momentum_point = np.zeros((num_x, num_y, num_v), dtype=np.float64)
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.int32_t, ndim=1] reflection = sim.reflection             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
  *     cdef np.ndarray[np.int32_t, ndim=2] mask2 = sim.mask2
  */
-  if (!(likely(((__pyx_v_sim->reflection) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->reflection, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 181, __pyx_L1_error)
+  if (!(likely(((__pyx_v_sim->reflection) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->reflection, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 175, __pyx_L1_error)
   __pyx_t_2 = __pyx_v_sim->reflection;
   __Pyx_INCREF(__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_reflection.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_reflection = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_reflection.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 181, __pyx_L1_error)
+      __PYX_ERR(0, 175, __pyx_L1_error)
     } else {__pyx_pybuffernd_reflection.diminfo[0].strides = __pyx_pybuffernd_reflection.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_reflection.diminfo[0].shape = __pyx_pybuffernd_reflection.rcbuffer->pybuffer.shape[0];
     }
   }
   __pyx_v_reflection = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":182
+  /* "fluid_dynamics.pyx":176
  *     cdef np.ndarray[np.int32_t, ndim=2] c = sim.c
  *     cdef np.ndarray[np.int32_t, ndim=1] reflection = sim.reflection
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int32_t, ndim=2] mask2 = sim.mask2
  *     cdef int i, x, y, rolled_x, rolled_y
  */
-  if (!(likely(((__pyx_v_sim->mask) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->mask, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 182, __pyx_L1_error)
+  if (!(likely(((__pyx_v_sim->mask) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->mask, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 176, __pyx_L1_error)
   __pyx_t_2 = __pyx_v_sim->mask;
   __Pyx_INCREF(__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_mask.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_mask = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_mask.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 182, __pyx_L1_error)
+      __PYX_ERR(0, 176, __pyx_L1_error)
     } else {__pyx_pybuffernd_mask.diminfo[0].strides = __pyx_pybuffernd_mask.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_mask.diminfo[0].shape = __pyx_pybuffernd_mask.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_mask.diminfo[1].strides = __pyx_pybuffernd_mask.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_mask.diminfo[1].shape = __pyx_pybuffernd_mask.rcbuffer->pybuffer.shape[1];
     }
   }
   __pyx_v_mask = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":183
+  /* "fluid_dynamics.pyx":177
  *     cdef np.ndarray[np.int32_t, ndim=1] reflection = sim.reflection
  *     cdef np.ndarray[np.int32_t, ndim=2] mask = sim.mask
  *     cdef np.ndarray[np.int32_t, ndim=2] mask2 = sim.mask2             # <<<<<<<<<<<<<<
  *     cdef int i, x, y, rolled_x, rolled_y
  *     cdef double momentum_total = 0.0
  */
-  if (!(likely(((__pyx_v_sim->mask2) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->mask2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 183, __pyx_L1_error)
+  if (!(likely(((__pyx_v_sim->mask2) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sim->mask2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 177, __pyx_L1_error)
   __pyx_t_2 = __pyx_v_sim->mask2;
   __Pyx_INCREF(__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_mask2.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_mask2 = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_mask2.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 183, __pyx_L1_error)
+      __PYX_ERR(0, 177, __pyx_L1_error)
     } else {__pyx_pybuffernd_mask2.diminfo[0].strides = __pyx_pybuffernd_mask2.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_mask2.diminfo[0].shape = __pyx_pybuffernd_mask2.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_mask2.diminfo[1].strides = __pyx_pybuffernd_mask2.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_mask2.diminfo[1].shape = __pyx_pybuffernd_mask2.rcbuffer->pybuffer.shape[1];
     }
   }
   __pyx_v_mask2 = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":185
+  /* "fluid_dynamics.pyx":179
  *     cdef np.ndarray[np.int32_t, ndim=2] mask2 = sim.mask2
  *     cdef int i, x, y, rolled_x, rolled_y
  *     cdef double momentum_total = 0.0             # <<<<<<<<<<<<<<
@@ -9043,7 +9041,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
   __pyx_v_momentum_total = 0.0;
 
-  /* "fluid_dynamics.pyx":187
+  /* "fluid_dynamics.pyx":181
  *     cdef double momentum_total = 0.0
  * 
  *     for i in range(num_v):             # <<<<<<<<<<<<<<
@@ -9055,7 +9053,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "fluid_dynamics.pyx":188
+    /* "fluid_dynamics.pyx":182
  * 
  *     for i in range(num_v):
  *         for x in range(num_x):             # <<<<<<<<<<<<<<
@@ -9067,7 +9065,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
     for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
       __pyx_v_x = __pyx_t_12;
 
-      /* "fluid_dynamics.pyx":189
+      /* "fluid_dynamics.pyx":183
  *     for i in range(num_v):
  *         for x in range(num_x):
  *             for y in range(num_y):             # <<<<<<<<<<<<<<
@@ -9079,7 +9077,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
       for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
         __pyx_v_y = __pyx_t_15;
 
-        /* "fluid_dynamics.pyx":191
+        /* "fluid_dynamics.pyx":185
  *             for y in range(num_y):
  * 
  *                 rolled_x = (x + c[i, 0]) % num_x             # <<<<<<<<<<<<<<
@@ -9099,16 +9097,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_c.diminfo[1].shape)) __pyx_t_18 = 1;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 191, __pyx_L1_error)
+          __PYX_ERR(0, 185, __pyx_L1_error)
         }
         __pyx_t_19 = (__pyx_v_x + (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_c.diminfo[1].strides)));
         if (unlikely(__pyx_v_num_x == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 191, __pyx_L1_error)
+          __PYX_ERR(0, 185, __pyx_L1_error)
         }
         __pyx_v_rolled_x = __Pyx_mod___pyx_t_5numpy_int32_t(__pyx_t_19, __pyx_v_num_x);
 
-        /* "fluid_dynamics.pyx":192
+        /* "fluid_dynamics.pyx":186
  * 
  *                 rolled_x = (x + c[i, 0]) % num_x
  *                 rolled_y = (y + c[i, 1]) % num_y             # <<<<<<<<<<<<<<
@@ -9128,16 +9126,16 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_16 >= __pyx_pybuffernd_c.diminfo[1].shape)) __pyx_t_18 = 1;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 192, __pyx_L1_error)
+          __PYX_ERR(0, 186, __pyx_L1_error)
         }
         __pyx_t_19 = (__pyx_v_y + (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_c.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_c.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_c.diminfo[1].strides)));
         if (unlikely(__pyx_v_num_y == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-          __PYX_ERR(0, 192, __pyx_L1_error)
+          __PYX_ERR(0, 186, __pyx_L1_error)
         }
         __pyx_v_rolled_y = __Pyx_mod___pyx_t_5numpy_int32_t(__pyx_t_19, __pyx_v_num_y);
 
-        /* "fluid_dynamics.pyx":194
+        /* "fluid_dynamics.pyx":188
  *                 rolled_y = (y + c[i, 1]) % num_y
  * 
  *                 if mask[x, y] == 1:             # <<<<<<<<<<<<<<
@@ -9157,12 +9155,12 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_mask.diminfo[1].shape)) __pyx_t_18 = 1;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 194, __pyx_L1_error)
+          __PYX_ERR(0, 188, __pyx_L1_error)
         }
         __pyx_t_20 = ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_mask.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_mask.diminfo[0].strides, __pyx_t_17, __pyx_pybuffernd_mask.diminfo[1].strides)) == 1);
         if (__pyx_t_20) {
 
-          /* "fluid_dynamics.pyx":195
+          /* "fluid_dynamics.pyx":189
  * 
  *                 if mask[x, y] == 1:
  *                     f[x, y, i] = 0.0             # <<<<<<<<<<<<<<
@@ -9187,11 +9185,11 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_21 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
           if (unlikely(__pyx_t_18 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_18);
-            __PYX_ERR(0, 195, __pyx_L1_error)
+            __PYX_ERR(0, 189, __pyx_L1_error)
           }
           *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_21, __pyx_pybuffernd_f.diminfo[2].strides) = 0.0;
 
-          /* "fluid_dynamics.pyx":196
+          /* "fluid_dynamics.pyx":190
  *                 if mask[x, y] == 1:
  *                     f[x, y, i] = 0.0
  *                     continue             # <<<<<<<<<<<<<<
@@ -9200,7 +9198,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
           goto __pyx_L7_continue;
 
-          /* "fluid_dynamics.pyx":194
+          /* "fluid_dynamics.pyx":188
  *                 rolled_y = (y + c[i, 1]) % num_y
  * 
  *                 if mask[x, y] == 1:             # <<<<<<<<<<<<<<
@@ -9209,7 +9207,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
         }
 
-        /* "fluid_dynamics.pyx":199
+        /* "fluid_dynamics.pyx":193
  * 
  * 
  *                 if mask[rolled_x, rolled_y] == 1:             # <<<<<<<<<<<<<<
@@ -9229,39 +9227,39 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_16 >= __pyx_pybuffernd_mask.diminfo[1].shape)) __pyx_t_18 = 1;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 199, __pyx_L1_error)
+          __PYX_ERR(0, 193, __pyx_L1_error)
         }
         __pyx_t_20 = ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_mask.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_mask.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_mask.diminfo[1].strides)) == 1);
         if (__pyx_t_20) {
 
-          /* "fluid_dynamics.pyx":200
+          /* "fluid_dynamics.pyx":194
  * 
  *                 if mask[rolled_x, rolled_y] == 1:
  *                     f[x, y, i] = f[x, y, sim.reflection[i]]             # <<<<<<<<<<<<<<
  *                 else:
  *                     f[x, y, i] = f[rolled_x, rolled_y, i]
  */
-          __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_6);
-          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sim->reflection, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_sim->reflection, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_3 = PyTuple_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_GIVEREF(__pyx_t_2);
-          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2)) __PYX_ERR(0, 200, __pyx_L1_error);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2)) __PYX_ERR(0, 194, __pyx_L1_error);
           __Pyx_GIVEREF(__pyx_t_6);
-          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_6)) __PYX_ERR(0, 200, __pyx_L1_error);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_6)) __PYX_ERR(0, 194, __pyx_L1_error);
           __Pyx_GIVEREF(__pyx_t_5);
-          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_t_5)) __PYX_ERR(0, 200, __pyx_L1_error);
+          if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_t_5)) __PYX_ERR(0, 194, __pyx_L1_error);
           __pyx_t_2 = 0;
           __pyx_t_6 = 0;
           __pyx_t_5 = 0;
-          __pyx_t_5 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_f), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_f), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-          __pyx_t_22 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_22 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L1_error)
+          __pyx_t_22 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_22 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 194, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __pyx_t_16 = __pyx_v_x;
           __pyx_t_21 = __pyx_v_y;
@@ -9281,11 +9279,11 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
           if (unlikely(__pyx_t_18 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_18);
-            __PYX_ERR(0, 200, __pyx_L1_error)
+            __PYX_ERR(0, 194, __pyx_L1_error)
           }
           *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_f.diminfo[2].strides) = __pyx_t_22;
 
-          /* "fluid_dynamics.pyx":199
+          /* "fluid_dynamics.pyx":193
  * 
  * 
  *                 if mask[rolled_x, rolled_y] == 1:             # <<<<<<<<<<<<<<
@@ -9295,7 +9293,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           goto __pyx_L10;
         }
 
-        /* "fluid_dynamics.pyx":202
+        /* "fluid_dynamics.pyx":196
  *                     f[x, y, i] = f[x, y, sim.reflection[i]]
  *                 else:
  *                     f[x, y, i] = f[rolled_x, rolled_y, i]             # <<<<<<<<<<<<<<
@@ -9321,7 +9319,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_16 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
           if (unlikely(__pyx_t_18 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_18);
-            __PYX_ERR(0, 202, __pyx_L1_error)
+            __PYX_ERR(0, 196, __pyx_L1_error)
           }
           __pyx_t_23 = __pyx_v_x;
           __pyx_t_24 = __pyx_v_y;
@@ -9341,13 +9339,13 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_25 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
           if (unlikely(__pyx_t_18 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_18);
-            __PYX_ERR(0, 202, __pyx_L1_error)
+            __PYX_ERR(0, 196, __pyx_L1_error)
           }
           *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_25, __pyx_pybuffernd_f.diminfo[2].strides) = (*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_16, __pyx_pybuffernd_f.diminfo[2].strides));
         }
         __pyx_L10:;
 
-        /* "fluid_dynamics.pyx":204
+        /* "fluid_dynamics.pyx":198
  *                     f[x, y, i] = f[rolled_x, rolled_y, i]
  * 
  *                 if mask2[x, y] == 0:             # <<<<<<<<<<<<<<
@@ -9367,12 +9365,12 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_21 >= __pyx_pybuffernd_mask2.diminfo[1].shape)) __pyx_t_18 = 1;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 204, __pyx_L1_error)
+          __PYX_ERR(0, 198, __pyx_L1_error)
         }
         __pyx_t_20 = ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_mask2.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_mask2.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_mask2.diminfo[1].strides)) == 0);
         if (__pyx_t_20) {
 
-          /* "fluid_dynamics.pyx":205
+          /* "fluid_dynamics.pyx":199
  * 
  *                 if mask2[x, y] == 0:
  *                     if mask2[rolled_x, rolled_y] == 1:             # <<<<<<<<<<<<<<
@@ -9392,12 +9390,12 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_16 >= __pyx_pybuffernd_mask2.diminfo[1].shape)) __pyx_t_18 = 1;
           if (unlikely(__pyx_t_18 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_18);
-            __PYX_ERR(0, 205, __pyx_L1_error)
+            __PYX_ERR(0, 199, __pyx_L1_error)
           }
           __pyx_t_20 = ((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_mask2.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_mask2.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_mask2.diminfo[1].strides)) == 1);
           if (__pyx_t_20) {
 
-            /* "fluid_dynamics.pyx":206
+            /* "fluid_dynamics.pyx":200
  *                 if mask2[x, y] == 0:
  *                     if mask2[rolled_x, rolled_y] == 1:
  *                         momentum_point[x, y, i] = u[x, y, 0] * (f[x, y, i] + f[x, y, reflection[i]])             # <<<<<<<<<<<<<<
@@ -9422,7 +9420,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_17 >= __pyx_pybuffernd_u.diminfo[2].shape)) __pyx_t_18 = 2;
             if (unlikely(__pyx_t_18 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_18);
-              __PYX_ERR(0, 206, __pyx_L1_error)
+              __PYX_ERR(0, 200, __pyx_L1_error)
             }
             __pyx_t_25 = __pyx_v_x;
             __pyx_t_24 = __pyx_v_y;
@@ -9442,7 +9440,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_23 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
             if (unlikely(__pyx_t_18 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_18);
-              __PYX_ERR(0, 206, __pyx_L1_error)
+              __PYX_ERR(0, 200, __pyx_L1_error)
             }
             __pyx_t_26 = __pyx_v_i;
             __pyx_t_18 = -1;
@@ -9452,7 +9450,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_26 >= __pyx_pybuffernd_reflection.diminfo[0].shape)) __pyx_t_18 = 0;
             if (unlikely(__pyx_t_18 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_18);
-              __PYX_ERR(0, 206, __pyx_L1_error)
+              __PYX_ERR(0, 200, __pyx_L1_error)
             }
             __pyx_t_27 = __pyx_v_x;
             __pyx_t_28 = __pyx_v_y;
@@ -9472,7 +9470,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_29 >= __pyx_pybuffernd_f.diminfo[2].shape)) __pyx_t_18 = 2;
             if (unlikely(__pyx_t_18 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_18);
-              __PYX_ERR(0, 206, __pyx_L1_error)
+              __PYX_ERR(0, 200, __pyx_L1_error)
             }
             __pyx_t_30 = __pyx_v_x;
             __pyx_t_31 = __pyx_v_y;
@@ -9492,11 +9490,11 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_32 >= __pyx_pybuffernd_momentum_point.diminfo[2].shape)) __pyx_t_18 = 2;
             if (unlikely(__pyx_t_18 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_18);
-              __PYX_ERR(0, 206, __pyx_L1_error)
+              __PYX_ERR(0, 200, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_momentum_point.diminfo[0].strides, __pyx_t_31, __pyx_pybuffernd_momentum_point.diminfo[1].strides, __pyx_t_32, __pyx_pybuffernd_momentum_point.diminfo[2].strides) = ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_u.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_u.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_u.diminfo[1].strides, __pyx_t_17, __pyx_pybuffernd_u.diminfo[2].strides)) * ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_23, __pyx_pybuffernd_f.diminfo[2].strides)) + (*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_f.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_f.diminfo[0].strides, __pyx_t_28, __pyx_pybuffernd_f.diminfo[1].strides, __pyx_t_29, __pyx_pybuffernd_f.diminfo[2].strides))));
 
-            /* "fluid_dynamics.pyx":205
+            /* "fluid_dynamics.pyx":199
  * 
  *                 if mask2[x, y] == 0:
  *                     if mask2[rolled_x, rolled_y] == 1:             # <<<<<<<<<<<<<<
@@ -9505,7 +9503,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
           }
 
-          /* "fluid_dynamics.pyx":204
+          /* "fluid_dynamics.pyx":198
  *                     f[x, y, i] = f[rolled_x, rolled_y, i]
  * 
  *                 if mask2[x, y] == 0:             # <<<<<<<<<<<<<<
@@ -9514,7 +9512,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
  */
         }
 
-        /* "fluid_dynamics.pyx":208
+        /* "fluid_dynamics.pyx":202
  *                         momentum_point[x, y, i] = u[x, y, 0] * (f[x, y, i] + f[x, y, reflection[i]])
  * 
  *                 momentum_total += momentum_point[x, y, i]             # <<<<<<<<<<<<<<
@@ -9539,7 +9537,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_28 >= __pyx_pybuffernd_momentum_point.diminfo[2].shape)) __pyx_t_18 = 2;
         if (unlikely(__pyx_t_18 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_18);
-          __PYX_ERR(0, 208, __pyx_L1_error)
+          __PYX_ERR(0, 202, __pyx_L1_error)
         }
         __pyx_v_momentum_total = (__pyx_v_momentum_total + (*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_momentum_point.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_momentum_point.diminfo[0].strides, __pyx_t_29, __pyx_pybuffernd_momentum_point.diminfo[1].strides, __pyx_t_28, __pyx_pybuffernd_momentum_point.diminfo[2].strides)));
         __pyx_L7_continue:;
@@ -9547,27 +9545,27 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
     }
   }
 
-  /* "fluid_dynamics.pyx":210
+  /* "fluid_dynamics.pyx":204
  *                 momentum_total += momentum_point[x, y, i]
  * 
  *     return f, momentum_total             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_momentum_total); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_momentum_total); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF((PyObject *)__pyx_v_f);
   __Pyx_GIVEREF((PyObject *)__pyx_v_f);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)__pyx_v_f))) __PYX_ERR(0, 210, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, ((PyObject *)__pyx_v_f))) __PYX_ERR(0, 204, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_5)) __PYX_ERR(0, 210, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_5)) __PYX_ERR(0, 204, __pyx_L1_error);
   __pyx_t_5 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "fluid_dynamics.pyx":169
+  /* "fluid_dynamics.pyx":163
  * 
  * 
  * def stream_and_reflect(Parameters sim,             # <<<<<<<<<<<<<<
@@ -9708,8 +9706,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_time5_start, __pyx_k_time5_start, sizeof(__pyx_k_time5_start), 0, 0, 1, 1},
     {&__pyx_n_s_timestep_loop, __pyx_k_timestep_loop, sizeof(__pyx_k_timestep_loop), 0, 0, 1, 1},
     {&__pyx_n_s_total, __pyx_k_total, sizeof(__pyx_k_total), 0, 0, 1, 1},
-    {&__pyx_n_s_total_x, __pyx_k_total_x, sizeof(__pyx_k_total_x), 0, 0, 1, 1},
-    {&__pyx_n_s_total_y, __pyx_k_total_y, sizeof(__pyx_k_total_y), 0, 0, 1, 1},
     {&__pyx_n_s_u, __pyx_k_u, sizeof(__pyx_k_u), 0, 0, 1, 1},
     {&__pyx_n_s_u_dot_c, __pyx_k_u_dot_c, sizeof(__pyx_k_u_dot_c), 0, 0, 1, 1},
     {&__pyx_n_s_u_dot_u, __pyx_k_u_dot_u, sizeof(__pyx_k_u_dot_u), 0, 0, 1, 1},
@@ -9804,34 +9800,34 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *                    np.ndarray[np.float64_t, ndim=3] f,
  *                    np.ndarray[np.float64_t, ndim=2] rho):
  */
-  __pyx_tuple__10 = PyTuple_Pack(14, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_rho, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_c, __pyx_n_s_u, __pyx_n_s_mask, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_v, __pyx_n_s_total_x, __pyx_n_s_total_y); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(12, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_rho, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_c, __pyx_n_s_u, __pyx_n_s_mask, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_v); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 14, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_fluid_velocity, 117, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_fluid_velocity, 117, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 117, __pyx_L1_error)
 
-  /* "fluid_dynamics.pyx":149
+  /* "fluid_dynamics.pyx":143
  *     return u
  * 
  * def collision(Parameters sim,             # <<<<<<<<<<<<<<
  *               np.ndarray[np.float64_t, ndim=3] f,
  *               np.ndarray[np.float64_t, ndim=3] feq):
  */
-  __pyx_tuple__12 = PyTuple_Pack(11, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_feq, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_tau_inv, __pyx_n_s_f_new, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_v); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(11, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_feq, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_tau_inv, __pyx_n_s_f_new, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_v); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 143, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_collision, 149, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_collision, 143, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 143, __pyx_L1_error)
 
-  /* "fluid_dynamics.pyx":169
+  /* "fluid_dynamics.pyx":163
  * 
  * 
  * def stream_and_reflect(Parameters sim,             # <<<<<<<<<<<<<<
  *                        np.ndarray[np.float64_t, ndim=3] f,
  *                        np.ndarray[np.float64_t, ndim=3] u):
  */
-  __pyx_tuple__14 = PyTuple_Pack(18, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_u, __pyx_n_s_delta_t, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_momentum_point, __pyx_n_s_c, __pyx_n_s_reflection, __pyx_n_s_mask, __pyx_n_s_mask2, __pyx_n_s_i, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_rolled_x, __pyx_n_s_rolled_y, __pyx_n_s_momentum_total); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(18, __pyx_n_s_sim, __pyx_n_s_f, __pyx_n_s_u, __pyx_n_s_delta_t, __pyx_n_s_num_x, __pyx_n_s_num_y, __pyx_n_s_num_v, __pyx_n_s_momentum_point, __pyx_n_s_c, __pyx_n_s_reflection, __pyx_n_s_mask, __pyx_n_s_mask2, __pyx_n_s_i, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_rolled_x, __pyx_n_s_rolled_y, __pyx_n_s_momentum_total); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_stream_and_reflect, 169, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fluid_dynamics_pyx, __pyx_n_s_stream_and_reflect, 163, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -10331,28 +10327,28 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_fluid_velocity, __pyx_t_2) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":149
+  /* "fluid_dynamics.pyx":143
  *     return u
  * 
  * def collision(Parameters sim,             # <<<<<<<<<<<<<<
  *               np.ndarray[np.float64_t, ndim=3] f,
  *               np.ndarray[np.float64_t, ndim=3] feq):
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14fluid_dynamics_9collision, 0, __pyx_n_s_collision, NULL, __pyx_n_s_fluid_dynamics, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14fluid_dynamics_9collision, 0, __pyx_n_s_collision, NULL, __pyx_n_s_fluid_dynamics, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_collision, __pyx_t_2) < 0) __PYX_ERR(0, 149, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_collision, __pyx_t_2) < 0) __PYX_ERR(0, 143, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "fluid_dynamics.pyx":169
+  /* "fluid_dynamics.pyx":163
  * 
  * 
  * def stream_and_reflect(Parameters sim,             # <<<<<<<<<<<<<<
  *                        np.ndarray[np.float64_t, ndim=3] f,
  *                        np.ndarray[np.float64_t, ndim=3] u):
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14fluid_dynamics_11stream_and_reflect, 0, __pyx_n_s_stream_and_reflect, NULL, __pyx_n_s_fluid_dynamics, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_14fluid_dynamics_11stream_and_reflect, 0, __pyx_n_s_stream_and_reflect, NULL, __pyx_n_s_fluid_dynamics, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_stream_and_reflect, __pyx_t_2) < 0) __PYX_ERR(0, 169, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_stream_and_reflect, __pyx_t_2) < 0) __PYX_ERR(0, 163, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "fluid_dynamics.pyx":1
