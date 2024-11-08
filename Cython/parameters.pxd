@@ -1,3 +1,5 @@
+# parameters.pxd
+
 cimport numpy as np
 
 cdef class Parameters:
@@ -13,3 +15,4 @@ cdef class Parameters:
     cdef public object reflection  # Reflection indices (will hold np.ndarray)
     cdef public object mask  # Boolean mask (will hold np.ndarray)
     cdef public object mask2  # Force measurement mask (will hold np.ndarray)
+

@@ -65,14 +65,14 @@ def initial_turbulence(sim):
         print('That was not a valid choice!')
     
     numbers = np.genfromtxt(mask_data, dtype=np.int64)
-    numbers = np.flip(np.transpose(numbers), axis = 1)
+    numbers = np.flip(np.transpose(numbers.astype(bool)), axis = 1)
     
     sim.mask[xleft:xright, ybottom:ytop] = numbers 
     
     #some extra conditions for special cases based on user obstacle choices
     if choice =='c':
-        sim.mask[:,190:200] = 1 #creating a tarmac road and tunnel as an obstacle
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True #creating a tarmac road and tunnel as an obstacle
+        sim.mask[:,0:10]=True
         sim.mask2[xleft:xright, ybottom:ytop] = numbers
         
     elif choice =='e':          #positioning multiple circles
@@ -92,50 +92,50 @@ def initial_turbulence(sim):
     elif choice =='f':
         sim.mask[250:450, 0:75] = numbers      # adding 2nd car behind first one separation 1px
         sim.mask2[250:450, 0:75] = numbers     # ensuring that the force is only being calculated for the 2nd car and not on the whole mask (including the road etc)
-        sim.mask[:,190:200] = 1 # creating a tarmac road and tunnel as an obstacle
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True # creating a tarmac road and tunnel as an obstacle
+        sim.mask[:,0:10]=True
         
     elif choice =='g':
         sim.mask[550:750, 0:75] = numbers      # 2nd car separation 300px
         sim.mask2[550:750, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
     
     elif choice =='h':
         sim.mask[507:707, 0:75] = numbers      # 2nd car separation 257px
         sim.mask2[507:707, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
         
     elif choice =='i':
         sim.mask[464:664, 0:75] = numbers      # 2nd car separation 214px
         sim.mask2[464:664, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
         
     elif choice =='j':
         sim.mask[421:621, 0:75] = numbers      # 2nd car separation 171px
         sim.mask2[421:621, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
         
     elif choice =='k':
         sim.mask[378:578, 0:75] = numbers      # 2nd car separation 128px
         sim.mask2[378:578, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
         
     elif choice =='l':
         sim.mask[335:535, 0:75] = numbers      # 2nd car separation 85px
         sim.mask2[335:535, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
     
     elif choice =='m':
         sim.mask[292:492, 0:75] = numbers      # 2nd car separation 42px
         sim.mask2[292:492, 0:75] = numbers
-        sim.mask[:,190:200] = 1
-        sim.mask[:,0:10] = 1
+        sim.mask[:,190:200]=True
+        sim.mask[:,0:10]=True
         
     else:
         sim.mask2[xleft:xright, ybottom:ytop] = numbers
