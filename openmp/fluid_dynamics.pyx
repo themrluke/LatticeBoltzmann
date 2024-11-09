@@ -1,4 +1,4 @@
-# fluid_dynamics.pyx
+# fluid_statics.pyx
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
@@ -24,6 +24,16 @@ def timestep_loop(Parameters sim,
     cdef int num_x = sim.num_x
     cdef int num_y = sim.num_y
     cdef int num_v = sim.num_v
+
+    cdef int[:, :] c = sim.c
+    cdef int[:, :] mask = sim.mask
+    cdef int[:, :] mask2 = sim.mask2
+    cdef int[:] reflection = sim.reflection
+    cdef double[:] w = sim.w
+    cdef double cs = sim.cs
+    cdef double cs2 = cs*cs
+    cdef double cs4 = cs2*cs2
+    cdef double tau_inv = sim.inv_tau
     cdef double momentum_total
 
     cdef double[:] force_array = np.empty((t_steps), dtype=np.float64)
@@ -38,11 +48,11 @@ def timestep_loop(Parameters sim,
 
     # Create the initial distribution by finding the equilibrium for the flow
     # calculated above.
-    f = equilibrium(sim, initial_rho, initial_u, feq_in)
+    f = equilibrium(sim, num_x, num_y, num_v, c, w, cs, cs2, cs4, initial_rho, initial_u, feq_in)
 
-    rho = fluid_density(sim, f, rho_in)
-    u = fluid_velocity(sim, f, rho, u_in)
-    feq = equilibrium(sim, rho, u, feq_in)
+    rho = fluid_density(sim, num_x, num_y, num_v, mask, f, rho_in)
+    u = fluid_velocity(sim, num_x, num_y, num_v, c, mask, f, rho, u_in)
+    feq = equilibrium(sim, num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq_in)
 
 
 
@@ -52,13 +62,13 @@ def timestep_loop(Parameters sim,
 
         # Perform collision step, using the calculated density and velocity data.
         time1_start = time.time()
-        f = collision(sim, f, feq, f_new_in)
+        f = collision(sim, num_x, num_y, num_v, tau_inv, f, feq, f_new_in)
         time1_end = time.time()
         #print('collision() time: ', time1_end - time1_start)
 
         # Streaming and reflection
         time2_start = time.time()
-        f, momentum_total = stream_and_reflect(sim, f, u, momentum_point_in)
+        f, momentum_total = stream_and_reflect(sim, num_x, num_y, num_v, c, mask, mask2, reflection, f, u, momentum_point_in)
         time2_end = time.time()
         #print('stream_and_reflect() time: ', time2_end - time2_start)
 
@@ -66,17 +76,17 @@ def timestep_loop(Parameters sim,
 
         # Calculate density and velocity data, for next time around
         time3_start = time.time()
-        rho = fluid_density(sim, f, rho_in)
+        rho = fluid_density(sim, num_x, num_y, num_v, mask, f, rho_in)
         time3_end = time.time()
         #print('fluid_density() time: ', time3_end - time3_start)
 
         time4_start = time.time()
-        u = fluid_velocity(sim, f, rho, u_in)
+        u = fluid_velocity(sim, num_x, num_y, num_v, c, mask, f, rho, u_in)
         time4_end = time.time()
         #print('fluid_velocity() time: ', time4_end - time4_start)
 
         time5_start = time.time()
-        feq = equilibrium(sim, rho, u, feq_in)
+        feq = equilibrium(sim, num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq_in)
         time5_end = time.time()
         #print('equilibrium() time: ', time5_end - time5_start)
 
@@ -84,25 +94,24 @@ def timestep_loop(Parameters sim,
 
 
 
-def equilibrium(Parameters sim, 
+def equilibrium(Parameters sim,
+                int num_x,
+                int num_y,
+                int num_v,
+                int[:, :] c,
+                double[:] w,
+                double cs, double cs2, double cs4,
                 double[:, :] rho, 
                 double[:, :, :] u,
                 double[:, :, :] feq):
     """
     Evaluate the equilibrium distribution across the lattice.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef double[:] w = sim.w
-    cdef int[:, :] c = sim.c
-    cdef double cs = sim.cs
-    cdef double cs2 = cs*cs
-    cdef double cs4 = cs2*cs2
+
     cdef int i, j, v
     cdef double u_dot_u, u_dot_c
 
-    for i in prange(num_x, nogil=True, schedule="dynamic"):
+    for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
             u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]
             for v in range(num_v):
@@ -112,18 +121,19 @@ def equilibrium(Parameters sim,
     return feq
 
 
-def fluid_density(Parameters sim, 
+def fluid_density(Parameters sim,
+                  int num_x,
+                  int num_y,
+                  int num_v,
+                  int[:, :] mask,
                   double[:, :, :] f,
                   double[:, :] rho):
     """
     Calculate fluid density from the distribution f.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
+
     cdef int i, j, v
     cdef double total
-    cdef int[:, :] mask = sim.mask
 
     #for i in prange(num_x, nogil=True, schedule="static"):
     for i in range(num_x):
@@ -138,20 +148,21 @@ def fluid_density(Parameters sim,
     return rho
 
 
-def fluid_velocity(Parameters sim, 
+def fluid_velocity(Parameters sim,
+                   int num_x,
+                   int num_y,
+                   int num_v,
+                   int[:, :] c,
+                   int[:, :] mask,
                    double[:, :, :] f, 
                    double[:, :] rho,
                    double[:, :, :] u):
     """
     Calculate fluid velocity from the distribution f and density rho.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
+
     cdef int x, y, v
     cdef double total_x, total_y
-    cdef int[:, :] c = sim.c
-    cdef int[:, :] mask = sim.mask
 
     #for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
     for x in range(num_x):
@@ -172,45 +183,46 @@ def fluid_velocity(Parameters sim,
                 
     return u
 
-def collision(Parameters sim, 
+def collision(Parameters sim,
+              int num_x,
+              int num_y,
+              int num_v,
+              double tau_inv,
               double[:, :, :] f, 
               double[:, :, :] feq,
               double[:, :, :] f_new):
     """
     Perform the collision step, updating the distribution f using feq.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef double tau_inv = sim.inv_tau
+
     cdef int i, j, v
 
-    for i in prange(num_x, nogil=True, schedule="guided"):
+    for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
             for v in range(num_v):
                 f_new[i, j, v] = f[i, j, v] * (1 - tau_inv) + feq[i, j, v] * tau_inv
     return f_new
 
 
-def stream_and_reflect(Parameters sim, 
+def stream_and_reflect(Parameters sim,
+                       int num_x,
+                       int num_y,
+                       int num_v,
+                       int[:, :] c,
+                       int[:, :] mask,
+                       int[:, :] mask2,
+                       int[:] reflection,
                        double[:, :, :] f, 
                        double[:, :, :] u,
                        double[:, :, :] momentum_point):
     """
     Perform the streaming and boundary reflection step.
     """
-    cdef int delta_t = 1
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef int[:, :] c = sim.c
-    cdef int[:] reflection = sim.reflection
-    cdef int[:, :] mask = sim.mask
-    cdef int[:, :] mask2 = sim.mask2
+
     cdef int i, x, y, rolled_x, rolled_y
     cdef double momentum_total = 0.0
 
-    for x in prange(num_x, nogil=True, schedule="guided"):
+    for x in prange(num_x, nogil=True, schedule="static"):
         for y in range(num_y):
             for i in range(num_v):
 

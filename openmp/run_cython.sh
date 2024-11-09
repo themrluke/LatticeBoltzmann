@@ -14,6 +14,6 @@ run_file=main.py
 
 python $setup_file build_ext --inplace
 
-export OMP_NUM_THREADS=16 # Set to the desired number of threads
+export OMP_NUM_THREADS=8 # Set to the desired number of threads
 
 python $run_file
