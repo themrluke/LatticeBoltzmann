@@ -11,7 +11,8 @@
             "/home/themrluke/miniconda3/envs/LB_env/lib/python3.12/site-packages/numpy/_core/include/numpy/ufuncobject.h"
         ],
         "extra_compile_args": [
-            "-O3"
+            "-O3",
+            "-march=native"
         ],
         "include_dirs": [
             "/home/themrluke/miniconda3/envs/LB_env/lib/python3.12/site-packages/numpy/_core/include"
