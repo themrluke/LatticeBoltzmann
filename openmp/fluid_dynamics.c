@@ -3493,8 +3493,8 @@ static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUS
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_14fluid_dynamics_timestep_loop(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, __Pyx_memviewslice __pyx_v_initial_rho, __Pyx_memviewslice __pyx_v_initial_u); /* proto */
 static PyObject *__pyx_pf_14fluid_dynamics_2equilibrium(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_w, CYTHON_UNUSED double __pyx_v_cs, double __pyx_v_cs2, double __pyx_v_cs4, __Pyx_memviewslice __pyx_v_rho, __Pyx_memviewslice __pyx_v_u, __Pyx_memviewslice __pyx_v_feq); /* proto */
-static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho); /* proto */
-static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho, __Pyx_memviewslice __pyx_v_u); /* proto */
+static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho); /* proto */
+static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho, __Pyx_memviewslice __pyx_v_u); /* proto */
 static PyObject *__pyx_pf_14fluid_dynamics_8collision(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, double __pyx_v_tau_inv, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_feq, __Pyx_memviewslice __pyx_v_f_new); /* proto */
 static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_mask2, __Pyx_memviewslice __pyx_v_reflection, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_u, __Pyx_memviewslice __pyx_v_momentum_point); /* proto */
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -21982,7 +21982,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
   CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim = 0;
-  int __pyx_v_num_x;
+  CYTHON_UNUSED int __pyx_v_num_x;
   int __pyx_v_num_y;
   int __pyx_v_num_v;
   __Pyx_memviewslice __pyx_v_mask = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -22162,7 +22162,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho) {
+static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho) {
   int __pyx_v_i;
   int __pyx_v_j;
   int __pyx_v_v;
@@ -22188,115 +22188,174 @@ static PyObject *__pyx_pf_14fluid_dynamics_4fluid_density(CYTHON_UNUSED PyObject
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("fluid_density", 1);
 
-  /* "fluid_dynamics.pyx":139
+  /* "fluid_dynamics.pyx":138
+ *     cdef double total
  * 
- *     #for i in prange(num_x, nogil=True, schedule="static"):
- *     for i in range(num_x):             # <<<<<<<<<<<<<<
+ *     for i in prange(num_x, nogil=True, schedule="static"):             # <<<<<<<<<<<<<<
+ *     #for i in range(num_x):
  *         for j in range(num_y):
- *             if mask[i, j] == 1:
  */
-  __pyx_t_1 = __pyx_v_num_x;
-  __pyx_t_2 = __pyx_t_1;
-  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      _save = NULL;
+      Py_UNBLOCK_THREADS
+      __Pyx_FastGIL_Remember();
+      #endif
+      /*try:*/ {
+        __pyx_t_1 = __pyx_v_num_x;
+        {
+            #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+                #undef likely
+                #undef unlikely
+                #define likely(x)   (x)
+                #define unlikely(x) (x)
+            #endif
+            __pyx_t_3 = (__pyx_t_1 - 0 + 1 - 1/abs(1)) / 1;
+            if (__pyx_t_3 > 0)
+            {
+                #ifdef _OPENMP
+                #pragma omp parallel private(__pyx_t_10, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9)
+                #endif /* _OPENMP */
+                {
+                    #ifdef _OPENMP
+                    #pragma omp for firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j) lastprivate(__pyx_v_total) lastprivate(__pyx_v_v) schedule(static)
+                    #endif /* _OPENMP */
+                    for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_3; __pyx_t_2++){
+                        {
+                            __pyx_v_i = (int)(0 + 1 * __pyx_t_2);
+                            /* Initialize private variables to invalid values */
+                            __pyx_v_j = ((int)0xbad0bad0);
+                            __pyx_v_total = ((double)__PYX_NAN());
+                            __pyx_v_v = ((int)0xbad0bad0);
 
-    /* "fluid_dynamics.pyx":140
- *     #for i in prange(num_x, nogil=True, schedule="static"):
- *     for i in range(num_x):
+                            /* "fluid_dynamics.pyx":140
+ *     for i in prange(num_x, nogil=True, schedule="static"):
+ *     #for i in range(num_x):
  *         for j in range(num_y):             # <<<<<<<<<<<<<<
  *             if mask[i, j] == 1:
  *                 rho[i, j] = 0.0001
  */
-    __pyx_t_4 = __pyx_v_num_y;
-    __pyx_t_5 = __pyx_t_4;
-    for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_j = __pyx_t_6;
+                            __pyx_t_4 = __pyx_v_num_y;
+                            __pyx_t_5 = __pyx_t_4;
+                            for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
+                              __pyx_v_j = __pyx_t_6;
 
-      /* "fluid_dynamics.pyx":141
- *     for i in range(num_x):
+                              /* "fluid_dynamics.pyx":141
+ *     #for i in range(num_x):
  *         for j in range(num_y):
  *             if mask[i, j] == 1:             # <<<<<<<<<<<<<<
  *                 rho[i, j] = 0.0001
  *             else:
  */
-      __pyx_t_7 = __pyx_v_i;
-      __pyx_t_8 = __pyx_v_j;
-      __pyx_t_9 = ((*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_mask.data + __pyx_t_7 * __pyx_v_mask.strides[0]) ) + __pyx_t_8 * __pyx_v_mask.strides[1]) ))) == 1);
-      if (__pyx_t_9) {
+                              __pyx_t_7 = __pyx_v_i;
+                              __pyx_t_8 = __pyx_v_j;
+                              __pyx_t_9 = ((*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_mask.data + __pyx_t_7 * __pyx_v_mask.strides[0]) ) + __pyx_t_8 * __pyx_v_mask.strides[1]) ))) == 1);
+                              if (__pyx_t_9) {
 
-        /* "fluid_dynamics.pyx":142
+                                /* "fluid_dynamics.pyx":142
  *         for j in range(num_y):
  *             if mask[i, j] == 1:
  *                 rho[i, j] = 0.0001             # <<<<<<<<<<<<<<
  *             else:
- *                 total = 0  # Thread-safe local variable
+ *                 total = 0.0  # Thread-safe local variable
  */
-        __pyx_t_8 = __pyx_v_i;
-        __pyx_t_7 = __pyx_v_j;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_8 * __pyx_v_rho.strides[0]) ) + __pyx_t_7 * __pyx_v_rho.strides[1]) )) = 0.0001;
+                                __pyx_t_8 = __pyx_v_i;
+                                __pyx_t_7 = __pyx_v_j;
+                                *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_8 * __pyx_v_rho.strides[0]) ) + __pyx_t_7 * __pyx_v_rho.strides[1]) )) = 0.0001;
 
-        /* "fluid_dynamics.pyx":141
- *     for i in range(num_x):
+                                /* "fluid_dynamics.pyx":141
+ *     #for i in range(num_x):
  *         for j in range(num_y):
  *             if mask[i, j] == 1:             # <<<<<<<<<<<<<<
  *                 rho[i, j] = 0.0001
  *             else:
  */
-        goto __pyx_L7;
-      }
+                                goto __pyx_L12;
+                              }
 
-      /* "fluid_dynamics.pyx":144
+                              /* "fluid_dynamics.pyx":144
  *                 rho[i, j] = 0.0001
  *             else:
- *                 total = 0  # Thread-safe local variable             # <<<<<<<<<<<<<<
+ *                 total = 0.0  # Thread-safe local variable             # <<<<<<<<<<<<<<
  *                 for v in range(num_v):
- *                     total += f[i, j, v]
+ *                     total = total + f[i, j, v]
  */
-      /*else*/ {
-        __pyx_v_total = 0.0;
+                              /*else*/ {
+                                __pyx_v_total = 0.0;
 
-        /* "fluid_dynamics.pyx":145
+                                /* "fluid_dynamics.pyx":145
  *             else:
- *                 total = 0  # Thread-safe local variable
+ *                 total = 0.0  # Thread-safe local variable
  *                 for v in range(num_v):             # <<<<<<<<<<<<<<
- *                     total += f[i, j, v]
+ *                     total = total + f[i, j, v]
  *                 rho[i, j] = total
  */
-        __pyx_t_10 = __pyx_v_num_v;
-        __pyx_t_11 = __pyx_t_10;
-        for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
-          __pyx_v_v = __pyx_t_12;
+                                __pyx_t_10 = __pyx_v_num_v;
+                                __pyx_t_11 = __pyx_t_10;
+                                for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
+                                  __pyx_v_v = __pyx_t_12;
 
-          /* "fluid_dynamics.pyx":146
- *                 total = 0  # Thread-safe local variable
+                                  /* "fluid_dynamics.pyx":146
+ *                 total = 0.0  # Thread-safe local variable
  *                 for v in range(num_v):
- *                     total += f[i, j, v]             # <<<<<<<<<<<<<<
+ *                     total = total + f[i, j, v]             # <<<<<<<<<<<<<<
  *                 rho[i, j] = total
  *     return rho
  */
-          __pyx_t_7 = __pyx_v_i;
-          __pyx_t_8 = __pyx_v_j;
-          __pyx_t_13 = __pyx_v_v;
-          __pyx_v_total = (__pyx_v_total + (*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_7 * __pyx_v_f.strides[0]) ) + __pyx_t_8 * __pyx_v_f.strides[1]) ) + __pyx_t_13 * __pyx_v_f.strides[2]) ))));
-        }
+                                  __pyx_t_7 = __pyx_v_i;
+                                  __pyx_t_8 = __pyx_v_j;
+                                  __pyx_t_13 = __pyx_v_v;
+                                  __pyx_v_total = (__pyx_v_total + (*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_7 * __pyx_v_f.strides[0]) ) + __pyx_t_8 * __pyx_v_f.strides[1]) ) + __pyx_t_13 * __pyx_v_f.strides[2]) ))));
+                                }
 
-        /* "fluid_dynamics.pyx":147
+                                /* "fluid_dynamics.pyx":147
  *                 for v in range(num_v):
- *                     total += f[i, j, v]
+ *                     total = total + f[i, j, v]
  *                 rho[i, j] = total             # <<<<<<<<<<<<<<
  *     return rho
  * 
  */
-        __pyx_t_13 = __pyx_v_i;
-        __pyx_t_8 = __pyx_v_j;
-        *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_13 * __pyx_v_rho.strides[0]) ) + __pyx_t_8 * __pyx_v_rho.strides[1]) )) = __pyx_v_total;
+                                __pyx_t_13 = __pyx_v_i;
+                                __pyx_t_8 = __pyx_v_j;
+                                *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_13 * __pyx_v_rho.strides[0]) ) + __pyx_t_8 * __pyx_v_rho.strides[1]) )) = __pyx_v_total;
+                              }
+                              __pyx_L12:;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+            #undef likely
+            #undef unlikely
+            #define likely(x)   __builtin_expect(!!(x), 1)
+            #define unlikely(x) __builtin_expect(!!(x), 0)
+        #endif
       }
-      __pyx_L7:;
-    }
+
+      /* "fluid_dynamics.pyx":138
+ *     cdef double total
+ * 
+ *     for i in prange(num_x, nogil=True, schedule="static"):             # <<<<<<<<<<<<<<
+ *     #for i in range(num_x):
+ *         for j in range(num_y):
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          __Pyx_FastGIL_Forget();
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L5:;
+      }
   }
 
   /* "fluid_dynamics.pyx":148
- *                     total += f[i, j, v]
+ *                     total = total + f[i, j, v]
  *                 rho[i, j] = total
  *     return rho             # <<<<<<<<<<<<<<
  * 
@@ -22354,7 +22413,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
   CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim = 0;
-  int __pyx_v_num_x;
+  CYTHON_UNUSED int __pyx_v_num_x;
   int __pyx_v_num_y;
   int __pyx_v_num_v;
   __Pyx_memviewslice __pyx_v_c = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -22568,7 +22627,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho, __Pyx_memviewslice __pyx_v_u) {
+static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED struct __pyx_obj_10parameters_Parameters *__pyx_v_sim, CYTHON_UNUSED int __pyx_v_num_x, int __pyx_v_num_y, int __pyx_v_num_v, __Pyx_memviewslice __pyx_v_c, __Pyx_memviewslice __pyx_v_mask, __Pyx_memviewslice __pyx_v_f, __Pyx_memviewslice __pyx_v_rho, __Pyx_memviewslice __pyx_v_u) {
   int __pyx_v_x;
   int __pyx_v_y;
   int __pyx_v_v;
@@ -22598,176 +22657,347 @@ static PyObject *__pyx_pf_14fluid_dynamics_6fluid_velocity(CYTHON_UNUSED PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("fluid_velocity", 1);
 
-  /* "fluid_dynamics.pyx":168
+  /* "fluid_dynamics.pyx":167
+ *     cdef double total_x, total_y
  * 
- *     #for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
- *     for x in range(num_x):             # <<<<<<<<<<<<<<
+ *     for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x             # <<<<<<<<<<<<<<
+ *     #for x in range(num_x):
  *         for y in range(num_y):
- *             if mask[x, y] == 1:
  */
-  __pyx_t_1 = __pyx_v_num_x;
-  __pyx_t_2 = __pyx_t_1;
-  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_x = __pyx_t_3;
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      _save = NULL;
+      Py_UNBLOCK_THREADS
+      __Pyx_FastGIL_Remember();
+      #endif
+      /*try:*/ {
+        __pyx_t_1 = __pyx_v_num_x;
+        {
+            double __pyx_parallel_temp0 = ((double)__PYX_NAN());
+            double __pyx_parallel_temp1 = ((double)__PYX_NAN());
+            int __pyx_parallel_temp2 = ((int)0xbad0bad0);
+            int __pyx_parallel_temp3 = ((int)0xbad0bad0);
+            int __pyx_parallel_temp4 = ((int)0xbad0bad0);
+            const char *__pyx_parallel_filename = NULL; int __pyx_parallel_lineno = 0, __pyx_parallel_clineno = 0;
+            PyObject *__pyx_parallel_exc_type = NULL, *__pyx_parallel_exc_value = NULL, *__pyx_parallel_exc_tb = NULL;
+            int __pyx_parallel_why;
+            __pyx_parallel_why = 0;
+            #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+                #undef likely
+                #undef unlikely
+                #define likely(x)   (x)
+                #define unlikely(x) (x)
+            #endif
+            __pyx_t_3 = (__pyx_t_1 - 0 + 1 - 1/abs(1)) / 1;
+            if (__pyx_t_3 > 0)
+            {
+                #ifdef _OPENMP
+                #pragma omp parallel private(__pyx_t_10, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9) private(__pyx_filename, __pyx_lineno, __pyx_clineno) shared(__pyx_parallel_why, __pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb)
+                #endif /* _OPENMP */
+                {
+                    #ifdef _OPENMP
+                    #ifdef WITH_THREAD
+                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                    #endif
+                    Py_BEGIN_ALLOW_THREADS
+                    #endif /* _OPENMP */
+                    #ifdef _OPENMP
+                    #pragma omp for lastprivate(__pyx_v_total_x) lastprivate(__pyx_v_total_y) lastprivate(__pyx_v_v) firstprivate(__pyx_v_x) lastprivate(__pyx_v_x) lastprivate(__pyx_v_y) schedule(static)
+                    #endif /* _OPENMP */
+                    for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_3; __pyx_t_2++){
+                        if (__pyx_parallel_why < 2)
+                        {
+                            __pyx_v_x = (int)(0 + 1 * __pyx_t_2);
+                            /* Initialize private variables to invalid values */
+                            __pyx_v_total_x = ((double)__PYX_NAN());
+                            __pyx_v_total_y = ((double)__PYX_NAN());
+                            __pyx_v_v = ((int)0xbad0bad0);
+                            __pyx_v_y = ((int)0xbad0bad0);
 
-    /* "fluid_dynamics.pyx":169
- *     #for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
- *     for x in range(num_x):
+                            /* "fluid_dynamics.pyx":169
+ *     for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
+ *     #for x in range(num_x):
  *         for y in range(num_y):             # <<<<<<<<<<<<<<
  *             if mask[x, y] == 1:
  *                 u[x, y, 0] = 0.0
  */
-    __pyx_t_4 = __pyx_v_num_y;
-    __pyx_t_5 = __pyx_t_4;
-    for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_y = __pyx_t_6;
+                            __pyx_t_4 = __pyx_v_num_y;
+                            __pyx_t_5 = __pyx_t_4;
+                            for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
+                              __pyx_v_y = __pyx_t_6;
 
-      /* "fluid_dynamics.pyx":170
- *     for x in range(num_x):
+                              /* "fluid_dynamics.pyx":170
+ *     #for x in range(num_x):
  *         for y in range(num_y):
  *             if mask[x, y] == 1:             # <<<<<<<<<<<<<<
  *                 u[x, y, 0] = 0.0
  *                 u[x, y, 1] = 0.0
  */
-      __pyx_t_7 = __pyx_v_x;
-      __pyx_t_8 = __pyx_v_y;
-      __pyx_t_9 = ((*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_mask.data + __pyx_t_7 * __pyx_v_mask.strides[0]) ) + __pyx_t_8 * __pyx_v_mask.strides[1]) ))) == 1);
-      if (__pyx_t_9) {
+                              __pyx_t_7 = __pyx_v_x;
+                              __pyx_t_8 = __pyx_v_y;
+                              __pyx_t_9 = ((*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_mask.data + __pyx_t_7 * __pyx_v_mask.strides[0]) ) + __pyx_t_8 * __pyx_v_mask.strides[1]) ))) == 1);
+                              if (__pyx_t_9) {
 
-        /* "fluid_dynamics.pyx":171
+                                /* "fluid_dynamics.pyx":171
  *         for y in range(num_y):
  *             if mask[x, y] == 1:
  *                 u[x, y, 0] = 0.0             # <<<<<<<<<<<<<<
  *                 u[x, y, 1] = 0.0
  *             else:
  */
-        __pyx_t_8 = __pyx_v_x;
-        __pyx_t_7 = __pyx_v_y;
-        __pyx_t_10 = 0;
-        *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_8 * __pyx_v_u.strides[0]) ) + __pyx_t_7 * __pyx_v_u.strides[1]) ) + __pyx_t_10 * __pyx_v_u.strides[2]) )) = 0.0;
+                                __pyx_t_8 = __pyx_v_x;
+                                __pyx_t_7 = __pyx_v_y;
+                                __pyx_t_10 = 0;
+                                *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_8 * __pyx_v_u.strides[0]) ) + __pyx_t_7 * __pyx_v_u.strides[1]) ) + __pyx_t_10 * __pyx_v_u.strides[2]) )) = 0.0;
 
-        /* "fluid_dynamics.pyx":172
+                                /* "fluid_dynamics.pyx":172
  *             if mask[x, y] == 1:
  *                 u[x, y, 0] = 0.0
  *                 u[x, y, 1] = 0.0             # <<<<<<<<<<<<<<
  *             else:
  *                 total_x = 0.0  # Declare inside the inner loop
  */
-        __pyx_t_10 = __pyx_v_x;
-        __pyx_t_7 = __pyx_v_y;
-        __pyx_t_8 = 1;
-        *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_10 * __pyx_v_u.strides[0]) ) + __pyx_t_7 * __pyx_v_u.strides[1]) ) + __pyx_t_8 * __pyx_v_u.strides[2]) )) = 0.0;
+                                __pyx_t_10 = __pyx_v_x;
+                                __pyx_t_7 = __pyx_v_y;
+                                __pyx_t_8 = 1;
+                                *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_10 * __pyx_v_u.strides[0]) ) + __pyx_t_7 * __pyx_v_u.strides[1]) ) + __pyx_t_8 * __pyx_v_u.strides[2]) )) = 0.0;
 
-        /* "fluid_dynamics.pyx":170
- *     for x in range(num_x):
+                                /* "fluid_dynamics.pyx":170
+ *     #for x in range(num_x):
  *         for y in range(num_y):
  *             if mask[x, y] == 1:             # <<<<<<<<<<<<<<
  *                 u[x, y, 0] = 0.0
  *                 u[x, y, 1] = 0.0
  */
-        goto __pyx_L7;
-      }
+                                goto __pyx_L12;
+                              }
 
-      /* "fluid_dynamics.pyx":174
+                              /* "fluid_dynamics.pyx":174
  *                 u[x, y, 1] = 0.0
  *             else:
  *                 total_x = 0.0  # Declare inside the inner loop             # <<<<<<<<<<<<<<
  *                 total_y = 0.0  # Declare inside the inner loop
  * 
  */
-      /*else*/ {
-        __pyx_v_total_x = 0.0;
+                              /*else*/ {
+                                __pyx_v_total_x = 0.0;
 
-        /* "fluid_dynamics.pyx":175
+                                /* "fluid_dynamics.pyx":175
  *             else:
  *                 total_x = 0.0  # Declare inside the inner loop
  *                 total_y = 0.0  # Declare inside the inner loop             # <<<<<<<<<<<<<<
  * 
  *                 for v in range(num_v):
  */
-        __pyx_v_total_y = 0.0;
+                                __pyx_v_total_y = 0.0;
 
-        /* "fluid_dynamics.pyx":177
+                                /* "fluid_dynamics.pyx":177
  *                 total_y = 0.0  # Declare inside the inner loop
  * 
  *                 for v in range(num_v):             # <<<<<<<<<<<<<<
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]
+ *                     total_x = total_x + (f[x, y, v] * c[v, 0])
+ *                     total_y = total_y + (f[x, y, v] * c[v, 1])
  */
-        __pyx_t_11 = __pyx_v_num_v;
-        __pyx_t_12 = __pyx_t_11;
-        for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-          __pyx_v_v = __pyx_t_13;
+                                __pyx_t_11 = __pyx_v_num_v;
+                                __pyx_t_12 = __pyx_t_11;
+                                for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
+                                  __pyx_v_v = __pyx_t_13;
 
-          /* "fluid_dynamics.pyx":178
+                                  /* "fluid_dynamics.pyx":178
  * 
  *                 for v in range(num_v):
- *                     total_x += f[x, y, v] * c[v, 0]             # <<<<<<<<<<<<<<
- *                     total_y += f[x, y, v] * c[v, 1]
+ *                     total_x = total_x + (f[x, y, v] * c[v, 0])             # <<<<<<<<<<<<<<
+ *                     total_y = total_y + (f[x, y, v] * c[v, 1])
  *                 u[x, y, 0] = total_x / rho[x, y]
  */
-          __pyx_t_8 = __pyx_v_x;
-          __pyx_t_7 = __pyx_v_y;
-          __pyx_t_10 = __pyx_v_v;
-          __pyx_t_14 = __pyx_v_v;
-          __pyx_t_15 = 0;
-          __pyx_v_total_x = (__pyx_v_total_x + ((*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_8 * __pyx_v_f.strides[0]) ) + __pyx_t_7 * __pyx_v_f.strides[1]) ) + __pyx_t_10 * __pyx_v_f.strides[2]) ))) * (*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_c.data + __pyx_t_14 * __pyx_v_c.strides[0]) ) + __pyx_t_15 * __pyx_v_c.strides[1]) )))));
+                                  __pyx_t_8 = __pyx_v_x;
+                                  __pyx_t_7 = __pyx_v_y;
+                                  __pyx_t_10 = __pyx_v_v;
+                                  __pyx_t_14 = __pyx_v_v;
+                                  __pyx_t_15 = 0;
+                                  __pyx_v_total_x = (__pyx_v_total_x + ((*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_8 * __pyx_v_f.strides[0]) ) + __pyx_t_7 * __pyx_v_f.strides[1]) ) + __pyx_t_10 * __pyx_v_f.strides[2]) ))) * (*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_c.data + __pyx_t_14 * __pyx_v_c.strides[0]) ) + __pyx_t_15 * __pyx_v_c.strides[1]) )))));
 
-          /* "fluid_dynamics.pyx":179
+                                  /* "fluid_dynamics.pyx":179
  *                 for v in range(num_v):
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]             # <<<<<<<<<<<<<<
+ *                     total_x = total_x + (f[x, y, v] * c[v, 0])
+ *                     total_y = total_y + (f[x, y, v] * c[v, 1])             # <<<<<<<<<<<<<<
  *                 u[x, y, 0] = total_x / rho[x, y]
  *                 u[x, y, 1] = total_y / rho[x, y]
  */
-          __pyx_t_15 = __pyx_v_x;
-          __pyx_t_14 = __pyx_v_y;
-          __pyx_t_10 = __pyx_v_v;
-          __pyx_t_7 = __pyx_v_v;
-          __pyx_t_8 = 1;
-          __pyx_v_total_y = (__pyx_v_total_y + ((*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_15 * __pyx_v_f.strides[0]) ) + __pyx_t_14 * __pyx_v_f.strides[1]) ) + __pyx_t_10 * __pyx_v_f.strides[2]) ))) * (*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_c.data + __pyx_t_7 * __pyx_v_c.strides[0]) ) + __pyx_t_8 * __pyx_v_c.strides[1]) )))));
-        }
+                                  __pyx_t_15 = __pyx_v_x;
+                                  __pyx_t_14 = __pyx_v_y;
+                                  __pyx_t_10 = __pyx_v_v;
+                                  __pyx_t_7 = __pyx_v_v;
+                                  __pyx_t_8 = 1;
+                                  __pyx_v_total_y = (__pyx_v_total_y + ((*((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_f.data + __pyx_t_15 * __pyx_v_f.strides[0]) ) + __pyx_t_14 * __pyx_v_f.strides[1]) ) + __pyx_t_10 * __pyx_v_f.strides[2]) ))) * (*((int *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_c.data + __pyx_t_7 * __pyx_v_c.strides[0]) ) + __pyx_t_8 * __pyx_v_c.strides[1]) )))));
+                                }
 
-        /* "fluid_dynamics.pyx":180
- *                     total_x += f[x, y, v] * c[v, 0]
- *                     total_y += f[x, y, v] * c[v, 1]
+                                /* "fluid_dynamics.pyx":180
+ *                     total_x = total_x + (f[x, y, v] * c[v, 0])
+ *                     total_y = total_y + (f[x, y, v] * c[v, 1])
  *                 u[x, y, 0] = total_x / rho[x, y]             # <<<<<<<<<<<<<<
  *                 u[x, y, 1] = total_y / rho[x, y]
  * 
  */
-        __pyx_t_8 = __pyx_v_x;
-        __pyx_t_7 = __pyx_v_y;
-        __pyx_t_16 = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_8 * __pyx_v_rho.strides[0]) ) + __pyx_t_7 * __pyx_v_rho.strides[1]) )));
-        if (unlikely(__pyx_t_16 == 0)) {
-          PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-          __PYX_ERR(0, 180, __pyx_L1_error)
-        }
-        __pyx_t_7 = __pyx_v_x;
-        __pyx_t_8 = __pyx_v_y;
-        __pyx_t_10 = 0;
-        *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_7 * __pyx_v_u.strides[0]) ) + __pyx_t_8 * __pyx_v_u.strides[1]) ) + __pyx_t_10 * __pyx_v_u.strides[2]) )) = (__pyx_v_total_x / __pyx_t_16);
+                                __pyx_t_8 = __pyx_v_x;
+                                __pyx_t_7 = __pyx_v_y;
+                                __pyx_t_16 = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_8 * __pyx_v_rho.strides[0]) ) + __pyx_t_7 * __pyx_v_rho.strides[1]) )));
+                                if (unlikely(__pyx_t_16 == 0)) {
+                                  #ifdef WITH_THREAD
+                                  PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                                  #endif
+                                  PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+                                  #ifdef WITH_THREAD
+                                  __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                                  #endif
+                                  __PYX_ERR(0, 180, __pyx_L8_error)
+                                }
+                                __pyx_t_7 = __pyx_v_x;
+                                __pyx_t_8 = __pyx_v_y;
+                                __pyx_t_10 = 0;
+                                *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_7 * __pyx_v_u.strides[0]) ) + __pyx_t_8 * __pyx_v_u.strides[1]) ) + __pyx_t_10 * __pyx_v_u.strides[2]) )) = (__pyx_v_total_x / __pyx_t_16);
 
-        /* "fluid_dynamics.pyx":181
- *                     total_y += f[x, y, v] * c[v, 1]
+                                /* "fluid_dynamics.pyx":181
+ *                     total_y = total_y + (f[x, y, v] * c[v, 1])
  *                 u[x, y, 0] = total_x / rho[x, y]
  *                 u[x, y, 1] = total_y / rho[x, y]             # <<<<<<<<<<<<<<
  * 
  * 
  */
-        __pyx_t_10 = __pyx_v_x;
-        __pyx_t_8 = __pyx_v_y;
-        __pyx_t_16 = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_10 * __pyx_v_rho.strides[0]) ) + __pyx_t_8 * __pyx_v_rho.strides[1]) )));
-        if (unlikely(__pyx_t_16 == 0)) {
-          PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-          __PYX_ERR(0, 181, __pyx_L1_error)
+                                __pyx_t_10 = __pyx_v_x;
+                                __pyx_t_8 = __pyx_v_y;
+                                __pyx_t_16 = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_rho.data + __pyx_t_10 * __pyx_v_rho.strides[0]) ) + __pyx_t_8 * __pyx_v_rho.strides[1]) )));
+                                if (unlikely(__pyx_t_16 == 0)) {
+                                  #ifdef WITH_THREAD
+                                  PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                                  #endif
+                                  PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+                                  #ifdef WITH_THREAD
+                                  __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                                  #endif
+                                  __PYX_ERR(0, 181, __pyx_L8_error)
+                                }
+                                __pyx_t_8 = __pyx_v_x;
+                                __pyx_t_10 = __pyx_v_y;
+                                __pyx_t_7 = 1;
+                                *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_8 * __pyx_v_u.strides[0]) ) + __pyx_t_10 * __pyx_v_u.strides[1]) ) + __pyx_t_7 * __pyx_v_u.strides[2]) )) = (__pyx_v_total_y / __pyx_t_16);
+                              }
+                              __pyx_L12:;
+                            }
+                            goto __pyx_L16;
+                            __pyx_L8_error:;
+                            {
+                                #ifdef WITH_THREAD
+                                PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                                #endif
+                                #ifdef _OPENMP
+                                #pragma omp flush(__pyx_parallel_exc_type)
+                                #endif /* _OPENMP */
+                                if (!__pyx_parallel_exc_type) {
+                                  __Pyx_ErrFetchWithState(&__pyx_parallel_exc_type, &__pyx_parallel_exc_value, &__pyx_parallel_exc_tb);
+                                  __pyx_parallel_filename = __pyx_filename; __pyx_parallel_lineno = __pyx_lineno; __pyx_parallel_clineno = __pyx_clineno;
+                                  __Pyx_GOTREF(__pyx_parallel_exc_type);
+                                }
+                                #ifdef WITH_THREAD
+                                __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                                #endif
+                            }
+                            __pyx_parallel_why = 4;
+                            goto __pyx_L15;
+                            __pyx_L15:;
+                            #ifdef _OPENMP
+                            #pragma omp critical(__pyx_parallel_lastprivates1)
+                            #endif /* _OPENMP */
+                            {
+                                __pyx_parallel_temp0 = __pyx_v_total_x;
+                                __pyx_parallel_temp1 = __pyx_v_total_y;
+                                __pyx_parallel_temp2 = __pyx_v_v;
+                                __pyx_parallel_temp3 = __pyx_v_x;
+                                __pyx_parallel_temp4 = __pyx_v_y;
+                            }
+                            __pyx_L16:;
+                            #ifdef _OPENMP
+                            #pragma omp flush(__pyx_parallel_why)
+                            #endif /* _OPENMP */
+                        }
+                    }
+                    #ifdef _OPENMP
+                    Py_END_ALLOW_THREADS
+                    #else
+{
+#ifdef WITH_THREAD
+                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                    #endif
+                    #endif /* _OPENMP */
+                    /* Clean up any temporaries */
+                    #ifdef WITH_THREAD
+                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                    #endif
+                    #ifndef _OPENMP
+}
+#endif /* _OPENMP */
+                }
+            }
+            if (__pyx_parallel_exc_type) {
+              /* This may have been overridden by a continue, break or return in another thread. Prefer the error. */
+              __pyx_parallel_why = 4;
+            }
+            if (__pyx_parallel_why) {
+              __pyx_v_total_x = __pyx_parallel_temp0;
+              __pyx_v_total_y = __pyx_parallel_temp1;
+              __pyx_v_v = __pyx_parallel_temp2;
+              __pyx_v_x = __pyx_parallel_temp3;
+              __pyx_v_y = __pyx_parallel_temp4;
+              switch (__pyx_parallel_why) {
+                    case 4:
+                {
+                    #ifdef WITH_THREAD
+                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                    #endif
+                    __Pyx_GIVEREF(__pyx_parallel_exc_type);
+                    __Pyx_ErrRestoreWithState(__pyx_parallel_exc_type, __pyx_parallel_exc_value, __pyx_parallel_exc_tb);
+                    __pyx_filename = __pyx_parallel_filename; __pyx_lineno = __pyx_parallel_lineno; __pyx_clineno = __pyx_parallel_clineno;
+                    #ifdef WITH_THREAD
+                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                    #endif
+                }
+                goto __pyx_L4_error;
+              }
+            }
         }
-        __pyx_t_8 = __pyx_v_x;
-        __pyx_t_10 = __pyx_v_y;
-        __pyx_t_7 = 1;
-        *((double *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_u.data + __pyx_t_8 * __pyx_v_u.strides[0]) ) + __pyx_t_10 * __pyx_v_u.strides[1]) ) + __pyx_t_7 * __pyx_v_u.strides[2]) )) = (__pyx_v_total_y / __pyx_t_16);
+        #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+            #undef likely
+            #undef unlikely
+            #define likely(x)   __builtin_expect(!!(x), 1)
+            #define unlikely(x) __builtin_expect(!!(x), 0)
+        #endif
       }
-      __pyx_L7:;
-    }
+
+      /* "fluid_dynamics.pyx":167
+ *     cdef double total_x, total_y
+ * 
+ *     for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x             # <<<<<<<<<<<<<<
+ *     #for x in range(num_x):
+ *         for y in range(num_y):
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          __Pyx_FastGIL_Forget();
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L4_error: {
+          #ifdef WITH_THREAD
+          __Pyx_FastGIL_Forget();
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L1_error;
+        }
+        __pyx_L5:;
+      }
   }
 
   /* "fluid_dynamics.pyx":184
@@ -23851,7 +24081,7 @@ static PyObject *__pyx_pf_14fluid_dynamics_10stream_and_reflect(CYTHON_UNUSED Py
                             goto __pyx_L18;
                             __pyx_L18:;
                             #ifdef _OPENMP
-                            #pragma omp critical(__pyx_parallel_lastprivates1)
+                            #pragma omp critical(__pyx_parallel_lastprivates2)
                             #endif /* _OPENMP */
                             {
                                 __pyx_parallel_temp0 = __pyx_v_i;

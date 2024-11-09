@@ -135,15 +135,15 @@ def fluid_density(Parameters sim,
     cdef int i, j, v
     cdef double total
 
-    #for i in prange(num_x, nogil=True, schedule="static"):
-    for i in range(num_x):
+    for i in prange(num_x, nogil=True, schedule="static"):
+    #for i in range(num_x):
         for j in range(num_y):
             if mask[i, j] == 1:
                 rho[i, j] = 0.0001
             else:
-                total = 0  # Thread-safe local variable
+                total = 0.0  # Thread-safe local variable
                 for v in range(num_v):
-                    total += f[i, j, v]
+                    total = total + f[i, j, v]
                 rho[i, j] = total
     return rho
 
@@ -164,8 +164,8 @@ def fluid_velocity(Parameters sim,
     cdef int x, y, v
     cdef double total_x, total_y
 
-    #for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
-    for x in range(num_x):
+    for x in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
+    #for x in range(num_x):
         for y in range(num_y):
             if mask[x, y] == 1:
                 u[x, y, 0] = 0.0
@@ -175,8 +175,8 @@ def fluid_velocity(Parameters sim,
                 total_y = 0.0  # Declare inside the inner loop
 
                 for v in range(num_v):
-                    total_x += f[x, y, v] * c[v, 0]
-                    total_y += f[x, y, v] * c[v, 1]
+                    total_x = total_x + (f[x, y, v] * c[v, 0])
+                    total_y = total_y + (f[x, y, v] * c[v, 1])
                 u[x, y, 0] = total_x / rho[x, y]
                 u[x, y, 1] = total_y / rho[x, y]
 
