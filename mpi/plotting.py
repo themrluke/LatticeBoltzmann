@@ -38,15 +38,16 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     
     x = np.arange(sim.num_x) + 0.5
     y = np.arange(sim.num_y) + 0.5
-    
-    [fig, ax] = plt.subplots(3, 1, figsize=(16,9))
+
     
     #needed to make the length of system longer to avoid interference from vortices passing out the back and appearing in front again
     #cutoff value allows the graph to remain focused on the interesting part of the vortex near the cars
     #cutff limits how far the graphs are plotted along x-direction. 
     #cutoff = sim.num_x for true scale of simulated fluid
-    cutoff = 1300
+
+    cutoff = 1300    
     
+    [fig, ax] = plt.subplots(3, 1, figsize=(16,9))
     # Density field
     
     c = ax[0].imshow(rho[:cutoff, :].transpose(), origin='lower', extent=[0,cutoff,0,sim.num_y], vmax=1.2) 
@@ -98,7 +99,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
 
     
     #TEST voricity plot to check if vortices are interfering with front of car due to going off graph at back
-    c = plt.imshow(vor.transpose(), origin='lower', extent=[0,sim.num_x,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
+    c = plt.imshow(vor.transpose(), origin='lower', extent=[0,sim.num_x/2,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
     bar2 = plt.colorbar(c)
     bar2.set_label('$v$')
     plt.title(r'Vorticity with Streamlines $v$', fontsize = '8')
@@ -114,7 +115,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     cmap = plt.matplotlib.colors.ListedColormap(colors)
 
     # Plot the array
-    plt.imshow(sim.mask2.transpose(), cmap=cmap, origin='lower', extent=[0, sim.num_x, 0, sim.num_y])
+    plt.imshow(sim.mask2.transpose(), cmap=cmap, origin='lower', extent=[0, sim.num_x/2, 0, sim.num_y])
 
     # Add colorbar for reference
     cbar = plt.colorbar(ticks=[0, 1])

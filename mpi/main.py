@@ -1,13 +1,14 @@
 # main.py
-import numpy as np
-from mpi4py import MPI
-import os
-import time
 
 from parameters import Parameters
 from initialisation import initial_turbulence
-from fluid_dynamics import equilibrium, fluid_density, fluid_velocity, timestep_loop
+from fluid_dynamics import timestep_loop
 #from plotting import plot_solution, setup_plot_directories
+
+import numpy as np
+import os
+import time
+from mpi4py import MPI
 
 import cProfile
 import pstats
@@ -22,7 +23,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 10, t_plot=100)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=20)
     sim = MPI.COMM_WORLD.bcast(sim if rank == 0 else None, root=0)
 
     # Set up plot directories
@@ -38,10 +39,6 @@ def main():
 
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim, local_start_x, local_end_x)
-
-    # Create arrays for boundaries
-    left_ghost = np.empty((sim.num_y, sim.num_v), dtype=np.float64)
-    right_ghost = np.empty((sim.num_y, sim.num_v), dtype=np.float64)
 
     #vor = fluid_vorticity(sim, u)
 
@@ -60,19 +57,14 @@ def main():
                                       initial_u,
                                       local_num_x,
                                       local_start_x,
-                                      local_end_x,
                                       rank,
                                       size)
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 
-    # Gather force arrays from all processes
-    if rank == 0:
-        global_force_array = np.empty((sim.t_steps * size), dtype=np.float64)
-    else:
-        global_force_array = None
 
-    MPI.COMM_WORLD.Gather(local_force_array, global_force_array, root=0)
+    global_force_array = np.empty((sim.t_steps), dtype=np.float64)
+    MPI.COMM_WORLD.Reduce(local_force_array, global_force_array, op=MPI.SUM, root=0)
 
     # Save results on rank 0
     if rank == 0:

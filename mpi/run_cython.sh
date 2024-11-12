@@ -15,7 +15,7 @@ run_file=main.py
 python $setup_file build_ext --inplace
 
 # Specify the number of MPI processes (adjust as needed)
-NUM_PROCESSES=8
+NUM_PROCESSES=1
 
 # Run the Python program with MPI
 mpiexec -n $NUM_PROCESSES python $run_file
