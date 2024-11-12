@@ -1,7 +1,7 @@
 # main.py
 from parameters import Parameters
 from initialisation import initial_turbulence
-from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity
+from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity, fluid_vorticity
 from plotting import plot_solution, setup_plot_directories
 
 import numpy as np
@@ -17,7 +17,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 10, t_plot=100)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 100, t_plot=1)
 
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
@@ -33,14 +33,13 @@ def main():
     rho = fluid_density(sim, f)
     u = fluid_velocity(sim, f, rho)
     feq = equilibrium(sim, rho, u)
-    #vor = fluid_vorticity(sim, u)
+    vor = fluid_vorticity(u)
 
-    # plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
-    #               dvv_dir=dvv_dir,
-    #               streamlines_dir=streamlines_dir, 
-    #               test_streamlines_dir=test_streamlines_dir,
-    #               test_mask_dir=test_mask_dir,
-    #               )
+    plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
+                  dvv_dir=dvv_dir,
+                  streamlines_dir=streamlines_dir, 
+                  test_streamlines_dir=test_streamlines_dir,
+                  test_mask_dir=test_mask_dir)
 
     # Finally evolve the distribution in time, using the 'collision' and
     # 'streaming_reflect' functions.
@@ -81,14 +80,14 @@ def main():
         print('equilibrium() time: ', time5_end - time5_start)
         #print('reynolds number: ', sim.Re)
         
-        # if (t % sim.t_plot == 0):
-        #     vor = fluid_vorticity(sim, u)
-        #     plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
-        #                   dvv_dir=dvv_dir,
-        #                   streamlines_dir=streamlines_dir, 
-        #                   test_streamlines_dir=test_streamlines_dir,
-        #                   test_mask_dir=test_mask_dir,
-        #                   )
+        if (t % sim.t_plot == 0):
+            vor = fluid_vorticity(u)
+            plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
+                          dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir, 
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir,
+                          )
 
     
     data_dir = 'Data'

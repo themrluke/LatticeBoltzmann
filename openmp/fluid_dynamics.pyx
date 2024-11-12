@@ -9,6 +9,7 @@ import numpy as np
 cimport numpy as np
 from cython.parallel import prange
 from parameters cimport Parameters
+from plotting import plot_solution, setup_plot_directories
 import time
 
 def timestep_loop(Parameters sim,
@@ -24,25 +25,30 @@ def timestep_loop(Parameters sim,
     cdef int num_x = sim.num_x
     cdef int num_y = sim.num_y
     cdef int num_v = sim.num_v
-
-    cdef int[:, :] c = sim.c
-    cdef int[:, :] mask = sim.mask
-    cdef int[:, :] mask2 = sim.mask2
-    cdef int[:] reflection = sim.reflection
-    cdef double[:] w = sim.w
     cdef double cs = sim.cs
     cdef double cs2 = cs*cs
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
-    cdef double momentum_total
 
-    cdef double[:] force_array = np.empty((t_steps), dtype=np.float64)
+    cdef double[:] w = sim.w
+    cdef int[:, :] c = sim.c
+    cdef int[:, :] mask = sim.mask
+    cdef int[:, :] mask2 = sim.mask2
+    cdef int[:] reflection = sim.reflection
     cdef double[:, :] rho = np.empty((num_x, num_y), dtype=np.float64)
-    cdef double[:, :, :] feq = np.empty((num_x, num_y, num_v), dtype=np.float64)
     cdef double[:, :, :] u = np.empty((num_x, num_y, 2), dtype=np.float64)
+    cdef double[:, :, :] feq = np.empty((num_x, num_y, num_v), dtype=np.float64)
     cdef double[:, :, :] f = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, :] f_new = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, :] temp
+    cdef double[:] force_array = np.empty((t_steps), dtype=np.float64)
     cdef double[:, :, :] momentum_point = np.empty((num_x, num_y, num_v), dtype=np.float64)
     momentum_point[:, :, :] = 0.0
+    cdef double momentum_total
+
+    cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
+
+    dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
 
     # Create the initial distribution by finding the equilibrium for the flow
@@ -52,6 +58,15 @@ def timestep_loop(Parameters sim,
     rho = fluid_density(num_x, num_y, num_v, mask, f, rho)
     u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
     feq = equilibrium(num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq)
+
+    vor = fluid_vorticity(u, num_x, num_y)
+
+    plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+                  dvv_dir=dvv_dir,
+                  streamlines_dir=streamlines_dir, 
+                  test_streamlines_dir=test_streamlines_dir,
+                  test_mask_dir=test_mask_dir,
+                  )
 
 
 
@@ -67,7 +82,10 @@ def timestep_loop(Parameters sim,
 
         # Streaming and reflection
         time2_start = time.time()
-        f, momentum_total = stream_and_reflect(num_x, num_y, num_v, c, mask, mask2, reflection, f, u, momentum_point)
+        f_new, momentum_total = stream_and_reflect(num_x, num_y, num_v, c, mask, mask2, reflection, f, f_new, u, momentum_point)
+        temp = f
+        f = f_new
+        f_new = temp
         time2_end = time.time()
         #print('stream_and_reflect() time: ', time2_end - time2_start)
 
@@ -89,6 +107,14 @@ def timestep_loop(Parameters sim,
         time5_end = time.time()
         #print('equilibrium() time: ', time5_end - time5_start)
 
+        if (t % sim.t_plot == 0):
+            vor = fluid_vorticity(u, num_x, num_y)
+            plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+                          dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir, 
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir)
+
     return force_array
 
 
@@ -108,6 +134,8 @@ def equilibrium(int num_x,
 
     cdef int i, j, k
     cdef double u_dot_u, u_dot_c
+
+    feq[:, :, :] = 0.0
 
     for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
@@ -131,6 +159,8 @@ def fluid_density(int num_x,
 
     cdef int i, j, k
     cdef double total
+
+    rho[:, :] = 0.0
 
     for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
@@ -159,29 +189,34 @@ def fluid_velocity(int num_x,
     cdef int i, j, k
     cdef double total_x, total_y
 
+    u[:, :, :] = 0.0
+
     for i in prange(num_x, nogil=True, schedule="static"):  # Parallelize over x
         for j in range(num_y):
-            if mask[i, j] == 1:
-                u[i, j, 0] = 0.0
-                u[i, j, 1] = 0.0
+            if mask[i, j] == 1:     # Is this needed
+                u[i, j, :] = 0.0
             else:
-                total_x = 0.0  # Declare inside the inner loop
-                total_y = 0.0  # Declare inside the inner loop
-
                 for k in range(num_v):
-                    total_x = total_x + (f[i, j, k] * c[k, 0])
-                    total_y = total_y + (f[i, j, k] * c[k, 1])
-                u[i, j, 0] = total_x / rho[i, j]
-                u[i, j, 1] = total_y / rho[i, j]
+                    u[i, j, 0] = u[i, j, 0] + (f[i, j, k] * c[k, 0] / rho[i, j])
+                    u[i, j, 1] = u[i, j, 1] + (f[i, j, k] * c[k, 1] / rho[i, j])
+    print(np.asarray(u[100, 100]))
 
-                
     return u
+
+def fluid_vorticity(double[:, :, :] u, int num_x, int num_y):
+
+    cdef np.ndarray[np.float64_t, ndim=2] vor = np.empty((num_x, num_y), dtype=np.float64)
+
+    u = np.asarray(u)
+    vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
+           np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
+    return vor
 
 def collision(int num_x,
               int num_y,
               int num_v,
               double tau_inv,
-              double[:, :, :] f, 
+              double[:, :, :] f,
               double[:, :, :] feq):
     """
     Perform the collision step, updating the distribution f using feq.
@@ -192,7 +227,7 @@ def collision(int num_x,
     for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
             for k in range(num_v):
-                f[i, j, k] = f[i, j, k] * (1 - tau_inv) + feq[i, j, k] * tau_inv
+                f[i, j, k] = (f[i, j, k] * (1 - tau_inv)) + (feq[i, j, k] * tau_inv)
     return f
 
 
@@ -203,7 +238,8 @@ def stream_and_reflect(int num_x,
                        int[:, :] mask,
                        int[:, :] mask2,
                        int[:] reflection,
-                       double[:, :, :] f, 
+                       double[:, :, :] f,
+                       double[:, :, :] f_new,
                        double[:, :, :] u,
                        double[:, :, :] momentum_point):
     """
@@ -212,28 +248,35 @@ def stream_and_reflect(int num_x,
 
     cdef int i, j, k, rolled_x, rolled_y
     cdef double momentum_total = 0.0
+    f_new[:, :, :] = 0.0
 
     for i in prange(num_x, nogil=True, schedule="static"):
         for j in range(num_y):
             for k in range(num_v):
 
-                rolled_x = (i + c[k, 0]) % num_x
-                rolled_y = (j + c[k, 1]) % num_y
+                rolled_x = (i - c[k, 0]) % num_x # Negative because our c vector point away from lattice node
+                rolled_y = (j - c[k, 1]) % num_y
+
+                if mask2[i, j] == 1:
+                    momentum_point[i, j, k] = 0.0
                 
-                if mask[i, j] == 1:
-                    f[i, j, k] = 0.0
-                    continue
-
-
-                elif mask[rolled_x, rolled_y] == 1:
-                    f[i, j, k] = f[i, j, reflection[k]]
                 else:
-                    f[i, j, k] = f[rolled_x, rolled_y, k]
-                
-                if mask2[i, j] == 0:
                     if mask2[rolled_x, rolled_y] == 1:
                         momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
+            
+                    else:
+                        momentum_point[i, j, k] = 0.0
                 
                 momentum_total += momentum_point[i, j, k]
+                
+                if mask[i, j] == 1:
+                    f_new[i, j, k] = 0.0
+                    continue
 
-    return f, momentum_total
+                elif mask[rolled_x, rolled_y] == 1:
+                    f_new[i, j, k] = f[i, j, reflection[k]]
+
+                else:
+                    f_new[i, j, k] = f[rolled_x, rolled_y, k]
+
+    return f_new, momentum_total

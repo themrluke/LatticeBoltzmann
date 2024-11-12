@@ -32,13 +32,13 @@ def fluid_velocity(sim, f, rho):
     
     inv_rho = 1/rho
     f_over_rho = np.einsum('ijk,ij->ijk', f, inv_rho)
-    u = np.where(sim.mask[...,np.newaxis], 0, np.einsum('ijk,kl->ijl', f_over_rho,sim.c))
+    u = np.where(sim.mask[...,np.newaxis], 0, np.einsum('ijk,kl->ijl', f_over_rho, sim.c))
     # Returns a numpy array of shape (sim.num_x, sim.num_y, 2), of fluid
     # velocities.
     return u
 
 
-def fluid_vorticity(sim, u):
+def fluid_vorticity(u):
     vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
            np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
     return vor
@@ -60,8 +60,16 @@ def stream_and_reflect(sim, f, u):
     momentum_point=np.zeros((sim.num_x,sim.num_y,9))
     
     for i in range(len(sim.c)):
-        momentum_point[:,:,i] = np.where(sim.mask2, 0, np.where(np.roll(sim.mask2, sim.c[i,:], axis=(0,1)), u[:,:,0]*(f[:,:,i]+f[:,:,sim.reflection[i]]), 0))               #should i roll by -sim.c as opposite direction as line below
-        f[:,:,i] = np.where(sim.mask, 0, np.where(np.roll(sim.mask, sim.c[i,:], axis=(0,1)), f[:,:,sim.reflection[i]], np.roll(f[:,:,i], sim.c[i,:]*delta_t, axis=(0,1))))
+        momentum_point[:,:,i] = np.where(sim.mask2, 
+                                         0, 
+                                         np.where(np.roll(sim.mask2, sim.c[i,:], axis=(0,1)), 
+                                                  u[:,:,0]*(f[:,:,i]+f[:,:,sim.reflection[i]]),
+                                                  0))               #should i roll by -sim.c as opposite direction as line below
+        f[:,:,i] = np.where(sim.mask, 
+                            0, 
+                            np.where(np.roll(sim.mask, sim.c[i,:], axis=(0,1)), 
+                                     f[:,:,sim.reflection[i]], 
+                                     np.roll(f[:,:,i], sim.c[i,:]*delta_t, axis=(0,1))))
     momentum_total = np.einsum('ijk->',momentum_point)
     
     return f, momentum_total
