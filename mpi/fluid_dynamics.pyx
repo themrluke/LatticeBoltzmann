@@ -290,10 +290,14 @@ def stream_and_reflect(int global_num_x,
                         f_new[i, j, k] = 0.0
 
                     elif mask[rolled_x, rolled_y] == 1:
-                        f_new[i, j, k] = left_ghost[rolled_y, k] # had reflection k here
+                        #f_new[i, j, k] = left_ghost[rolled_y, reflection[k]]*999
+                        f_new[i, j, k] = f[i, j, reflection[k]]
 
                     else:
                         f_new[i, j, k] = left_ghost[rolled_y, k]
+
+                    if mask2[rolled_x, rolled_y] == 1:
+                        momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
                     continue
 
                 elif rolled_x >= start_x + num_x or (end_location == global_num_x):
@@ -301,10 +305,14 @@ def stream_and_reflect(int global_num_x,
                         f_new[i, j, k] = 0.0
 
                     elif mask[rolled_x, rolled_y] == 1:
-                        f_new[i, j, k] = right_ghost[rolled_y, k]
+                        #f_new[i, j, k] = right_ghost[rolled_y, reflection[k]]*999
+                        f_new[i, j, k] = f[i, j, reflection[k]]
 
                     else:
                         f_new[i, j, k] = right_ghost[rolled_y, k]
+
+                    if mask2[rolled_x, rolled_y] == 1:
+                        momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
                     continue
                 
                 if mask2[i + start_x, j] == 1:

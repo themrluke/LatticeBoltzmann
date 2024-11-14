@@ -23,7 +23,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=20)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=700)
     sim = MPI.COMM_WORLD.bcast(sim if rank == 0 else None, root=0)
 
     # Set up plot directories
