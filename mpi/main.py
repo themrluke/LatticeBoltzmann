@@ -36,6 +36,7 @@ def main():
 
     local_start_x = rank * (local_num_x)
     local_end_x = local_start_x + local_num_x
+    print('START, END, NUM: ', local_start_x, local_end_x, local_num_x)
 
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim, local_start_x, local_end_x)
