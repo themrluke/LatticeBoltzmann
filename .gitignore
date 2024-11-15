@@ -9,3 +9,15 @@
 
 # Ignore all txt files
 *.txt
+
+# Ignore all so files (compiled)
+*.so
+
+# Ignore all o files (compiled)
+*.o
+
+# Ignore all C files (compiled)
+*.c
+
+# Ignore all pyc files (pycache)
+*.pyc
