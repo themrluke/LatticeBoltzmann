@@ -2,8 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False
-
+# cython: boundscheck=True, wraparound=False, cdivision=False, initializedcheck=True
 
 import numpy as np
 cimport numpy as np
@@ -13,8 +12,8 @@ from plotting import plot_solution, setup_plot_directories
 import time
 
 def timestep_loop(Parameters sim,
-                  double[:, :] initial_rho,
-                  double[:, :, :] initial_u,
+                  double[:, ::1] initial_rho,
+                  double[:, :, ::1] initial_u,
                   int local_num_x,
                   int start_x,
                   int rank,
@@ -33,19 +32,19 @@ def timestep_loop(Parameters sim,
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
 
-    cdef double[:] w = sim.w
-    cdef int[:, :] c = sim.c
-    cdef int[:, :] mask = sim.mask
-    cdef int[:, :] mask2 = sim.mask2
-    cdef int[:] reflection = sim.reflection
-    cdef double[:, :] rho = np.empty((local_num_x, num_y), dtype=np.float64)
-    cdef double[:, :, :] u = np.empty((local_num_x, num_y, 2), dtype=np.float64)
-    cdef double[:, :, :] feq = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
-    cdef double[:, :, :] f = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
-    cdef double[:, :, :] f_new = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
-    cdef double[:, :, :] temp
-    cdef double[:] local_force_array = np.empty((t_steps), dtype=np.float64)
-    cdef double[:, :, :] momentum_point = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
+    cdef double[::1] w = sim.w
+    cdef int[:, ::1] c = sim.c
+    cdef int[:, ::1] mask = sim.mask
+    cdef int[:, ::1] mask2 = sim.mask2
+    cdef int[::1] reflection = sim.reflection
+    cdef double[:, ::1] rho = np.empty((local_num_x, num_y), dtype=np.float64)
+    cdef double[:, :, ::1] u = np.empty((local_num_x, num_y, 2), dtype=np.float64)
+    cdef double[:, :, ::1] feq = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] f = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] f_new = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] temp
+    cdef double[::1] local_force_array = np.empty((t_steps), dtype=np.float64)
+    cdef double[:, :, ::1] momentum_point = np.empty((local_num_x, num_y, num_v), dtype=np.float64)
     momentum_point[:, :, :] = 0.0
     cdef double momentum_total
 
@@ -55,8 +54,8 @@ def timestep_loop(Parameters sim,
 
 
     # Create boundarys to transfer
-    cdef double[:, :] left_ghost = np.empty((num_y, num_v), dtype=np.float64)
-    cdef double[:, :] right_ghost = np.empty((num_y, num_v), dtype=np.float64)
+    cdef double[:, ::1] left_ghost = np.empty((num_y, num_v), dtype=np.float64)
+    cdef double[:, ::1] right_ghost = np.empty((num_y, num_v), dtype=np.float64)
 
 
     # Initialize local subdomain
@@ -82,6 +81,9 @@ def timestep_loop(Parameters sim,
     for t in range(1, sim.t_steps + 1):
         # print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
         # print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+    
+        # Collision step
+        f = collision(local_num_x, num_y, num_v, tau_inv, f, feq)
 
         # Communicate boundaries with neighbors or periodic wrapping
         MPI.COMM_WORLD.Sendrecv(sendbuf=f[f.shape[0]-1, :, :], dest=right_neighbor,
@@ -90,10 +92,6 @@ def timestep_loop(Parameters sim,
         MPI.COMM_WORLD.Sendrecv(sendbuf=f[0, :, :], dest=left_neighbor,
                                         recvbuf=right_ghost, source=right_neighbor)
 
-    
-        # Collision step
-        f = collision(local_num_x, num_y, num_v, tau_inv, f, feq)
-
         # Streaming and reflection
         f_new, momentum_total = stream_and_reflect(
             num_x, local_num_x, num_y, num_v, c, mask, mask2, start_x,
@@ -101,14 +99,13 @@ def timestep_loop(Parameters sim,
         temp = f
         f = f_new
         f_new = temp
-
         
         # Update force array
         local_force_array[t - 1] = momentum_total
 
         # Update density and velocity
         rho = fluid_density(local_num_x, num_y, num_v, mask, start_x, f, rho)
-        u = fluid_velocity(local_num_x, num_y, num_v, c, mask, start_x,f, rho, u)
+        u = fluid_velocity(local_num_x, num_y, num_v, c, mask, start_x, f, rho, u)
 
         # Update equilibrium
         feq = equilibrium(local_num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq)
@@ -121,6 +118,7 @@ def timestep_loop(Parameters sim,
                             streamlines_dir=streamlines_dir, 
                             test_streamlines_dir=test_streamlines_dir,
                             test_mask_dir=test_mask_dir)
+                print(f'PLOT {t} complete')
 
     return local_force_array
 
@@ -130,12 +128,12 @@ def timestep_loop(Parameters sim,
 def equilibrium(int num_x,
                 int num_y,
                 int num_v,
-                int[:, :] c,
-                double[:] w,
+                int[:, ::1] c,
+                double[::1] w,
                 double cs, double cs2, double cs4,
-                double[:, :] rho, 
-                double[:, :, :] u,
-                double[:, :, :] feq):
+                double[:, ::1] rho, 
+                double[:, :, ::1] u,
+                double[:, :, ::1] feq):
     """
     Evaluate the equilibrium distribution across the lattice.
     """
@@ -158,10 +156,10 @@ def equilibrium(int num_x,
 def fluid_density(int num_x,
                   int num_y,
                   int num_v,
-                  int[:, :] mask,
+                  int[:, ::1] mask,
                   int start_x,
-                  double[:, :, :] f,
-                  double[:, :] rho):
+                  double[:, :, ::1] f,
+                  double[:, ::1] rho):
     """
     Calculate fluid density from the distribution f.
     """
@@ -186,12 +184,12 @@ def fluid_density(int num_x,
 def fluid_velocity(int num_x,
                    int num_y,
                    int num_v,
-                   int[:, :] c,
-                   int[:, :] mask,
+                   int[:, ::1] c,
+                   int[:, ::1] mask,
                    int start_x,
-                   double[:, :, :] f, 
-                   double[:, :] rho,
-                   double[:, :, :] u):
+                   double[:, :, ::1] f, 
+                   double[:, ::1] rho,
+                   double[:, :, ::1] u):
     """
     Calculate fluid velocity from the distribution f and density rho.
     """
@@ -203,7 +201,7 @@ def fluid_velocity(int num_x,
 
     for i in range(num_x):
         for j in range(num_y):
-            if mask[i + start_x, j] == 1:     # Is this needed
+            if mask[i + start_x, j] == 1:
                 u[i, j, :] = 0.0
             else:
                 for k in range(num_v):
@@ -212,7 +210,7 @@ def fluid_velocity(int num_x,
     return u
 
 
-def fluid_vorticity(double[:, :, :] u, int num_x, int num_y):
+def fluid_vorticity(double[:, :, ::1] u, int num_x, int num_y):
 
     cdef np.ndarray[np.float64_t, ndim=2] vor = np.empty((num_x, num_y), dtype=np.float64)
 
@@ -226,8 +224,8 @@ def collision(int num_x,
               int num_y,
               int num_v,
               double tau_inv,
-              double[:, :, :] f, 
-              double[:, :, :] feq):
+              double[:, :, ::1] f, 
+              double[:, :, ::1] feq):
     """
     Perform the collision step, updating the distribution f using feq.
     """
@@ -246,17 +244,17 @@ def stream_and_reflect(int global_num_x,
                     int num_x,
                     int num_y,
                     int num_v,
-                    int[:, :] c,
-                    int[:, :] mask,
-                    int[:, :] mask2,
+                    int[:, ::1] c,
+                    int[:, ::1] mask,
+                    int[:, ::1] mask2,
                     int start_x,
-                    int[:] reflection,
-                    double[:, :, :] f,
-                    double[:, :, :] f_new,
-                    double[:, :, :] u,
-                    double[:, :, :] momentum_point,
-                    double[:, :] left_ghost,
-                    double[:, :] right_ghost):
+                    int[::1] reflection,
+                    double[:, :, ::1] f,
+                    double[:, :, ::1] f_new,
+                    double[:, :, ::1] u,
+                    double[:, :, ::1] momentum_point,
+                    double[:, ::1] left_ghost,
+                    double[:, ::1] right_ghost):
     """
     Perform the streaming and boundary reflection step.
     """
@@ -265,6 +263,7 @@ def stream_and_reflect(int global_num_x,
     cdef double momentum_total = 0.0
     f_new[:, :, :] = 0.0
 
+  
     for i in range(num_x):
         for j in range(num_y):
             for k in range(num_v):

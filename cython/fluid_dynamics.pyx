@@ -2,17 +2,18 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=False, wraparound=False
+# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
 
 
 import numpy as np
 cimport numpy as np
 from parameters cimport Parameters
+from plotting import plot_solution, setup_plot_directories
 import time
 
 def timestep_loop(Parameters sim,
-                  double[:, :] initial_rho,
-                  double[:, :, :] initial_u):
+                  double[:, ::1] initial_rho,
+                  double[:, :, ::1] initial_u):
 
     """
     Loop over each timestep to perform calculations
@@ -23,210 +24,255 @@ def timestep_loop(Parameters sim,
     cdef int num_x = sim.num_x
     cdef int num_y = sim.num_y
     cdef int num_v = sim.num_v
+    cdef double cs = sim.cs
+    cdef double cs2 = cs*cs
+    cdef double cs4 = cs2*cs2
+    cdef double tau_inv = sim.inv_tau
+
+    cdef double[::1] w = sim.w
+    cdef int[:, ::1] c = sim.c
+    cdef int[:, ::1] mask = sim.mask
+    cdef int[:, ::1] mask2 = sim.mask2
+    cdef int[::1] reflection = sim.reflection
+    cdef double[:, ::1] rho = np.empty((num_x, num_y), dtype=np.float64)
+    cdef double[:, :, ::1] u = np.empty((num_x, num_y, 2), dtype=np.float64)
+    cdef double[:, :, ::1] feq = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] f = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] f_new = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    cdef double[:, :, ::1] temp
+    cdef double[::1] force_array = np.empty((t_steps), dtype=np.float64)
+    cdef double[:, :, ::1] momentum_point = np.empty((num_x, num_y, num_v), dtype=np.float64)
+    momentum_point[:, :, :] = 0.0
     cdef double momentum_total
 
-    cdef double[:] force_array = np.empty((t_steps), dtype=np.float64)
-    cdef double[:, :] rho = np.empty((num_x, num_y), dtype=np.float64)
-    cdef double[:, :, :] feq_in = np.empty((num_x, num_y, num_v), dtype=np.float64)
-    cdef double[:, :] rho_in = np.empty((num_x, num_y), dtype=np.float64)
-    cdef double[:, :, :] u_in = np.empty((num_x, num_y, 2), dtype=np.float64)
-    cdef double[:, :, :] f_new_in = np.empty((num_x, num_y, num_v), dtype=np.float64)
-    cdef double[:, :, :] momentum_point_in = np.empty((num_x, num_y, num_v), dtype=np.float64)
-    momentum_point_in[:, :, :] = 0.0
+    cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
+
+    dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
 
     # Create the initial distribution by finding the equilibrium for the flow
     # calculated above.
-    f = equilibrium(sim, initial_rho, initial_u, feq_in)
+    f = equilibrium(num_x, num_y, num_v, c, w, cs, cs2, cs4, initial_rho, initial_u, f)
 
-    rho = fluid_density(sim, f, rho_in)
-    u = fluid_velocity(sim, f, rho, u_in)
-    feq = equilibrium(sim, rho, u, feq_in)
+    rho = fluid_density(num_x, num_y, num_v, mask, f, rho)
+    u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
+    feq = equilibrium(num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq)
+
+    vor = fluid_vorticity(u, num_x, num_y)
+
+    plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+                  dvv_dir=dvv_dir,
+                  streamlines_dir=streamlines_dir, 
+                  test_streamlines_dir=test_streamlines_dir,
+                  test_mask_dir=test_mask_dir,
+                  )
 
 
 
     for t in range(1, t_steps + 1):
-        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+        #print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
+        #print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
         # Perform collision step, using the calculated density and velocity data.
         time1_start = time.time()
-        f = collision(sim, f, feq, f_new_in)
+        f = collision(num_x, num_y, num_v, tau_inv, f, feq)
         time1_end = time.time()
-        print('collision() time: ', time1_end - time1_start)
+        #print('collision() time: ', time1_end - time1_start)
 
         # Streaming and reflection
         time2_start = time.time()
-        f, momentum_total = stream_and_reflect(sim, f, u, momentum_point_in)
+        f_new, momentum_total = stream_and_reflect(num_x, num_y, num_v, c, mask, mask2, reflection, f, f_new, u, momentum_point)
+        temp = f
+        f = f_new
+        f_new = temp
         time2_end = time.time()
-        print('stream_and_reflect() time: ', time2_end - time2_start)
+        #print('stream_and_reflect() time: ', time2_end - time2_start)
 
         force_array[t-1] = momentum_total
 
         # Calculate density and velocity data, for next time around
         time3_start = time.time()
-        rho = fluid_density(sim, f, rho_in)
+        rho = fluid_density(num_x, num_y, num_v, mask, f, rho)
         time3_end = time.time()
-        print('fluid_density() time: ', time3_end - time3_start)
+        #print('fluid_density() time: ', time3_end - time3_start)
 
         time4_start = time.time()
-        u = fluid_velocity(sim, f, rho, u_in)
+        u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
         time4_end = time.time()
-        print('fluid_velocity() time: ', time4_end - time4_start)
+        #print('fluid_velocity() time: ', time4_end - time4_start)
 
         time5_start = time.time()
-        feq = equilibrium(sim, rho, u, feq_in)
+        feq = equilibrium(num_x, num_y, num_v, c, w, cs, cs2, cs4, rho, u, feq)
         time5_end = time.time()
-        print('equilibrium() time: ', time5_end - time5_start)
+        #print('equilibrium() time: ', time5_end - time5_start)
+
+        if (t % sim.t_plot == 0):
+            vor = fluid_vorticity(u, num_x, num_y)
+            plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+                          dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir, 
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir)
 
     return force_array
 
 
 
-def equilibrium(Parameters sim, 
-                double[:, :] rho, 
-                double[:, :, :] u,
-                double[:, :, :] feq):
+def equilibrium(int num_x,
+                int num_y,
+                int num_v,
+                int[:, ::1] c,
+                double[::1] w,
+                double cs, double cs2, double cs4,
+                double[:, ::1] rho, 
+                double[:, :, ::1] u,
+                double[:, :, ::1] feq):
     """
     Evaluate the equilibrium distribution across the lattice.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef double[:] w = sim.w
-    cdef int[:, :] c = sim.c
-    cdef double cs = sim.cs
-    cdef double cs2 = cs*cs
-    cdef double cs4 = cs2*cs2
-    cdef int i, j, v
+
+    cdef int i, j, k
     cdef double u_dot_u, u_dot_c
+
+    feq[:, :, :] = 0.0
 
     for i in range(num_x):
         for j in range(num_y):
             u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]
-            for v in range(num_v):
-                u_dot_c = u[i, j, 0] * c[v, 0] + u[i, j, 1] * c[v, 1]
-                feq[i, j, v] = w[v] * (1 + u_dot_c / cs2 + (u_dot_c*u_dot_c) / (2 * cs4) - u_dot_u / (2 * cs2)) * rho[i, j]
+            for k in range(num_v):
+                u_dot_c = u[i, j, 0] * c[k, 0] + u[i, j, 1] * c[k, 1]
+                feq[i, j, k] = w[k] * (1 + u_dot_c / cs2 + (u_dot_c*u_dot_c) / (2 * cs4) - u_dot_u / (2 * cs2)) * rho[i, j]
 
     return feq
 
 
-def fluid_density(Parameters sim, 
-                  double[:, :, :] f,
-                  double[:, :] rho):
+def fluid_density(int num_x,
+                  int num_y,
+                  int num_v,
+                  int[:, ::1] mask,
+                  double[:, :, ::1] f,
+                  double[:, ::1] rho):
     """
     Calculate fluid density from the distribution f.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef int i, j, v
+
+    cdef int i, j, k
     cdef double total
-    cdef int[:, :] mask = sim.mask
+
+    rho[:, :] = 0.0
 
     for i in range(num_x):
         for j in range(num_y):
             if mask[i, j] == 1:
                 rho[i, j] = 0.0001
             else:
-                total = 0
-                for v in range(num_v):
-                    total += f[i, j, v]
+                total = 0.0  # Thread-safe local variable
+                for k in range(num_v):
+                    total = total + f[i, j, k]
                 rho[i, j] = total
     return rho
 
 
-def fluid_velocity(Parameters sim, 
-                   double[:, :, :] f, 
-                   double[:, :] rho,
-                   double[:, :, :] u):
+def fluid_velocity(int num_x,
+                   int num_y,
+                   int num_v,
+                   int[:, ::1] c,
+                   int[:, ::1] mask,
+                   double[:, :, ::1] f, 
+                   double[:, ::1] rho,
+                   double[:, :, ::1] u):
     """
     Calculate fluid velocity from the distribution f and density rho.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef int x, y, v
-    cdef double total_x, total_y
-    cdef int[:, :] c = sim.c
-    cdef int[:, :] mask = sim.mask
 
-    for x in range(num_x):
-        for y in range(num_y):
-            if mask[x, y] == 1:
-                u[x, y, 0] = 0.0
-                u[x, y, 1] = 0.0
+    cdef int i, j, k
+    cdef double total_x, total_y
+
+    u[:, :, :] = 0.0
+
+    for i in range(num_x):  # Parallelize over x
+        for j in range(num_y):
+            if mask[i, j] == 1:
+                u[i, j, :] = 0.0
             else:
-                total_x = 0.0
-                total_y = 0.0
-                for v in range(num_v):
-                    total_x += f[x, y, v] * c[v, 0]
-                    total_y += f[x, y, v] * c[v, 1]
-                u[x, y, 0] = total_x / rho[x, y]
-                u[x, y, 1] = total_y / rho[x, y]
+                for k in range(num_v):
+                    u[i, j, 0] = u[i, j, 0] + (f[i, j, k] * c[k, 0] / rho[i, j])
+                    u[i, j, 1] = u[i, j, 1] + (f[i, j, k] * c[k, 1] / rho[i, j])
+
     return u
 
-def collision(Parameters sim, 
-              double[:, :, :] f, 
-              double[:, :, :] feq,
-              double[:, :, :] f_new):
+def fluid_vorticity(double[:, :, ::1] u, int num_x, int num_y):
+
+    cdef np.ndarray[np.float64_t, ndim=2] vor = np.empty((num_x, num_y), dtype=np.float64)
+
+    u = np.asarray(u)
+    vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
+           np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
+    return vor
+
+def collision(int num_x,
+              int num_y,
+              int num_v,
+              double tau_inv,
+              double[:, :, ::1] f,
+              double[:, :, ::1] feq):
     """
     Perform the collision step, updating the distribution f using feq.
     """
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef double tau_inv = sim.inv_tau
-    cdef int i, j, v
+
+    cdef int i, j, k
 
     for i in range(num_x):
         for j in range(num_y):
-            for v in range(num_v):
-                f_new[i, j, v] = f[i, j, v] * (1 - tau_inv) + feq[i, j, v] * tau_inv
-    return f_new
+            for k in range(num_v):
+                f[i, j, k] = (f[i, j, k] * (1 - tau_inv)) + (feq[i, j, k] * tau_inv)
+    return f
 
 
-def stream_and_reflect(Parameters sim, 
-                       double[:, :, :] f, 
-                       double[:, :, :] u,
-                       double[:, :, :] momentum_point):
+def stream_and_reflect(int num_x,
+                       int num_y,
+                       int num_v,
+                       int[:, ::1] c,
+                       int[:, ::1] mask,
+                       int[:, ::1] mask2,
+                       int[::1] reflection,
+                       double[:, :, ::1] f,
+                       double[:, :, ::1] f_new,
+                       double[:, :, ::1] u,
+                       double[:, :, ::1] momentum_point):
     """
     Perform the streaming and boundary reflection step.
     """
-    cdef int delta_t = 1
-    cdef int num_x = sim.num_x
-    cdef int num_y = sim.num_y
-    cdef int num_v = sim.num_v
-    cdef int[:, :] c = sim.c
-    cdef int[:] reflection = sim.reflection
-    cdef int[:, :] mask = sim.mask
-    cdef int[:, :] mask2 = sim.mask2
 
-
-    cdef int i, x, y, rolled_x, rolled_y
+    cdef int i, j, k, rolled_x, rolled_y
     cdef double momentum_total = 0.0
+    f_new[:, :, :] = 0.0
 
-    for i in range(num_v):
-        for x in range(num_x):
-            for y in range(num_y):
+    for i in range(num_x):
+        for j in range(num_y):
+            for k in range(num_v):
 
-                rolled_x = (x + c[i, 0]) % num_x
-                rolled_y = (y + c[i, 1]) % num_y
+                rolled_x = (i - c[k, 0] + num_x) % num_x
+                rolled_y = (j - c[k, 1] + num_y) % num_y
+
+                if mask2[i, j] == 1:
+                    momentum_point[i, j, k] = 0.0
                 
-                if mask[x, y] == 1:
-                    f[x, y, i] = 0.0
-                    continue
-
-
-                if mask[rolled_x, rolled_y] == 1:
-                    f[x, y, i] = f[x, y, reflection[i]]
+                elif mask2[rolled_x, rolled_y] == 1:
+                    momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
+            
                 else:
-                    f[x, y, i] = f[rolled_x, rolled_y, i]
+                    momentum_point[i, j, k] = 0.0
                 
-                if mask2[x, y] == 0:
-                    if mask2[rolled_x, rolled_y] == 1:
-                        momentum_point[x, y, i] = u[x, y, 0] * (f[x, y, i] + f[x, y, reflection[i]])
+                momentum_total += momentum_point[i, j, k]
                 
-                momentum_total += momentum_point[x, y, i]
+                if mask[i, j] == 1:
+                    f_new[i, j, k] = 0.0
 
-    return f, momentum_total
+                elif mask[rolled_x, rolled_y] == 1:
+                    f_new[i, j, k] = f[i, j, reflection[k]]
+
+                else:
+                    f_new[i, j, k] = f[rolled_x, rolled_y, k]
+
+    return f_new, momentum_total

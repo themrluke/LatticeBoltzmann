@@ -18,7 +18,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 5000, t_plot=1000)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim)
@@ -28,9 +28,9 @@ def main():
     time_start = time.time()
     force_array = timestep_loop(sim, initial_rho, initial_u)
     time_end = time.time()
-    plt.plot(np.arange(100, 1000, 1), np.asarray(force_array[100:]))
-    plt.savefig(f"plots/force_graph.png", dpi=300)
-    plt.close()
+    # plt.plot(np.arange(100, 1000, 1), np.asarray(force_array[100:]))
+    # plt.savefig(f"plots/force_graph.png", dpi=300)
+    # plt.close()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 
 
