@@ -199,7 +199,6 @@ def fluid_velocity(int num_x,
                 for k in range(num_v):
                     u[i, j, 0] = u[i, j, 0] + (f[i, j, k] * c[k, 0] / rho[i, j])
                     u[i, j, 1] = u[i, j, 1] + (f[i, j, k] * c[k, 1] / rho[i, j])
-    print(np.asarray(u[100, 100]))
 
     return u
 

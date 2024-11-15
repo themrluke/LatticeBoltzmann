@@ -4,6 +4,7 @@ from parameters import Parameters
 from initialisation import initial_turbulence
 from fluid_dynamics import timestep_loop
 #from plotting import plot_solution, setup_plot_directories
+import matplotlib.pyplot as plt
 
 import numpy as np
 import os
@@ -23,7 +24,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=700)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=2000)
     sim = MPI.COMM_WORLD.bcast(sim if rank == 0 else None, root=0)
 
     # Set up plot directories
@@ -36,7 +37,6 @@ def main():
 
     local_start_x = rank * (local_num_x)
     local_end_x = local_start_x + local_num_x
-    print('START, END, NUM: ', local_start_x, local_end_x, local_num_x)
 
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim, local_start_x, local_end_x)
@@ -66,6 +66,10 @@ def main():
 
     global_force_array = np.empty((sim.t_steps), dtype=np.float64)
     MPI.COMM_WORLD.Reduce(local_force_array, global_force_array, op=MPI.SUM, root=0)
+    # if rank == 0:
+    #     plt.plot(np.arange(100, 1000, 1), np.asarray(global_force_array[100:]))
+    #     plt.savefig(f"plots/force_graph.png", dpi=300)
+    #     plt.close()
 
     # Save results on rank 0
     if rank == 0:
@@ -73,6 +77,7 @@ def main():
         os.makedirs(data_dir, exist_ok=True)
         np.savetxt(os.path.join(data_dir, "forces.csv"), global_force_array)
         print("Simulation completed")
+
 
 # Run the main function if the script is executed directly
 if __name__ == "__main__":

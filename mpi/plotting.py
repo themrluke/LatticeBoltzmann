@@ -36,7 +36,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     # index increasing *across*. This explains the use of 'transpose' and
     # 'origin = 'lower'' in the code below.
     
-    x = np.arange(sim.num_x/4) + 0.5
+    x = np.arange(sim.num_x/8) + 0.5
     y = np.arange(sim.num_y) + 0.5
 
     
@@ -45,7 +45,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     #cutff limits how far the graphs are plotted along x-direction. 
     #cutoff = sim.num_x for true scale of simulated fluid
 
-    cutoff = int(sim.num_x/4)
+    cutoff = int(sim.num_x/8)
     
     [fig, ax] = plt.subplots(3, 1, figsize=(16,9))
     # Density field
@@ -99,7 +99,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
 
     
     #TEST voricity plot to check if vortices are interfering with front of car due to going off graph at back
-    c = plt.imshow(vor.transpose(), origin='lower', extent=[0,sim.num_x/4,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
+    c = plt.imshow(vor.transpose(), origin='lower', extent=[0,sim.num_x/8,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
     bar2 = plt.colorbar(c)
     bar2.set_label('$v$')
     plt.title(r'Vorticity with Streamlines $v$', fontsize = '8')
@@ -115,7 +115,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     cmap = plt.matplotlib.colors.ListedColormap(colors)
 
     # Plot the array
-    plt.imshow(sim.mask2.transpose(), cmap=cmap, origin='lower', extent=[0, sim.num_x/4, 0, sim.num_y])
+    plt.imshow(sim.mask2.transpose(), cmap=cmap, origin='lower', extent=[0, sim.num_x/8, 0, sim.num_y])
 
     # Add colorbar for reference
     cbar = plt.colorbar(ticks=[0, 1])

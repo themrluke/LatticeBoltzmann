@@ -56,8 +56,7 @@ def timestep_loop(Parameters sim,
 
     # Create boundarys to transfer
     cdef double[:, :] left_ghost = np.empty((num_y, num_v), dtype=np.float64)
-    #print(f"Rank {rank}: Initialized left_ghost with shape {left_ghost.shape} Rank {rank}: num_y = {type(num_y)}, num_v = {type(num_v)}")
-    cdef double [:, :] right_ghost = np.empty((num_y, num_v), dtype=np.float64)
+    cdef double[:, :] right_ghost = np.empty((num_y, num_v), dtype=np.float64)
 
 
     # Initialize local subdomain
@@ -81,10 +80,9 @@ def timestep_loop(Parameters sim,
     right_neighbor = rank + 1 if rank < size - 1 else 0
 
     for t in range(1, sim.t_steps + 1):
-        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+        # print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
+        # print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
-        print(f"Rank {rank}: Starting timestep {t}")
         # Communicate boundaries with neighbors or periodic wrapping
         MPI.COMM_WORLD.Sendrecv(sendbuf=f[f.shape[0]-1, :, :], dest=right_neighbor,
                                 recvbuf=left_ghost, source=left_neighbor)
@@ -275,45 +273,6 @@ def stream_and_reflect(int global_num_x,
                 rolled_y = (j - c[k, 1]) % num_y
 
                 end_location = (i + start_x - c[k, 0])
-
-                #Handle particles streaming out of the local subdomain
-                # if rolled_x < start_x or (end_location == -1):
-                #     f_new[i, j, k] = left_ghost[rolled_y, k]
-                #     continue
-
-                # elif rolled_x >= start_x + num_x or (end_location == global_num_x):
-                #     f_new[i, j, k] = right_ghost[rolled_y, k]
-                #     continue
-
-                if rolled_x < start_x or (end_location == -1):
-                    if mask[i + start_x, j] == 1:
-                        f_new[i, j, k] = 0.0
-
-                    elif mask[rolled_x, rolled_y] == 1:
-                        #f_new[i, j, k] = left_ghost[rolled_y, reflection[k]]*999
-                        f_new[i, j, k] = f[i, j, reflection[k]]
-
-                    else:
-                        f_new[i, j, k] = left_ghost[rolled_y, k]
-
-                    if mask2[rolled_x, rolled_y] == 1:
-                        momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
-                    continue
-
-                elif rolled_x >= start_x + num_x or (end_location == global_num_x):
-                    if mask[i + start_x, j] == 1:
-                        f_new[i, j, k] = 0.0
-
-                    elif mask[rolled_x, rolled_y] == 1:
-                        #f_new[i, j, k] = right_ghost[rolled_y, reflection[k]]*999
-                        f_new[i, j, k] = f[i, j, reflection[k]]
-
-                    else:
-                        f_new[i, j, k] = right_ghost[rolled_y, k]
-
-                    if mask2[rolled_x, rolled_y] == 1:
-                        momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
-                    continue
                 
                 if mask2[i + start_x, j] == 1:
                     momentum_point[i, j, k] = 0.0
@@ -332,7 +291,13 @@ def stream_and_reflect(int global_num_x,
                 elif mask[rolled_x, rolled_y] == 1:
                     f_new[i, j, k] = f[i, j, reflection[k]]
 
+                elif rolled_x < start_x or (end_location == -1):
+                    f_new[i, j, k] = left_ghost[rolled_y, k]
+
+                elif rolled_x >= start_x + num_x or (end_location == global_num_x):
+                    f_new[i, j, k] = right_ghost[rolled_y, k]
+
                 else:
-                    f_new[i, j, k] = f[rolled_x - start_x, rolled_y, k]
+                    f_new[i, j, k] = f[end_location - start_x, rolled_y, k]
                 
     return f_new, momentum_total
