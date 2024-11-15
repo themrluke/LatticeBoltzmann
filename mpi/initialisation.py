@@ -161,7 +161,7 @@ def initial_turbulence(sim, start_x, end_x):
     ux_initial = np.full((local_num_x, sim.num_y), sim.u0)
     ux = np.where(sim.mask[start_x:end_x], 0, ux_initial)
 
-    r = np.random.default_rng(42).uniform(random1, random2, (local_num_x, sim.num_y))
+    r = np.random.uniform(random1, random2, (local_num_x, sim.num_y))
     uy = np.where(sim.mask[start_x:end_x], 0, np.full((local_num_x, sim.num_y), (1 / 10) * sim.u0 * r))
     u = np.stack((ux, uy), axis=2)
 

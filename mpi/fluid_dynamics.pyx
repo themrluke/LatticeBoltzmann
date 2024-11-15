@@ -2,7 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False, cdivision=False, initializedcheck=True
+# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
 
 import numpy as np
 cimport numpy as np
@@ -268,8 +268,8 @@ def stream_and_reflect(int global_num_x,
         for j in range(num_y):
             for k in range(num_v):
 
-                rolled_x = (i + start_x - c[k, 0]) % global_num_x
-                rolled_y = (j - c[k, 1]) % num_y
+                rolled_x = (i + start_x - c[k, 0] + global_num_x) % global_num_x
+                rolled_y = (j - c[k, 1] + num_y) % num_y
 
                 end_location = (i + start_x - c[k, 0])
                 
