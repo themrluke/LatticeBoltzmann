@@ -1,4 +1,5 @@
 # main.py
+
 from parameters import Parameters
 from initialisation import initial_turbulence
 from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity, fluid_vorticity
@@ -102,7 +103,6 @@ if __name__ == "__main__":
     profiler.enable()
     main()
     profiler.disable()
-    #profiler.dump_stats('profile_data.prof')  # Save the profile data to a file
     
     # Print the top 20 functions by cumulative time spent
     stats = pstats.Stats(profiler)
