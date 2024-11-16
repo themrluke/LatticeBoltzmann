@@ -13,7 +13,7 @@ def equilibrium(rho, u, num_x, num_y, num_v, c, w, cs):
 
     feq = np.zeros((num_x, num_y, num_v), dtype=np.float64)
 
-    for i in prange(num_x):
+    for i in prange(num_x, ):
         for j in range(num_y):
             u_dot_u = u[i, j, 0]**2 + u[i, j, 1]**2
             for v in range(num_v):
@@ -60,10 +60,10 @@ def fluid_velocity(f, rho, num_x, num_y, num_v, c, mask):
     return u
 
 
-def fluid_vorticity(u):
-    vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
-           np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
-    return vor
+# def fluid_vorticity(u):
+#     vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
+#            np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
+#     return vor
 
 @njit(parallel=True, fastmath=True, nogil=True, boundscheck=False, cache=True)
 def collision(f, feq, num_x, num_y, num_v, tau):

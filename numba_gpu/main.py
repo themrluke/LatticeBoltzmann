@@ -2,7 +2,15 @@
 
 from parameters import Parameters
 from initialisation import initial_turbulence
-from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity, fluid_vorticity
+from fluid_dynamics import (
+    equilibrium_kernel,
+    collision_kernel,
+    stream_and_reflect_kernel,
+    fluid_density_kernel,
+    fluid_velocity_kernel,
+    fluid_vorticity_kernel,
+)
+
 from plotting import plot_solution, setup_plot_directories
 
 import numpy as np
@@ -12,14 +20,11 @@ import time
 import cProfile
 import pstats
 
-
-# Now import numba
-import numba
+from numba import cuda
 
 # Verify the threads
-print(f"Max available threads: {numba.config.NUMBA_DEFAULT_NUM_THREADS}")
-numba.set_num_threads(8)
-print(f"Using {numba.get_num_threads()} threads for Numba parallelization.")
+print(f"Max available threads: {cuda.gpus}")
+print(f"CUDA devices: {cuda.gpus}")
 
 
 def main():
@@ -29,22 +34,89 @@ def main():
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
     sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
-
+    
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
     # Initialize density and velocity fields.
     initial_rho, initial_u = initial_turbulence(sim)
 
-    # Create the initial distribution by finding the equilibrium for the flow
-    # calculated above.
-    f = equilibrium(initial_rho, initial_u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
+    # CUDA grid and block dimensions
+    threads_per_block = (16, 16, 4)
+    blocks_per_grid_x = (sim.num_x + threads_per_block[0] - 1) // threads_per_block[0]
+    blocks_per_grid_y = (sim.num_y + threads_per_block[1] - 1) // threads_per_block[1]
+    blocks_per_grid_v = (sim.num_v + threads_per_block[2] - 1) // threads_per_block[2]
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v)
 
-    # We could just copy initial_rho, initial_v and f into rho, v and feq.
-    rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
-    u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
-    feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
-    vor = fluid_vorticity(u)
+    threads_per_block_2d = (16, 16)
+    blocks_per_grid_2d_x = (sim.num_x + threads_per_block_2d[0] - 1) // threads_per_block_2d[0]
+    blocks_per_grid_2d_y = (sim.num_y + threads_per_block_2d[1] - 1) // threads_per_block_2d[1]
+    blocks_per_grid_2d = (blocks_per_grid_2d_x, blocks_per_grid_2d_y)
+
+    # Preallocate arrays on the GPU
+    f_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    feq_device = cuda.device_array_like(f_device)
+    rho_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
+    u_device = cuda.device_array((sim.num_x, sim.num_y, 2), dtype=np.float64)
+    vor_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
+    f_new_device = cuda.device_array_like(f_device)
+    momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    momentum_partial_device = cuda.device_array(blocks_per_grid_x * blocks_per_grid_y * blocks_per_grid_v, dtype=np.float64)
+    
+    # Copy constants to the GPU
+    initial_rho_device = cuda.to_device(initial_rho)
+    initial_u_device = cuda.to_device(initial_u)
+    c_device = cuda.to_device(sim.c)
+    w_device = cuda.to_device(sim.w)
+    mask_device = cuda.to_device(sim.mask)
+    mask2_device = cuda.to_device(sim.mask2)
+    reflection_device = cuda.to_device(sim.reflection)
+
+
+    equilibrium_kernel[blocks_per_grid, threads_per_block](
+        initial_rho_device,
+        initial_u_device,
+        feq_device,
+        c_device,
+        w_device,
+        sim.cs,
+    )
+    cuda.synchronize()
+
+    feq_host = feq_device.copy_to_host()
+    print(f"feq max: {np.max(feq_host)}, feq min: {np.min(feq_host)}")
+
+
+    f_device = cuda.to_device(feq_device.copy_to_host())
+
+    # Calculate initial fluid density
+    fluid_density_kernel[blocks_per_grid_2d, threads_per_block_2d](feq_device, rho_device, mask_device)
+    cuda.synchronize()
+
+    # Calculate initial fluid velocity
+    fluid_velocity_kernel[blocks_per_grid_2d, threads_per_block_2d](feq_device, rho_device, u_device, c_device, mask_device)
+    cuda.synchronize()
+
+    # Calculate initial equilibrium distribution
+    equilibrium_kernel[blocks_per_grid, threads_per_block](
+        rho_device, u_device, feq_device, c_device, w_device, sim.cs
+    )
+    cuda.synchronize()
+
+    feq_host = feq_device.copy_to_host()
+    print(f"feq max: {np.max(feq_host)}, feq min: {np.min(feq_host)}")
+    u_host = u_device.copy_to_host()
+    print(f"u max: {np.max(u_host)}, u min: {np.min(u_host)}")
+
+    # Optional: Calculate initial vorticity for plotting
+    fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
+    cuda.synchronize()
+
+    # For plotting or initialization, copy the results to the CPU
+    rho = rho_device.copy_to_host()
+    u = u_device.copy_to_host()
+    vor = vor_device.copy_to_host()
+
 
     plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
                   dvv_dir=dvv_dir,
@@ -58,48 +130,62 @@ def main():
 
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+        print(f"Step {t}")
 
-        # Perform collision step, using the calculated density and velocity data.
-        time1_start = time.time()
-        f = collision(f, feq, sim.num_x, sim.num_y, sim.num_v, sim.tau)
-        time1_end = time.time()
-        #print('collision() time: ', time1_end - time1_start)
+        # Collision step
+        collision_kernel[blocks_per_grid, threads_per_block](f_device, feq_device, sim.tau)
+        cuda.synchronize()
 
-        # Streaming and reflection
-        time2_start = time.time()
-        f, momentum_total = stream_and_reflect(f, u, sim.num_x, sim.num_y, sim.num_v,
-                                               sim.c, sim.mask, sim.mask2, sim.reflection)
-        time2_end = time.time()
-        #print('stream_and_reflect() time: ', time2_end - time2_start)
+        # Streaming and reflection step
+        stream_and_reflect_kernel[blocks_per_grid, threads_per_block](
+            f_device,
+            f_new_device,
+            momentum_point_device,
+            u_device,
+            mask_device,
+            mask2_device,
+            reflection_device,
+            c_device,
+            momentum_partial_device
+        )
+        cuda.synchronize()
 
-        force_array[t-1] = momentum_total
+        rho_host = rho_device.copy_to_host()
+        u_host = u_device.copy_to_host()
+        feq_host = feq_device.copy_to_host()
+        print(f"Step {t}: rho max={np.max(rho_host)}, min={np.min(rho_host)}")
+        print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
+        print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
 
-        # Calculate density and velocity data, for next time around
-        time3_start = time.time()
-        rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
-        time3_end = time.time()
-        #print('fluid_density() time: ', time3_end - time3_start)
+        # Swap buffers
+        f_device, f_new_device = f_new_device, f_device
 
-        time4_start = time.time()
-        u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
-        time4_end = time.time()
-        #print('fluid_velocity() time: ', time4_end - time4_start)
+        # Update fluid density
+        fluid_density_kernel[blocks_per_grid_2d, threads_per_block_2d](f_device, rho_device, mask_device)
+        cuda.synchronize()
 
-        time5_start = time.time()
-        feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
-        time5_end = time.time()
-        #print('equilibrium() time: ', time5_end - time5_start)
-        
-        if (t % sim.t_plot == 0):
-            vor = fluid_vorticity(u)
-            plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
-                          dvv_dir=dvv_dir,
-                          streamlines_dir=streamlines_dir, 
+        # Update fluid velocity
+        fluid_velocity_kernel[blocks_per_grid_2d, threads_per_block_2d](f_device, rho_device, u_device, c_device, mask_device)
+        cuda.synchronize()
+
+        equilibrium_kernel[blocks_per_grid, threads_per_block](
+        rho_device, u_device, feq_device, c_device, w_device, sim.cs
+        )
+        cuda.synchronize()
+
+        # Calculate vorticity (optional for plotting)
+        if t % sim.t_plot == 0:
+            fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
+            cuda.synchronize()
+
+            # Copy data back for plotting
+            rho = rho_device.copy_to_host()
+            u = u_device.copy_to_host()
+            vor = vor_device.copy_to_host()
+            plot_solution(sim, t=t, rho=rho, u=u, vor=vor, dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir,
                           test_streamlines_dir=test_streamlines_dir,
-                          test_mask_dir=test_mask_dir,
-                          )
+                          test_mask_dir=test_mask_dir)
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 

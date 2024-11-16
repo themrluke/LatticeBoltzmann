@@ -24,7 +24,6 @@ def main():
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
     sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=100)
-    sim = MPI.COMM_WORLD.bcast(sim if rank == 0 else None, root=0)
 
     # Divide the domain along the x-dimension
     local_num_x = sim.num_x // size
