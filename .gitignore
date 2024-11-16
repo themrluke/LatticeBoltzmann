@@ -7,20 +7,14 @@
 # Ignore all CSV files
 *.csv
 
-# Ignore all txt files
-*.txt
-
-# Ignore all so files (compiled)
-*.so
-
-# Ignore all o files (compiled)
-*.o
-
-# Ignore all C files (compiled)
+# Ignore all C, so, o files (compiled from Cython)
 *.c
+*.so
+*.o
 
 # Ignore all pyc files (pycache)
 *.pyc
 
-# Ignore all nbi files (numba cache)
+# Ignore all nbi and nbc files (Numba cache)
 *.nbi
+*.nbc
