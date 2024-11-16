@@ -21,3 +21,6 @@
 
 # Ignore all pyc files (pycache)
 *.pyc
+
+# Ignore all nbi files (numba cache)
+*.nbi
