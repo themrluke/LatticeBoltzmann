@@ -13,12 +13,12 @@ def equilibrium(rho, u, num_x, num_y, num_v, c, w, cs):
 
     feq = np.zeros((num_x, num_y, num_v), dtype=np.float64)
 
-    for i in prange(num_x, ):
+    for i in prange(num_x):
         for j in range(num_y):
-            u_dot_u = u[i, j, 0]**2 + u[i, j, 1]**2
-            for v in range(num_v):
-                u_dot_c = u[i, j, 0] * c[v, 0] + u[i, j, 1] * c[v, 1]
-                feq[i, j, v] = w[v] * (
+            u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]
+            for k in range(num_v):
+                u_dot_c = u[i, j, 0] * c[k, 0] + u[i, j, 1] * c[k, 1]
+                feq[i, j, k] = w[k] * (
                     1 + u_dot_c / cs**2 +
                     (u_dot_c**2) / (2 * cs**4) -
                     u_dot_u / (2 * cs**2)
@@ -92,7 +92,6 @@ def stream_and_reflect(f, u, num_x, num_y, num_v, c, mask, mask2, reflection):
 
                 if mask2[i, j] == 1:
                     momentum_point[i, j, k] = 0.0
-                
                 
                 elif mask2[rolled_x, rolled_y] == 1:
                     momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])

@@ -12,7 +12,6 @@ import time
 import cProfile
 import pstats
 
-
 # Now import numba
 import numba
 
@@ -38,11 +37,11 @@ def main():
 
     # Create the initial distribution by finding the equilibrium for the flow
     # calculated above.
-    feq = equilibrium(initial_rho, initial_u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
+    f = equilibrium(initial_rho, initial_u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
 
     # We could just copy initial_rho, initial_v and f into rho, v and feq.
-    rho = fluid_density(feq, sim.num_x, sim.num_y, sim.num_v, sim.mask)
-    u = fluid_velocity(feq, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
+    rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
+    u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
     feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
     # vor = fluid_vorticity(u)
 
@@ -58,8 +57,8 @@ def main():
 
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+        # print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
+        # print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
         # Perform collision step, using the calculated density and velocity data.
         time1_start = time.time()

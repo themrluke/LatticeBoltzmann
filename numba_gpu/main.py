@@ -26,6 +26,12 @@ from numba import cuda
 print(f"Max available threads: {cuda.gpus}")
 print(f"CUDA devices: {cuda.gpus}")
 
+device = cuda.get_current_device()
+print("Threads per block:", device.MAX_THREADS_PER_BLOCK)
+print("Threads per warp:", device.WARP_SIZE)
+print("Shared memory per block:", device.MAX_SHARED_MEMORY_PER_BLOCK)
+print("Registers per block:", device.MAX_REGISTERS_PER_BLOCK)
+
 
 def main():
     
@@ -33,7 +39,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 100, t_plot=500)
     
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
@@ -42,13 +48,13 @@ def main():
     initial_rho, initial_u = initial_turbulence(sim)
 
     # CUDA grid and block dimensions
-    threads_per_block = (16, 16, 4)
+    threads_per_block = (32, 32, 1) # x*y*z should be a multiple of 32
     blocks_per_grid_x = (sim.num_x + threads_per_block[0] - 1) // threads_per_block[0]
     blocks_per_grid_y = (sim.num_y + threads_per_block[1] - 1) // threads_per_block[1]
     blocks_per_grid_v = (sim.num_v + threads_per_block[2] - 1) // threads_per_block[2]
     blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v)
 
-    threads_per_block_2d = (16, 16)
+    threads_per_block_2d = (32, 32)
     blocks_per_grid_2d_x = (sim.num_x + threads_per_block_2d[0] - 1) // threads_per_block_2d[0]
     blocks_per_grid_2d_y = (sim.num_y + threads_per_block_2d[1] - 1) // threads_per_block_2d[1]
     blocks_per_grid_2d = (blocks_per_grid_2d_x, blocks_per_grid_2d_y)
@@ -72,7 +78,6 @@ def main():
     mask2_device = cuda.to_device(sim.mask2)
     reflection_device = cuda.to_device(sim.reflection)
 
-
     equilibrium_kernel[blocks_per_grid, threads_per_block](
         initial_rho_device,
         initial_u_device,
@@ -81,42 +86,31 @@ def main():
         w_device,
         sim.cs,
     )
-    cuda.synchronize()
-
-    feq_host = feq_device.copy_to_host()
-    print(f"feq max: {np.max(feq_host)}, feq min: {np.min(feq_host)}")
-
-
-    f_device = cuda.to_device(feq_device.copy_to_host())
+    #cuda.synchronize()
 
     # Calculate initial fluid density
     fluid_density_kernel[blocks_per_grid_2d, threads_per_block_2d](feq_device, rho_device, mask_device)
-    cuda.synchronize()
+    #cuda.synchronize()
 
     # Calculate initial fluid velocity
+    u_device[:] = 0
     fluid_velocity_kernel[blocks_per_grid_2d, threads_per_block_2d](feq_device, rho_device, u_device, c_device, mask_device)
-    cuda.synchronize()
+    #cuda.synchronize()
 
     # Calculate initial equilibrium distribution
     equilibrium_kernel[blocks_per_grid, threads_per_block](
         rho_device, u_device, feq_device, c_device, w_device, sim.cs
     )
-    cuda.synchronize()
-
-    feq_host = feq_device.copy_to_host()
-    print(f"feq max: {np.max(feq_host)}, feq min: {np.min(feq_host)}")
-    u_host = u_device.copy_to_host()
-    print(f"u max: {np.max(u_host)}, u min: {np.min(u_host)}")
+    #cuda.synchronize()
 
     # Optional: Calculate initial vorticity for plotting
     fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
-    cuda.synchronize()
+    #cuda.synchronize()
 
     # For plotting or initialization, copy the results to the CPU
     rho = rho_device.copy_to_host()
     u = u_device.copy_to_host()
     vor = vor_device.copy_to_host()
-
 
     plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
                   dvv_dir=dvv_dir,
@@ -134,7 +128,7 @@ def main():
 
         # Collision step
         collision_kernel[blocks_per_grid, threads_per_block](f_device, feq_device, sim.tau)
-        cuda.synchronize()
+        #cuda.synchronize()
 
         # Streaming and reflection step
         stream_and_reflect_kernel[blocks_per_grid, threads_per_block](
@@ -148,12 +142,10 @@ def main():
             c_device,
             momentum_partial_device
         )
-        cuda.synchronize()
+        #cuda.synchronize()
 
-        rho_host = rho_device.copy_to_host()
         u_host = u_device.copy_to_host()
         feq_host = feq_device.copy_to_host()
-        print(f"Step {t}: rho max={np.max(rho_host)}, min={np.min(rho_host)}")
         print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
         print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
 
@@ -162,21 +154,22 @@ def main():
 
         # Update fluid density
         fluid_density_kernel[blocks_per_grid_2d, threads_per_block_2d](f_device, rho_device, mask_device)
-        cuda.synchronize()
+        #cuda.synchronize()
 
         # Update fluid velocity
+        u_device[:] = 0
         fluid_velocity_kernel[blocks_per_grid_2d, threads_per_block_2d](f_device, rho_device, u_device, c_device, mask_device)
-        cuda.synchronize()
+        #cuda.synchronize()
 
         equilibrium_kernel[blocks_per_grid, threads_per_block](
         rho_device, u_device, feq_device, c_device, w_device, sim.cs
         )
-        cuda.synchronize()
+        #cuda.synchronize()
 
         # Calculate vorticity (optional for plotting)
         if t % sim.t_plot == 0:
             fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
-            cuda.synchronize()
+            #cuda.synchronize()
 
             # Copy data back for plotting
             rho = rho_device.copy_to_host()

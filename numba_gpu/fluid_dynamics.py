@@ -1,12 +1,8 @@
 # fluid_dynamics.py
 
-from numba import njit, prange, cuda, float32
+from numba import cuda, float32
 import numpy as np
 
-print(cuda.gpus)  # List available GPUs
-
-
-# Python code with explicit loops
 
 @cuda.jit
 def equilibrium_kernel(rho, u, feq, c, w, cs):
@@ -15,7 +11,7 @@ def equilibrium_kernel(rho, u, feq, c, w, cs):
     num_x, num_y, num_v = feq.shape
 
     if i < num_x and j < num_y and k < num_v:
-        u_dot_u = u[i, j, 0]**2 + u[i, j, 1]**2
+        u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]
         u_dot_c = u[i, j, 0] * c[k, 0] + u[i, j, 1] * c[k, 1]
         feq[i, j, k] = w[k] * (
             1 + u_dot_c / cs**2 +
@@ -38,23 +34,6 @@ def fluid_density_kernel(f, rho, mask):
             for k in range(num_v):
                 total = total + f[i, j, k]
             rho[i, j] = total
-
-@njit(parallel=True, fastmath=True, nogil=True, boundscheck=False, cache=True)
-def fluid_velocity(f, rho, num_x, num_y, num_v, c, mask):
-    # Calculate the fluid velocity from the distribution f and the fluid density rho
-
-    u = np.zeros((num_x, num_y, 2), dtype=np.float64)
-
-    for i in prange(num_x):
-        for j in range(num_y):
-            if mask[i, j] == 1:
-                u[i, j, :] = 0
-
-            else:
-                for k in range(num_v):
-                    u[i, j, 0] = u[i, j, 0] + (f[i, j, k] * c[k, 0] / rho[i, j])
-                    u[i, j, 1] = u[i, j, 1] + (f[i, j, k] * c[k, 1] / rho[i, j])
-    return u
 
 @cuda.jit
 def fluid_velocity_kernel(f, rho, u, c, mask):
@@ -118,17 +97,21 @@ def stream_and_reflect_kernel(f, f_new, momentum_point, u, mask, mask2, reflecti
 
         if mask2[i, j] == 1:
             momentum_point[i, j, k] = 0.0
+
         elif mask2[rolled_x, rolled_y] == 1:
             momentum_point[i, j, k] = u[i, j, 0] * (f[i, j, k] + f[i, j, reflection[k]])
+
         else:
             momentum_point[i, j, k] = 0.0
 
-        momentum_total = momentum_point[i, j, k]
+        momentum_total = momentum_total + momentum_point[i, j, k]
 
         if mask[i, j] == 1:
             f_new[i, j, k] = 0.0
+
         elif mask[rolled_x, rolled_y] == 1:
-            f_new[i, j, k] = f[rolled_x, rolled_y, reflection[k]]
+            f_new[i, j, k] = f[i, j, reflection[k]]
+
         else:
             f_new[i, j, k] = f[rolled_x, rolled_y, k]
 
