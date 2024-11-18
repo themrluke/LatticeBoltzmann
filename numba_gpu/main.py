@@ -6,6 +6,7 @@ from fluid_dynamics import (
     equilibrium_kernel,
     collision_kernel,
     stream_and_reflect_kernel,
+    global_reduce_kernel,
     fluid_density_kernel,
     fluid_velocity_kernel,
     fluid_vorticity_kernel,
@@ -21,6 +22,7 @@ import cProfile
 import pstats
 
 from numba import cuda
+import matplotlib.pyplot as plt
 
 # Verify the threads
 print(f"CUDA devices: {cuda.gpus}")
@@ -38,7 +40,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 5000, t_plot=1000)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 1000, t_plot=1000)
     
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
@@ -59,15 +61,18 @@ def main():
     blocks_per_grid_2d = (blocks_per_grid_2d_x, blocks_per_grid_2d_y)
 
     # Preallocate arrays on the GPU
-    f_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float32)
+    f_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
     feq_device = cuda.device_array_like(f_device)
-    rho_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float32)
-    u_device = cuda.device_array((sim.num_x, sim.num_y, 2), dtype=np.float32)
-    vor_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float32)
+    rho_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
+    u_device = cuda.device_array((sim.num_x, sim.num_y, 2), dtype=np.float64)
+    vor_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
     f_new_device = cuda.device_array_like(f_device)
-    momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float32)
-    momentum_partial_device = cuda.device_array(blocks_per_grid_x * blocks_per_grid_y * blocks_per_grid_v, dtype=np.float32)
+    momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    momentum_partial_device = cuda.device_array(blocks_per_grid_x * blocks_per_grid_y * blocks_per_grid_v, dtype=np.float64)
     
+    # Allocate global force accumulator
+    total_momentum_device = cuda.device_array(1, dtype=np.float64)
+
     # Copy constants to the GPU
     initial_rho_device = cuda.to_device(initial_rho)
     initial_u_device = cuda.to_device(initial_u)
@@ -140,8 +145,14 @@ def main():
             c_device,
             momentum_partial_device
         )
-        #cuda.synchronize()
-        #force_array[t-1] = momentum_partial_device.copy_to_host()
+        
+        
+        total_momentum_device[0] = 0.0  # Reset the total momentum accumulator
+        global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](momentum_partial_device, total_momentum_device)
+        cuda.synchronize()
+
+        total_momentum_host = total_momentum_device.copy_to_host()
+        force_array[t - 1] = total_momentum_host[0]
 
         # u_host = u_device.copy_to_host()
         # feq_host = feq_device.copy_to_host()
@@ -165,21 +176,26 @@ def main():
         )
         #cuda.synchronize()
 
-        # Calculate vorticity (optional for plotting)
-        # if t % sim.t_plot == 0:
-        #     fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
-        #     #cuda.synchronize()
+        #Calculate vorticity (optional for plotting)
+        if t % sim.t_plot == 0:
+            fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
+            #cuda.synchronize()
 
-        #     # Copy data back for plotting
-        #     rho = rho_device.copy_to_host()
-        #     u = u_device.copy_to_host()
-        #     vor = vor_device.copy_to_host()
-        #     plot_solution(sim, t=t, rho=rho, u=u, vor=vor, dvv_dir=dvv_dir,
-        #                   streamlines_dir=streamlines_dir,
-        #                   test_streamlines_dir=test_streamlines_dir,
-        #                   test_mask_dir=test_mask_dir)
+            # Copy data back for plotting
+            rho = rho_device.copy_to_host()
+            u = u_device.copy_to_host()
+            vor = vor_device.copy_to_host()
+            plot_solution(sim, t=t, rho=rho, u=u, vor=vor, dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir,
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir)
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+
+
+    plt.plot(np.arange(100, 1000, 1), np.asarray(force_array[100:]))
+    plt.savefig(f"plots/force_graph.png", dpi=300)
+    plt.close()
 
     data_dir = 'Data'
     os.makedirs(data_dir, exist_ok=True) # Ensure output directory exists

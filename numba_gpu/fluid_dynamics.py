@@ -1,6 +1,6 @@
 # fluid_dynamics.py
 
-from numba import cuda, float32
+from numba import cuda, float64
 import numpy as np
 
 
@@ -82,11 +82,14 @@ def stream_and_reflect_kernel(f, f_new, momentum_point, u, mask, mask2, reflecti
     i, j, k = cuda.grid(3)
     num_x, num_y, num_v = f.shape
 
-    # Determine the total number of threads in the block
+    # Shared memory for block-wise reduction
+    shared_momentum = cuda.shared.array(1024, dtype=float64)  # Adjust size as needed
+
+    # Thread ID within the block
     tid = cuda.threadIdx.x + cuda.threadIdx.y * cuda.blockDim.x + cuda.threadIdx.z * cuda.blockDim.x * cuda.blockDim.y
     block_id = cuda.blockIdx.x + cuda.blockIdx.y * cuda.gridDim.x + cuda.blockIdx.z * cuda.gridDim.x * cuda.gridDim.y
 
-    momentum_total = 0.0
+    local_momentum = 0.0
 
     if i < num_x and j < num_y and k < num_v:
         rolled_x = (i - c[k, 0] + num_x) % num_x
@@ -101,7 +104,7 @@ def stream_and_reflect_kernel(f, f_new, momentum_point, u, mask, mask2, reflecti
         else:
             momentum_point[i, j, k] = 0.0
 
-        momentum_total = momentum_total + momentum_point[i, j, k]
+        local_momentum = local_momentum + momentum_point[i, j, k]
 
         if mask[i, j] == 1:
             f_new[i, j, k] = 0.0
@@ -112,13 +115,46 @@ def stream_and_reflect_kernel(f, f_new, momentum_point, u, mask, mask2, reflecti
         else:
             f_new[i, j, k] = f[rolled_x, rolled_y, k]
 
-    # # Use global memory for block-wise reduction
-    # momentum_partial[block_id * cuda.blockDim.x * cuda.blockDim.y * cuda.blockDim.z + tid] = momentum_total
-    # cuda.syncthreads()
-    
-    # # Perform reduction across global memory
-    # if tid == 0:
-    #     block_total = 0.0
-    #     for t in range(cuda.blockDim.x * cuda.blockDim.y * cuda.blockDim.z):
-    #         block_total += momentum_partial[block_id * cuda.blockDim.x * cuda.blockDim.y * cuda.blockDim.z + t]
-    #     momentum_partial[block_id] = block_total
+     # Store local momentum in shared memory
+    if tid < shared_momentum.shape[0]:  # Ensure no out-of-bounds
+        shared_momentum[tid] = local_momentum
+    else:
+        shared_momentum[tid] = 0.0
+    cuda.syncthreads()
+
+    # Perform reduction in shared memory
+    stride = 1
+    while stride < cuda.blockDim.x * cuda.blockDim.y * cuda.blockDim.z:
+        if tid % (2 * stride) == 0 and (tid + stride) < shared_momentum.shape[0]:
+            shared_momentum[tid] += shared_momentum[tid + stride]
+        stride *= 2
+        cuda.syncthreads()
+
+    # Write block-wise result to global memory
+    if tid == 0:
+        momentum_partial[block_id] = shared_momentum[0]
+
+@cuda.jit
+def global_reduce_kernel(momentum_partial, total_momentum):
+    """Sum all block-wise results into a single value."""
+    tid = cuda.threadIdx.x + cuda.blockIdx.x * cuda.blockDim.x
+    shared_momentum = cuda.shared.array(1024, dtype=float64)
+
+    # Load into shared memory
+    if tid < len(momentum_partial):
+        shared_momentum[cuda.threadIdx.x] = momentum_partial[tid]
+    else:
+        shared_momentum[cuda.threadIdx.x] = 0.0
+    cuda.syncthreads()
+
+    # Perform reduction in shared memory
+    stride = 1
+    while stride < cuda.blockDim.x:
+        if cuda.threadIdx.x % (2 * stride) == 0:
+            shared_momentum[cuda.threadIdx.x] += shared_momentum[cuda.threadIdx.x + stride]
+        stride *= 2
+        cuda.syncthreads()
+
+    # Write result to global memory
+    if cuda.threadIdx.x == 0:
+        cuda.atomic.add(total_momentum, 0, shared_momentum[0])
