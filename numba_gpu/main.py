@@ -151,13 +151,12 @@ def main():
         global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](momentum_partial_device, total_momentum_device)
         cuda.synchronize()
 
-        total_momentum_host = total_momentum_device.copy_to_host()
-        force_array[t - 1] = total_momentum_host[0]
+        force_array[t - 1] = total_momentum_device.copy_to_host()[0]
 
-        # u_host = u_device.copy_to_host()
-        # feq_host = feq_device.copy_to_host()
-        # print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
-        # print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
+        u_host = u_device.copy_to_host()
+        feq_host = feq_device.copy_to_host()
+        print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
+        print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
 
         # Swap buffers
         f_device, f_new_device = f_new_device, f_device
