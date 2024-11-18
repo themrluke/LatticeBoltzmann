@@ -23,7 +23,6 @@ import pstats
 from numba import cuda
 
 # Verify the threads
-print(f"Max available threads: {cuda.gpus}")
 print(f"CUDA devices: {cuda.gpus}")
 
 device = cuda.get_current_device()
@@ -39,7 +38,7 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 100, t_plot=500)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 5000, t_plot=1000)
     
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
@@ -48,26 +47,26 @@ def main():
     initial_rho, initial_u = initial_turbulence(sim)
 
     # CUDA grid and block dimensions
-    threads_per_block = (32, 32, 1) # x*y*z should be a multiple of 32
+    threads_per_block = (16, 4, 16) # x*y*z should be a multiple of 32
     blocks_per_grid_x = (sim.num_x + threads_per_block[0] - 1) // threads_per_block[0]
     blocks_per_grid_y = (sim.num_y + threads_per_block[1] - 1) // threads_per_block[1]
     blocks_per_grid_v = (sim.num_v + threads_per_block[2] - 1) // threads_per_block[2]
     blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v)
 
-    threads_per_block_2d = (32, 32)
+    threads_per_block_2d = (16, 4)
     blocks_per_grid_2d_x = (sim.num_x + threads_per_block_2d[0] - 1) // threads_per_block_2d[0]
     blocks_per_grid_2d_y = (sim.num_y + threads_per_block_2d[1] - 1) // threads_per_block_2d[1]
     blocks_per_grid_2d = (blocks_per_grid_2d_x, blocks_per_grid_2d_y)
 
     # Preallocate arrays on the GPU
-    f_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    f_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float32)
     feq_device = cuda.device_array_like(f_device)
-    rho_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
-    u_device = cuda.device_array((sim.num_x, sim.num_y, 2), dtype=np.float64)
-    vor_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float64)
+    rho_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float32)
+    u_device = cuda.device_array((sim.num_x, sim.num_y, 2), dtype=np.float32)
+    vor_device = cuda.device_array((sim.num_x, sim.num_y), dtype=np.float32)
     f_new_device = cuda.device_array_like(f_device)
-    momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
-    momentum_partial_device = cuda.device_array(blocks_per_grid_x * blocks_per_grid_y * blocks_per_grid_v, dtype=np.float64)
+    momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float32)
+    momentum_partial_device = cuda.device_array(blocks_per_grid_x * blocks_per_grid_y * blocks_per_grid_v, dtype=np.float32)
     
     # Copy constants to the GPU
     initial_rho_device = cuda.to_device(initial_rho)
@@ -124,7 +123,6 @@ def main():
 
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        print(f"Step {t}")
 
         # Collision step
         collision_kernel[blocks_per_grid, threads_per_block](f_device, feq_device, sim.tau)
@@ -143,11 +141,12 @@ def main():
             momentum_partial_device
         )
         #cuda.synchronize()
+        #force_array[t-1] = momentum_partial_device.copy_to_host()
 
-        u_host = u_device.copy_to_host()
-        feq_host = feq_device.copy_to_host()
-        print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
-        print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
+        # u_host = u_device.copy_to_host()
+        # feq_host = feq_device.copy_to_host()
+        # print(f"Step {t}: u max={np.max(u_host)}, min={np.min(u_host)}")
+        # print(f"Step {t}: feq max={np.max(feq_host)}, min={np.min(feq_host)}")
 
         # Swap buffers
         f_device, f_new_device = f_new_device, f_device
@@ -167,18 +166,18 @@ def main():
         #cuda.synchronize()
 
         # Calculate vorticity (optional for plotting)
-        if t % sim.t_plot == 0:
-            fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
-            #cuda.synchronize()
+        # if t % sim.t_plot == 0:
+        #     fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](u_device, vor_device)
+        #     #cuda.synchronize()
 
-            # Copy data back for plotting
-            rho = rho_device.copy_to_host()
-            u = u_device.copy_to_host()
-            vor = vor_device.copy_to_host()
-            plot_solution(sim, t=t, rho=rho, u=u, vor=vor, dvv_dir=dvv_dir,
-                          streamlines_dir=streamlines_dir,
-                          test_streamlines_dir=test_streamlines_dir,
-                          test_mask_dir=test_mask_dir)
+        #     # Copy data back for plotting
+        #     rho = rho_device.copy_to_host()
+        #     u = u_device.copy_to_host()
+        #     vor = vor_device.copy_to_host()
+        #     plot_solution(sim, t=t, rho=rho, u=u, vor=vor, dvv_dir=dvv_dir,
+        #                   streamlines_dir=streamlines_dir,
+        #                   test_streamlines_dir=test_streamlines_dir,
+        #                   test_mask_dir=test_mask_dir)
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 
