@@ -5,7 +5,7 @@ import os
 import time
 
 from parameters import Parameters
-from initialisation import initial_turbulence
+from initialisation import InitialiseSimulation
 from fluid_dynamics import (
     equilibrium_kernel_launcher,
     collision_kernel_launcher,
@@ -34,11 +34,13 @@ def main():
     # Initialize parameters
     sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps=500, t_plot=100)
 
+    initialiser = InitialiseSimulation(sim)
+
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
     # Initialize density and velocity fields
-    initial_rho, initial_u = initial_turbulence(sim)
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
     # Split the simulation domain across GPUs
     x_chunks = np.array_split(np.arange(sim.num_x), num_gpus)

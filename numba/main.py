@@ -1,8 +1,8 @@
 # main.py
 
 from parameters import Parameters
-from initialisation import initial_turbulence
-from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity#, fluid_vorticity
+from initialisation import InitialiseSimulation
+from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity, fluid_vorticity
 from plotting import plot_solution, setup_plot_directories
 
 import numpy as np
@@ -27,13 +27,15 @@ def main():
     # CHANGE PARAMETER VALUES HERE.
     # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=50)
+
+    initialiser = InitialiseSimulation(sim)
 
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
     # Initialize density and velocity fields.
-    initial_rho, initial_u = initial_turbulence(sim)
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
     # Create the initial distribution by finding the equilibrium for the flow
     # calculated above.
@@ -43,13 +45,13 @@ def main():
     rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
     u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
     feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
-    # vor = fluid_vorticity(u)
+    vor = fluid_vorticity(u)
 
-    # plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
-    #               dvv_dir=dvv_dir,
-    #               streamlines_dir=streamlines_dir, 
-    #               test_streamlines_dir=test_streamlines_dir,
-    #               test_mask_dir=test_mask_dir)
+    plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
+                  dvv_dir=dvv_dir,
+                  streamlines_dir=streamlines_dir, 
+                  test_streamlines_dir=test_streamlines_dir,
+                  test_mask_dir=test_mask_dir)
 
     # Finally evolve the distribution in time, using the 'collision' and
     # 'streaming_reflect' functions.
@@ -57,8 +59,8 @@ def main():
 
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        # print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        # print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
+        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
+        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
         # Perform collision step, using the calculated density and velocity data.
         time1_start = time.time()
@@ -91,14 +93,14 @@ def main():
         time5_end = time.time()
         #print('equilibrium() time: ', time5_end - time5_start)
         
-        # if (t % sim.t_plot == 0):
-        #     vor = fluid_vorticity(u)
-        #     plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
-        #                   dvv_dir=dvv_dir,
-        #                   streamlines_dir=streamlines_dir, 
-        #                   test_streamlines_dir=test_streamlines_dir,
-        #                   test_mask_dir=test_mask_dir,
-        #                   )
+        if (t % sim.t_plot == 0):
+            vor = fluid_vorticity(u)
+            plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
+                          dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir, 
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir,
+                          )
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 

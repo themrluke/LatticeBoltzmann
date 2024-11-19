@@ -60,10 +60,10 @@ def fluid_velocity(f, rho, num_x, num_y, num_v, c, mask):
     return u
 
 
-# def fluid_vorticity(u):
-#     vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
-#            np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
-#     return vor
+def fluid_vorticity(u):
+    vor = (np.roll(u[:,:,1], -1, 0) - np.roll(u[:,:,1], 1, 0) -
+           np.roll(u[:,:,0], -1, 1) + np.roll(u[:,:,0], 1, 1))
+    return vor
 
 @njit(parallel=True, fastmath=True, nogil=True, boundscheck=False, cache=True)
 def collision(f, feq, num_x, num_y, num_v, tau):

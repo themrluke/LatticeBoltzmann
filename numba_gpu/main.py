@@ -1,7 +1,7 @@
 # main.py
 
 from parameters import Parameters
-from initialisation import initial_turbulence
+from initialisation import InitialiseSimulation
 from fluid_dynamics import (
     equilibrium_kernel,
     collision_kernel,
@@ -42,11 +42,13 @@ def main():
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
     sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
     
+    initialiser = InitialiseSimulation(sim)
+
     # Set up plot directories
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
     # Initialize density and velocity fields.
-    initial_rho, initial_u = initial_turbulence(sim)
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
     # CUDA grid and block dimensions
     threads_per_block = (16, 4, 16) # x*y*z should be a multiple of 32
