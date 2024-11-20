@@ -1,122 +1,159 @@
 # main.py
 
+import os 
+import time 
+import numpy as np
+import numba
+import matplotlib.pyplot as plt
+import cProfile
+import pstats
+
 from parameters import Parameters
 from initialisation import InitialiseSimulation
 from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_density, fluid_velocity, fluid_vorticity
 from plotting import plot_solution, setup_plot_directories
 
-import numpy as np
-import os
-import time
-
-import cProfile
-import pstats
-
-# Now import numba
-import numba
 
 # Verify the threads
 print(f"Max available threads: {numba.config.NUMBA_DEFAULT_NUM_THREADS}")
-numba.set_num_threads(8)
+numba.set_num_threads(8) # Set number of threads
 print(f"Using {numba.get_num_threads()} threads for Numba parallelization.")
 
 
-def main():
-    
+def simulation_setup():
+    """
+    Setup the Lattice Boltzmann parameters, initialise the obstacle and fields
+
+    Returns:
+        sim: Parameters object
+        rho (np.ndarray): 2D array of the fluid density at each lattice point
+        u (np.ndarray): 3D array of the fluid x & y velocity at each lattice point
+        feq (np.ndarray): Equilibrium distribution array
+        reusable_arrays (Tuple): Reusable arrays (initialise_feq, initialise_rho, initialise_u, initialise_momentum_point, initialise_f_new)
+        directories (Tuple): Directories for different plot types
+    """
+
     # Initialise parameters
-    # CHANGE PARAMETER VALUES HERE.
-    # Original parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=50)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=500)
 
+    # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-
-    # Set up plot directories
-    dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
-
-    # Initialize density and velocity fields.
     initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
-    # Create the initial distribution by finding the equilibrium for the flow
-    # calculated above.
-    f = equilibrium(initial_rho, initial_u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
+    # Set up plot directories
+    directories = setup_plot_directories()
 
-    # We could just copy initial_rho, initial_v and f into rho, v and feq.
-    rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
-    u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
-    feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
-    vor = fluid_vorticity(u)
+    # Allocate empty arrays once for arrays that need to be reset each timestep
+    initialise_feq = np.zeros((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    initialise_rho = np.zeros((sim.num_x, sim.num_y), dtype=np.float64)
+    initialise_u = np.zeros((sim.num_x, sim.num_y, 2), dtype=np.float64)
+    initialise_momentum_point = np.zeros((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    initialise_f_new = np.zeros((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
+    reusable_arrays = (initialise_feq, initialise_rho, initialise_u, initialise_momentum_point, initialise_f_new)
 
-    plot_solution(sim, t=0, rho=rho, u=u, vor=vor,
-                  dvv_dir=dvv_dir,
-                  streamlines_dir=streamlines_dir, 
-                  test_streamlines_dir=test_streamlines_dir,
-                  test_mask_dir=test_mask_dir)
+    # Create the initial distribution by finding the equilibrium for the flow calculated above
+    f = equilibrium(sim.num_x, sim.num_y, sim.num_v, initial_rho, initial_u, sim.c, sim.w, sim.cs, initialise_feq)
+    rho = fluid_density(sim.num_x, sim.num_y, sim.num_v, f, sim.mask, initialise_rho)
+    u = fluid_velocity(sim.num_x, sim.num_y, sim.num_v, f, rho, sim.c, sim.mask, initialise_u)
+    feq = equilibrium(sim.num_x, sim.num_y, sim.num_v, rho, u, sim.c, sim.w, sim.cs, initialise_feq)
 
-    # Finally evolve the distribution in time, using the 'collision' and
-    # 'streaming_reflect' functions.
-    force_array = np.zeros((sim.t_steps)) #initialising the array which will store the force throughout the whole simulation
+    return sim, rho, u, f, feq, reusable_arrays, directories
 
+
+def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
+    """
+    Evolves the simulation over time
+
+    Arguments:
+        sim: Parameters object
+        rho (np.ndarray): 2D array of the fluid density at each lattice point
+        u (np.ndarray): 3D array of the fluid x & y velocity at each lattice point
+        feq (np.ndarray): Equilibrium distribution array
+        reusable_arrays (Tuple): Reusable arrays (initialise_feq, initialise_rho, initialise_u, initialise_momentum_point, initialise_f_new)
+        directories (Tuple): Directories for different plot types
+
+    Returns:
+        force_array (np.ndarray): Total transverse force on obstacle for each timestep
+    """
+
+    initialise_feq, initialise_rho, initialise_u, initialise_momentum_point, initialise_f_new = reusable_arrays
+
+    force_array = np.zeros(sim.t_steps) # Initialising the array to store force values throughout simulation
+
+    # Cache attributes that are repeatedly accessed
+    num_x = sim.num_x
+    num_y = sim.num_y
+    num_v = sim.num_v
+    tau = sim.tau
+    c = sim.c
+    mask = sim.mask
+    mask2 = sim.mask2
+    reflection = sim.reflection
+    w = sim.w
+    cs = sim.cs
+
+    # Finally evolve the distribution in time
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
 
         # Perform collision step, using the calculated density and velocity data.
-        time1_start = time.time()
-        f = collision(f, feq, sim.num_x, sim.num_y, sim.num_v, sim.tau)
-        time1_end = time.time()
-        #print('collision() time: ', time1_end - time1_start)
+        f = collision(num_x, num_y, num_v, f, feq, tau)
 
         # Streaming and reflection
-        time2_start = time.time()
-        f, momentum_total = stream_and_reflect(f, u, sim.num_x, sim.num_y, sim.num_v,
-                                               sim.c, sim.mask, sim.mask2, sim.reflection)
-        time2_end = time.time()
-        #print('stream_and_reflect() time: ', time2_end - time2_start)
+        f, momentum_total = stream_and_reflect(num_x, num_y, num_v,
+                                               f, u, c, mask, mask2, reflection,
+                                               initialise_momentum_point, initialise_f_new)
 
-        force_array[t-1] = momentum_total
+        force_array[t-1] = momentum_total # Calculate the force at current timestep
 
         # Calculate density and velocity data, for next time around
-        time3_start = time.time()
-        rho = fluid_density(f, sim.num_x, sim.num_y, sim.num_v, sim.mask)
-        time3_end = time.time()
-        #print('fluid_density() time: ', time3_end - time3_start)
+        rho = fluid_density(num_x, num_y, num_v, f, mask, initialise_rho)
+        u = fluid_velocity(num_x, num_y, num_v, f, rho, c, mask, initialise_u)
 
-        time4_start = time.time()
-        u = fluid_velocity(f, rho, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.mask)
-        time4_end = time.time()
-        #print('fluid_velocity() time: ', time4_end - time4_start)
+        # Recalculate equilibrium
+        feq = equilibrium(num_x, num_y, num_v, rho, u, c, w, cs, initialise_feq)
 
-        time5_start = time.time()
-        feq = equilibrium(rho, u, sim.num_x, sim.num_y, sim.num_v, sim.c, sim.w, sim.cs)
-        time5_end = time.time()
-        #print('equilibrium() time: ', time5_end - time5_start)
-        
-        if (t % sim.t_plot == 0):
+        if (t % sim.t_plot == 0): # Visualise the simulation
             vor = fluid_vorticity(u)
-            plot_solution(sim, t=t, rho=rho, u=u, vor=vor,
-                          dvv_dir=dvv_dir,
-                          streamlines_dir=streamlines_dir, 
-                          test_streamlines_dir=test_streamlines_dir,
-                          test_mask_dir=test_mask_dir,
-                          )
+            plot_solution(sim, t, rho, u, vor, *directories)
+
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 
+    return force_array
+
+
+def main():
+
+    # Setup simulation
+    sim, rho, u, f, feq, reusable_arrays, directories = simulation_setup()
+
+    # Visualise setup
+    vor = fluid_vorticity(u)
+    plot_solution(sim, 0, rho, u, vor, *directories)
+
+    # Evolve simulation over time
+    force_array = timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories)
+
+    # # Plot the force over time to make sure consistent between methods
+    # plt.plot(np.arange(100, 1000, 1), np.asarray(force_array[100:]))
+    # plt.savefig(f"plots/force_graph.png", dpi=300)
+    # plt.close()
+
+    # Save force data to CSV file
     data_dir = 'Data'
     os.makedirs(data_dir, exist_ok=True) # Ensure output directory exists
-    np.savetxt(os.path.join(data_dir, 'forces.csv'), force_array) # Save force data to CSV file in output dir
-    # edit each time file creation names here and in plot_solution() function   
+    np.savetxt(os.path.join(data_dir, 'forces.csv'), force_array)
 
-# Run the main function if the script is executed directly
+
 if __name__ == "__main__":
 
     profiler = cProfile.Profile()
     profiler.enable()
     main()
     profiler.disable()
-    
+
     # Print the top 20 functions by cumulative time spent
     stats = pstats.Stats(profiler)
     stats.sort_stats('cumulative').print_stats(20)
