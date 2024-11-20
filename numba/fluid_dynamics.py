@@ -99,7 +99,7 @@ def fluid_velocity(num_x, num_y, num_v, f, rho, c, mask, u):
     for i in prange(num_x): # Parallelize over x
         for j in range(num_y):
             if mask[i, j] == 1:
-                u[i, j, :] = 0 # Set velocity to 0 in the obstacle
+                u[i, j, :] = 0.0 # Set velocity to 0 in the obstacle
 
             else:
                 for k in range(num_v): # Sum contributions from all velocity directions
