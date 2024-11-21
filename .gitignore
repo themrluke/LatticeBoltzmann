@@ -18,3 +18,6 @@
 # Ignore all nbi and nbc files (Numba cache)
 *.nbi
 *.nbc
+
+# Ignore all out files (from BlueCrystal slurm output)
+*.out
