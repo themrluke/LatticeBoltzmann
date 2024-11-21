@@ -86,7 +86,12 @@ def timestep_loop(sim, rho, u, f, feq, directories):
         #     plot_solution(sim, t, rho, u, vor, *directories)
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 

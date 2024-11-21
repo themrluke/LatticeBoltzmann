@@ -15,8 +15,6 @@ from plotting import plot_solution, setup_plot_directories
 
 
 # Verify the threads
-print(f"Max available threads: {numba.config.NUMBA_DEFAULT_NUM_THREADS}")
-numba.set_num_threads(1) # Set number of threads
 print(f"Using {numba.get_num_threads()} threads for Numba parallelization.")
 
 
@@ -120,7 +118,12 @@ def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
         #     print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 

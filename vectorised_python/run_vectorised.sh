@@ -23,4 +23,7 @@ conda activate LB_env
 
 run_file=main.py
 
-python $run_file
+# Run the script N times
+for i in {1..5}; do
+    python $run_file
+done

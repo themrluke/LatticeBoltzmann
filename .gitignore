@@ -21,3 +21,6 @@
 
 # Ignore all out files (from BlueCrystal slurm output)
 *.out
+
+# Ignore all txt files (for timings data)
+*.txt

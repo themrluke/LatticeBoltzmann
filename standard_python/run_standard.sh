@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================
-# run_numba_gpu.sh
+# run_standard.sh
 # ======================
 
 #SBATCH --job-name=cython_job         # Name of the job
@@ -11,11 +11,6 @@
 #SBATCH --cpus-per-task=1             # Use 1 CPU per task
 #SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
 #SBATCH --mem=5G                      # Memory allocation (1 GB)
-
-NUM_RUNS=5  # Number of runs per thread count
-
-# Remove leftover timings data
-rm -rf *.txt
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
@@ -28,8 +23,7 @@ conda activate LB_env
 
 run_file=main.py
 
-# Run the file NUM_RUNS times
-for i in $(seq 1 $NUM_RUNS); do
-    echo "Run $i"
+# Run the script N times
+for i in {1..5}; do
     python $run_file
 done

@@ -12,6 +12,12 @@
 #SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
 #SBATCH --mem=5G                      # Memory allocation (1 GB)
 
+MAX_THREADS=8           # Maximum number of threads to test
+NUM_RUNS_PER_THREAD=2  # Number of runs per thread count
+
+# Remove leftover timings data
+rm -rf *.txt
+
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
 
@@ -26,6 +32,16 @@ run_file=main.py
 
 python $setup_file build_ext --inplace
 
-export OMP_NUM_THREADS=1 # Set to the desired number of threads
+# Loop over thread counts from 1 to MAX_THREADS
+for threads in $(seq 1 $MAX_THREADS); do
+    echo "Running with $threads OpenMP thread(s)"
 
-python $run_file
+    # Set the number of threads for OpenMP
+    export OMP_NUM_THREADS=$threads
+
+    # Run the file NUM_RUNS_PER_THREAD times for each thread count
+    for i in $(seq 1 $NUM_RUNS_PER_THREAD); do
+        echo "Run $i for $threads OpenMP thread(s)"
+        python $run_file
+    done
+done

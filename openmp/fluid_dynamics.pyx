@@ -39,6 +39,7 @@ def timestep_loop(Parameters sim,
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
     cdef double momentum_total
+    cdef double time_start, time_end, execution_time
 
     cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
 
@@ -108,7 +109,12 @@ def timestep_loop(Parameters sim,
         #     print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 

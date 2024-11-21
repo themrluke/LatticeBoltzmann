@@ -12,17 +12,27 @@
 #SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
 #SBATCH --mem=5G                      # Memory allocation (1 GB)
 
+NUM_RUNS=10  # Number of runs per thread count
+
+# Remove leftover timings data
+rm -rf *.txt
+
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
 
 # Activate the environment
 conda activate LB_env
 
-# Change to the submission directory
-cd $SLURM_SUBMIT_DIR
+# # Change to the submission directory
+# cd $SLURM_SUBMIT_DIR
 
 setup_file=setup.py
 run_file=main.py
 
 python $setup_file build_ext --inplace
-python $run_file
+
+# Run the file NUM_RUNS times
+for i in $(seq 1 $NUM_RUNS); do
+    echo "Run $i"
+    python $run_file
+done

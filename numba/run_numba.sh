@@ -12,6 +12,12 @@
 #SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
 #SBATCH --mem=5G                      # Memory allocation (1 GB)
 
+MAX_THREADS=8           # Maximum number of threads to test
+NUM_RUNS_PER_THREAD=10  # Number of runs per thread count
+
+# Remove leftover timings data
+rm -rf *.txt
+
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
 
@@ -23,4 +29,15 @@ conda activate LB_env
 
 run_file=main.py
 
-python $run_file
+# Loop over thread counts from 1 to MAX_THREADS
+for threads in $(seq 1 $MAX_THREADS); do
+    # Set the number of threads for Numba
+    export NUMBA_NUM_THREADS=$threads
+    echo "Running with $threads thread(s)"
+
+    # Run the file NUM_RUNS_PER_THREAD times for each thread count
+    for i in $(seq 1 $NUM_RUNS_PER_THREAD); do
+        echo "Run $i for $threads thread(s)"
+        python $run_file
+    done
+done

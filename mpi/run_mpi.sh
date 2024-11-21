@@ -12,6 +12,13 @@
 #SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
 #SBATCH --mem=5G                      # Memory allocation (1 GB)
 
+# Parameters (set these variables)
+MAX_PROCESSES=8         # Maximum number of MPI processes to test
+NUM_RUNS_PER_PROCESS=2 # Number of runs per process count
+
+# Remove leftover timings data
+rm -rf *.txt
+
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
 
@@ -26,8 +33,13 @@ run_file=main.py
 
 python $setup_file build_ext --inplace
 
-# Specify the number of MPI processes (adjust as needed)
-NUM_PROCESSES=1
-
-# Run the Python program with MPI
-mpiexec -n $NUM_PROCESSES python $run_file
+# Loop over process counts from 1 to MAX_PROCESSES
+for processes in $(seq 1 $MAX_PROCESSES); do
+    echo "Running with $processes MPI process(es)"
+    
+    # Run the file NUM_RUNS_PER_PROCESS times for each process count
+    for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
+        echo "Run $i for $processes MPI process(es)"
+        mpiexec -n $processes python $run_file
+    done
+done
