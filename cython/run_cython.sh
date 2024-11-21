@@ -18,8 +18,8 @@ source ~/miniconda3/etc/profile.d/conda.sh
 # Activate the environment
 conda activate LB_env
 
-# # Change to the submission directory
-# cd $SLURM_SUBMIT_DIR
+# Change to the submission directory
+cd $SLURM_SUBMIT_DIR
 
 setup_file=setup.py
 run_file=main.py
