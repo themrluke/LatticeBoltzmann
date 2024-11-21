@@ -9,11 +9,11 @@
 #SBATCH --nodes=1                     # Use 1 node
 #SBATCH --ntasks-per-node=1           # Use 1 task per node
 #SBATCH --cpus-per-task=28            # Use 28 CPU per task
-#SBATCH --time=6:00:00                # Wall time
+#SBATCH --time=2:55:00                # Wall time
 #SBATCH --mem=5G                      # Memory allocation
 
 MAX_THREADS=28          # Maximum number of threads to test
-NUM_RUNS_PER_THREAD=10  # Number of runs per thread count
+NUM_RUNS_PER_THREAD=5  # Number of runs per thread count
 
 # Remove leftover timings data
 rm -rf *.txt
