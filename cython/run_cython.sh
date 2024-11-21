@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================
-# my_python_job.sh
+# run_cython.sh
 # ======================
 
 #SBATCH --job-name=cython_job           # Name of the job
