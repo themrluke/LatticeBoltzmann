@@ -26,13 +26,13 @@ class Parameters():
         self.inv_tau = 1 / tau
         self.cs = 1 / np.sqrt(3)  # Speed of sound
         self.rho0 = 1.0  # Fluid density
-        self.num_vel = 9
+        self.num_v = 9
         self.c = np.array([[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1],
                            [-1, -1], [1, -1], [0, 0]])
         self.w = np.array([1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36, 4/9])
         self.reflection = np.array([2, 3, 0, 1, 6, 7, 4, 5, 8])
-        self.mask = np.full((num_x, num_y), False)
-        self.mask2 = np.full((num_x, num_y), False) #the part of the total mask which we are measuring the force on        
+        self.mask = np.full((num_x, num_y), 0, dtype=np.int32)
+        self.mask2 = np.full((num_x, num_y), 0, dtype=np.int32) # The part of the total mask which we are measuring the force on 
         self.scalemax = scalemax
         if scalemax == 0.015:
             self.scalemin = -0.03 #-scalemax for all shapes other than cybertruck set to: -0.03

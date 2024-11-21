@@ -1,4 +1,4 @@
-name: LB_env
+name: multi_gpu_env
 channels:
   - conda-forge
   - defaults
@@ -21,3 +21,4 @@ dependencies:
   - cython-lint  # Optional, for debugging Cython code
   - pip:
       - pytest-mpi  # Testing MPI code (optional)
+      - cupy-cuda12x
