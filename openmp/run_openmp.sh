@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================
-# run_cython.sh
+# run_openmp.sh
 # ======================
 
 #SBATCH --job-name=cython_job         # Name of the job
@@ -25,4 +25,7 @@ setup_file=setup.py
 run_file=main.py
 
 python $setup_file build_ext --inplace
+
+export OMP_NUM_THREADS=1 # Set to the desired number of threads
+
 python $run_file

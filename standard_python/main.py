@@ -26,7 +26,7 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 100, t_plot=10)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -81,9 +81,9 @@ def timestep_loop(sim, rho, u, f, feq, directories):
         # Recalculate equilibrium
         feq = equilibrium(sim, rho, u)
 
-        if (t % sim.t_plot == 0): # Visualise the simulation
-            vor = fluid_vorticity(u)
-            plot_solution(sim, t, rho, u, vor, *directories)
+        # if (t % sim.t_plot == 0): # Visualise the simulation
+        #     vor = fluid_vorticity(u)
+        #     plot_solution(sim, t, rho, u, vor, *directories)
 
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
@@ -96,9 +96,8 @@ def main():
     # Setup simulation
     sim, rho, u, f, feq, directories = simulation_setup()
 
-    # Visualise setup
-    vor = fluid_vorticity(u)
-    plot_solution(sim, 0, rho, u, vor, *directories)
+    # vor = fluid_vorticity(u)
+    # plot_solution(sim, 0, rho, u, vor, *directories) # Visualise setup
 
     # Evolve simulation over time
     force_array = timestep_loop(sim, rho, u, f, feq, directories)

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================
-# run_cython.sh
+# run_vectorised.sh
 # ======================
 
 #SBATCH --job-name=cython_job         # Name of the job
@@ -21,8 +21,6 @@ conda activate LB_env
 # # Change to the submission directory
 # cd $SLURM_SUBMIT_DIR
 
-setup_file=setup.py
 run_file=main.py
 
-python $setup_file build_ext --inplace
 python $run_file

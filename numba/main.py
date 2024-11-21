@@ -4,7 +4,7 @@ import os
 import time 
 import numpy as np
 import numba
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import cProfile
 import pstats
 
@@ -16,7 +16,7 @@ from plotting import plot_solution, setup_plot_directories
 
 # Verify the threads
 print(f"Max available threads: {numba.config.NUMBA_DEFAULT_NUM_THREADS}")
-numba.set_num_threads(8) # Set number of threads
+numba.set_num_threads(1) # Set number of threads
 print(f"Using {numba.get_num_threads()} threads for Numba parallelization.")
 
 
@@ -35,7 +35,7 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=10000)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -114,10 +114,10 @@ def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
         # Recalculate equilibrium
         feq = equilibrium(num_x, num_y, num_v, rho, u, c, w, cs, initialise_feq)
 
-        if (t % sim.t_plot == 0): # Visualise the simulation
-            vor = fluid_vorticity(u)
-            plot_solution(sim, t, rho, u, vor, *directories)
-            print(f'PLOT {t} complete')
+        # if (t % sim.t_plot == 0): # Visualise the simulation
+        #     vor = fluid_vorticity(u)
+        #     plot_solution(sim, t, rho, u, vor, *directories)
+        #     print(f'PLOT {t} complete')
 
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
@@ -130,9 +130,8 @@ def main():
     # Setup simulation
     sim, rho, u, f, feq, reusable_arrays, directories = simulation_setup()
 
-    # Visualise setup
-    vor = fluid_vorticity(u)
-    plot_solution(sim, 0, rho, u, vor, *directories)
+    # vor = fluid_vorticity(u)
+    # plot_solution(sim, 0, rho, u, vor, *directories) # Visualise setup
 
     # Evolve simulation over time
     force_array = timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories)

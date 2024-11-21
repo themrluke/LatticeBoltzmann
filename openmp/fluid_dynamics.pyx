@@ -2,7 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, initializedcheck=False
 
 import time
 import numpy as np
@@ -66,13 +66,13 @@ def timestep_loop(Parameters sim,
     u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
     feq = equilibrium(num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-    vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
-    plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                  dvv_dir=dvv_dir,
-                  streamlines_dir=streamlines_dir, 
-                  test_streamlines_dir=test_streamlines_dir,
-                  test_mask_dir=test_mask_dir,
-                  )
+    # vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
+    # plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+    #               dvv_dir=dvv_dir,
+    #               streamlines_dir=streamlines_dir, 
+    #               test_streamlines_dir=test_streamlines_dir,
+    #               test_mask_dir=test_mask_dir,
+    #               )
 
     # Finally evolve the distribution in time
     time_start = time.time()
@@ -98,14 +98,14 @@ def timestep_loop(Parameters sim,
         # Recalculate equilibrium
         feq = equilibrium(num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-        if (t % sim.t_plot == 0): # Visualise the simulation
-            vor = fluid_vorticity(u, num_x, num_y)
-            plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                          dvv_dir=dvv_dir,
-                          streamlines_dir=streamlines_dir, 
-                          test_streamlines_dir=test_streamlines_dir,
-                          test_mask_dir=test_mask_dir)
-            print(f'PLOT {t} complete')
+        # if (t % sim.t_plot == 0): # Visualise the simulation
+        #     vor = fluid_vorticity(u, num_x, num_y)
+        #     plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+        #                   dvv_dir=dvv_dir,
+        #                   streamlines_dir=streamlines_dir, 
+        #                   test_streamlines_dir=test_streamlines_dir,
+        #                   test_mask_dir=test_mask_dir)
+        #     print(f'PLOT {t} complete')
 
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)

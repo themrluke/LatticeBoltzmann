@@ -1,6 +1,6 @@
 #!/bin/bash
 # ======================
-# run_cython.sh
+# run_mpi.sh
 # ======================
 
 #SBATCH --job-name=cython_job         # Name of the job
@@ -25,4 +25,9 @@ setup_file=setup.py
 run_file=main.py
 
 python $setup_file build_ext --inplace
-python $run_file
+
+# Specify the number of MPI processes (adjust as needed)
+NUM_PROCESSES=1
+
+# Run the Python program with MPI
+mpiexec -n $NUM_PROCESSES python $run_file
