@@ -9,8 +9,8 @@
 #SBATCH --nodes=1                     # Use 1 node
 #SBATCH --ntasks-per-node=1           # Use 1 task per node
 #SBATCH --cpus-per-task=1             # Use 1 CPU per task
-#SBATCH --time=0:02:00                # Wall time (10 minutes for testing)
-#SBATCH --mem=5G                      # Memory allocation (1 GB)
+#SBATCH --time=0:20:00                # Wall time (20mins)
+#SBATCH --mem=5G                      # Memory allocation
 
 NUM_RUNS=10  # Number of runs per thread count
 
@@ -23,8 +23,8 @@ source ~/miniconda3/etc/profile.d/conda.sh
 # Activate the environment
 conda activate LB_env
 
-# # Change to the submission directory
-# cd $SLURM_SUBMIT_DIR
+# Change to the submission directory
+cd $SLURM_SUBMIT_DIR
 
 setup_file=setup.py
 run_file=main.py
