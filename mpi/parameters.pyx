@@ -43,9 +43,9 @@ cdef class Parameters:
         self.rho0 = 1.0  # Initial fluid density
         self.num_v = 9 # Number of velocity directions
         self.c = np.array([[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1],
-                           [-1, -1], [1, -1], [0, 0]]) # D2Q9 model discrete velocity directions
+                           [-1, -1], [1, -1], [0, 0]], dtype=np.int32) # D2Q9 model discrete velocity directions
         self.w = np.array([1/9, 1/9, 1/9, 1/9, 1/36, 1/36, 1/36, 1/36, 4/9]) # Weight coefficients for each velocity direction
-        self.reflection = np.array([2, 3, 0, 1, 6, 7, 4, 5, 8]) # Reflection mapping
+        self.reflection = np.array([2, 3, 0, 1, 6, 7, 4, 5, 8], dtype=np.int32) # Reflection mapping
         self.mask = np.full((num_x, num_y), 0, dtype=np.int32) # Initialise the binary obstacle mask
         self.mask2 = np.full((num_x, num_y), 0, dtype=np.int32) # Region of total mask to measure the force on
 

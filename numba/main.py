@@ -35,7 +35,7 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=500)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -97,7 +97,7 @@ def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
 
-        # Perform collision step, using the calculated density and velocity data.
+        # Perform collision step, using the calculated density and velocity data
         f = collision(num_x, num_y, num_v, f, feq, tau)
 
         # Streaming and reflection
@@ -117,6 +117,7 @@ def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
         if (t % sim.t_plot == 0): # Visualise the simulation
             vor = fluid_vorticity(u)
             plot_solution(sim, t, rho, u, vor, *directories)
+            print(f'PLOT {t} complete')
 
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)

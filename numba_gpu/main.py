@@ -46,7 +46,7 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
+    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -97,13 +97,13 @@ def simulation_setup():
     return (
         sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
         threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-        threads_per_block_2d, blocks_per_grid_2d_x, blocks_per_grid_2d_y, blocks_per_grid_2d
+        threads_per_block_2d, blocks_per_grid_2d
     )
 
 
 def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
                   threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-                  threads_per_block_2d, blocks_per_grid_2d_x, blocks_per_grid_2d_y, blocks_per_grid_2d
+                  threads_per_block_2d, blocks_per_grid_2d
                   ):
     """
     Evolves the simulation over time
@@ -143,7 +143,7 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
 
-        # Perform collision step, using the calculated density and velocity data.
+        # Perform collision step, using the calculated density and velocity data
         collision_kernel[blocks_per_grid, threads_per_block](
             num_x, num_y, num_v, f_device, feq_device, tau
         )
@@ -186,6 +186,7 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
             u = u_device.copy_to_host()
             vor = vor_device.copy_to_host()
             plot_solution(sim, t, rho, u, vor, *directories)
+            print(f'PLOT {t} complete')
 
     time_end = time.time()
     print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
@@ -199,7 +200,7 @@ def main():
     (
     sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
     threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-    threads_per_block_2d, blocks_per_grid_2d_x, blocks_per_grid_2d_y, blocks_per_grid_2d
+    threads_per_block_2d, blocks_per_grid_2d
     ) = simulation_setup()
 
     # Visualise setup
@@ -215,7 +216,7 @@ def main():
     force_array = timestep_loop(
         sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
         threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-        threads_per_block_2d, blocks_per_grid_2d_x, blocks_per_grid_2d_y, blocks_per_grid_2d
+        threads_per_block_2d, blocks_per_grid_2d
         )
 
     # # Plot the force over time to make sure consistent between methods

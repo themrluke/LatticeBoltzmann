@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Delete all .c and .so files in the current directory
-rm -rf build *.c *.so
+# # Delete all .c and .so files in the current directory
+# rm -rf build *.c *.so
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh  # Adjust this path if needed for your Conda installation

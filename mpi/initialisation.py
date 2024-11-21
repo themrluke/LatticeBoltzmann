@@ -7,7 +7,7 @@ import numpy as np
 class InitialiseSimulation:
     """
     Class to initialise the simulation with different choices of obstacles.
-    
+
     Attributes:
         sim (Parameters): Object with all the input parameters for the fluid and lattice
         obstacle_options (dict): A dictionary of obstacle filepaths, fluid y-randomness and obstacle placement on the lattice
@@ -37,14 +37,14 @@ class InitialiseSimulation:
         Returns:
             np.ndarray: 2D NumPy array of binary containing obstacle data
         """
-        
+
         mask_file = self.obstacle_options[choice]["file"]
         mask_dir = os.path.join(os.path.dirname(__file__), "..", "masks")
         mask_path = os.path.join(mask_dir, mask_file) # Find mask file from parent directory
 
         if not os.path.exists(mask_path):
             raise FileNotFoundError(f"Mask file for choice {choice} not found: {mask_path}")
-        
+
         # Load the binary mask data (1s correspond to obstacle, 0s correspond to no obstacle)
         mask_data = np.genfromtxt(mask_path, dtype=np.int32)
         return np.flip(np.transpose(mask_data), axis=1)
@@ -53,7 +53,7 @@ class InitialiseSimulation:
     def special_conditions(self, choice, mask_data, placement):
         """
         Apply modifications to mask for specific obstacles.
-        
+
         Arguments:
             choice (str): Indicates which obstacle to select
             mask_data (np.ndarray): 2D NumPy array of binary containing obstacle data
@@ -82,7 +82,7 @@ class InitialiseSimulation:
             for offset in offsets:
                 xleft, xright, ytop, ybottom = offset
                 sim.mask[xleft:xright, ybottom:ytop] = mask_data
-            
+
             # Adjust scale for visualisation plots
             sim.scalemin = -0.04
             sim.scalemax = 0.04
@@ -96,7 +96,7 @@ class InitialiseSimulation:
             sim.mask2[250 + offset:450 + offset, 0:75] = mask_data # Force only calculated for the 2nd car, not whole mask (including the road etc)
             sim.mask[:, 190:200] = 1  # Tunnel ceiling
             sim.mask[:, 0:10] = 1 # Tarmac road
-            
+
         else:
             sim.mask2[xleft:xright, ybottom:ytop] = mask_data # Portion of mask to calculate force on
 
@@ -107,11 +107,11 @@ class InitialiseSimulation:
 
         Arguments:
             choice (str): Indicates which obstacle to select
-        
+
         Returns:
             rho (np.ndarray): 2D array of the fluid density at each lattice point
             u (np.ndarray): 3D array of the fluid x & y velocity at each lattice point
-        
+
         """
 
         if choice not in self.obstacle_options:
@@ -128,7 +128,7 @@ class InitialiseSimulation:
 
         # Apply additional mask modifications for specific obstacles
         self.special_conditions(choice, mask_data, placement)
-        
+
         # The below is slightly modified for MPI implementation
 
         local_num_x = end_x - start_x # Calculate the subdomain size for thread
@@ -136,13 +136,13 @@ class InitialiseSimulation:
         # Initialise velocity field for subdomain
         ux_initial = np.full((local_num_x, sim.num_y), sim.u0)
         ux = np.where(sim.mask[start_x:end_x], 0, ux_initial)
-        
+
         r = np.random.uniform(random_range[0], random_range[1], (local_num_x, sim.num_y)) # These values will alter angle of incoming fluid, leading to faster turbulent flow
         uy = np.where(sim.mask[start_x:end_x], 0, np.full((local_num_x, sim.num_y), (1/10) * sim.u0 * r))
         u = np.stack((ux, uy), axis=2) # sets the velocity of the fluid as u0 in the x-direction
-        
+
         # Initialise density field for subdomain
         rho_initial = np.full((local_num_x, sim.num_y), sim.rho0)
         rho = np.where(sim.mask[start_x:end_x], 0.0001, rho_initial)
-    
+
         return rho, u

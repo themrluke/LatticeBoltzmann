@@ -4,12 +4,13 @@
 
 # cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
 
+import time
 import numpy as np
 cimport numpy as np
 from mpi4py import MPI
+
 from parameters cimport Parameters
 from plotting import plot_solution, setup_plot_directories
-import time
 
 
 def timestep_loop(Parameters sim,
@@ -71,16 +72,14 @@ def timestep_loop(Parameters sim,
 
     dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir = setup_plot_directories()
 
-    # Initialize local subdomain
+    # Create the initial distribution by finding the equilibrium for the flow calculated above
     f = equilibrium(local_num_x, num_y, num_v, c, w, cs2, cs4, initial_rho, initial_u, f)
-
     rho = fluid_density(local_num_x, num_y, num_v, mask, start_x, f, rho)
     u = fluid_velocity(local_num_x, num_y, num_v, c, mask, start_x, f, rho, u)
     feq = equilibrium(local_num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-    if rank == 0:
+    if rank == 0: # Visualise setup
         vor = fluid_vorticity(u, local_num_x, num_y)
-
         plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
                     dvv_dir=dvv_dir,
                     streamlines_dir=streamlines_dir, 
@@ -88,42 +87,44 @@ def timestep_loop(Parameters sim,
                     test_mask_dir=test_mask_dir,
                     )
 
+    # Work out the rank to the left and right
     left_neighbor = rank - 1 if rank > 0 else size - 1
     right_neighbor = rank + 1 if rank < size - 1 else 0
 
+    # Finally evolve the distribution in time
+    time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        # print(f"Step {t} - f max: {np.max(f)}, f min: {np.min(f)}")
-        # print(f"Step {t} - u max: {np.max(u)}, u min: {np.min(u)}")
-    
-        # Collision step
+
+        # Perform collision step, using the calculated density and velocity data
         f = collision(local_num_x, num_y, num_v, tau_inv, f, feq)
 
-        # Communicate boundaries with neighbors or periodic wrapping
-        MPI.COMM_WORLD.Sendrecv(sendbuf=f[f.shape[0]-1, :, :], dest=right_neighbor,
-                                recvbuf=left_ghost, source=left_neighbor)
+        # Communicate boundaries with neighbors including periodic boundaries
+        MPI.COMM_WORLD.Sendrecv(
+            sendbuf=f[f.shape[0]-1, :, :], dest=right_neighbor, recvbuf=left_ghost, source=left_neighbor
+        )
 
-        MPI.COMM_WORLD.Sendrecv(sendbuf=f[0, :, :], dest=left_neighbor,
-                                        recvbuf=right_ghost, source=right_neighbor)
+        MPI.COMM_WORLD.Sendrecv(
+            sendbuf=f[0, :, :], dest=left_neighbor, recvbuf=right_ghost, source=right_neighbor
+        )
 
         # Streaming and reflection
         f_new, momentum_total = stream_and_reflect(
-            num_x, local_num_x, num_y, num_v, c, mask, mask2, start_x,
-            reflection, f, f_new, u, momentum_point, left_ghost, right_ghost)
+            num_x, local_num_x, num_y, num_v, c, mask, mask2, start_x, reflection, f, f_new, u, momentum_point, left_ghost, right_ghost
+        )
         temp = f
         f = f_new
         f_new = temp
 
-        # Update force array
-        local_force_array[t - 1] = momentum_total
+        local_force_array[t - 1] = momentum_total # Calculate the force at current timestep
 
-        # Update density and velocity
+        # Calculate density and velocity data, for next time around
         rho = fluid_density(local_num_x, num_y, num_v, mask, start_x, f, rho)
         u = fluid_velocity(local_num_x, num_y, num_v, c, mask, start_x, f, rho, u)
 
-        # Update equilibrium
+        # Recalculate equilibrium
         feq = equilibrium(local_num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-        if rank == 0:
+        if rank == 0: # Visualise the simulation
             if (t % sim.t_plot == 0):
                 vor = fluid_vorticity(u, local_num_x, num_y)
                 plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
@@ -132,6 +133,9 @@ def timestep_loop(Parameters sim,
                             test_streamlines_dir=test_streamlines_dir,
                             test_mask_dir=test_mask_dir)
                 print(f'PLOT {t} complete')
+
+    time_end = time.time()
+    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
 
     return local_force_array
 
@@ -258,7 +262,7 @@ def fluid_velocity(int num_x,
             if mask[i + start_x, j] == 1:
                 u[i, j, :] = 0.0 # Set velocity to 0 in the obstacle
             else:
-                for k in range(num_v):  # Sum contributions from all velocity directions
+                for k in range(num_v): # Sum contributions from all velocity directions
                     u[i, j, 0] = u[i, j, 0] + (f[i, j, k] * c[k, 0] / rho[i, j])
                     u[i, j, 1] = u[i, j, 1] + (f[i, j, k] * c[k, 1] / rho[i, j])
     return u
