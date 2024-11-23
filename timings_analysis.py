@@ -172,7 +172,6 @@ def bar_plot(standard_time, vectorised_time, cython_time):
 
     # Add the values inside the bars
     for bar, time in zip(bars, times):
-        height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2.0, 3,  # Position inside the bar
                  f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, fontweight='bold', rotation='vertical')
         

@@ -14,10 +14,10 @@
 
 # Parameters (set these variables)
 MAX_PROCESSES=28         # Maximum number of MPI processes to test
-NUM_RUNS_PER_PROCESS=5   # Number of runs per process count
+NUM_RUNS_PER_PROCESS=1   # Number of runs per process count
 
 # Remove leftover timings data
-rm -rf *.txt
+rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh

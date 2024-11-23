@@ -13,7 +13,7 @@
 #SBATCH --mem=5G                      # Memory allocation
 
 MAX_THREADS=28          # Maximum number of threads to test
-NUM_RUNS_PER_THREAD=5  # Number of runs per thread count
+NUM_RUNS_PER_THREAD=1  # Number of runs per thread count
 
 # Remove leftover timings data
 rm -rf loop_timings.txt
