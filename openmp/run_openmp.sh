@@ -16,7 +16,7 @@ MAX_THREADS=28          # Maximum number of threads to test
 NUM_RUNS_PER_THREAD=5  # Number of runs per thread count
 
 # Remove leftover timings data
-rm -rf *.txt
+rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh

@@ -1,5 +1,9 @@
+# timings_analysis.py
+
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
+
 
 def find_min_times(filepath, num_runs, max_threads):
     """
@@ -16,15 +20,15 @@ def find_min_times(filepath, num_runs, max_threads):
 
     min_times = [] # Will hold the fastest run for each number of threads
 
-    # Read the timing data from the text file
+    # Read data from text file
     with open(filepath, "r") as file:
         lines = file.readlines()
 
-    # Quick check to ensure expected number of lines in file
+    # Check to ensure expected number of lines in file
     if len(lines) !=num_runs * max_threads:
         raise ValueError(f"Expected {num_runs * max_threads} lines, but found {len(lines)} in {filepath}")
     
-    # Find the fastes run for each thread count
+    # Find the fastest run for each thread count
     for thread in range(max_threads):
         start_idx = thread * num_runs
         end_idx = start_idx + num_runs
@@ -34,6 +38,7 @@ def find_min_times(filepath, num_runs, max_threads):
         min_times.append(min(thread_times)) # List now only inclues fastest run for each thread count
 
     return min_times
+
 
 def find_min_times_mpi(filepath, num_runs, max_threads):
     """
@@ -53,15 +58,16 @@ def find_min_times_mpi(filepath, num_runs, max_threads):
 
     min_times = []  # Holds the fastest run for each number of threads
 
-    # Read the timing data from the text file
+    # Read data from text file
     with open(filepath, "r") as file:
         lines = file.readlines()
 
     current_index = 0
 
-    # Process each thread count from 1 to max_threads
+    # Find fastest run for each thread count
     for threads in range(1, max_threads + 1):
-        run_times = []  # Stores the longest time for each run
+
+        run_times = []  # Stores the time for last process to finish for each thread count
 
         # Process each run for the current thread count
         for run in range(num_runs):
@@ -71,13 +77,14 @@ def find_min_times_mpi(filepath, num_runs, max_threads):
             ]
             current_index += threads
 
-            # Select the longest time from this run
+            # We want the longest time (last process to finish)
             run_times.append(max(run_timings))
 
         # Find the minimum time across all runs for this thread count
         min_times.append(min(run_times))
 
     return min_times
+
 
 def single_thread_times(filepath, num_runs):
     """
@@ -107,19 +114,34 @@ def single_thread_times(filepath, num_runs):
     return min_time
 
 def multi_threading_plot(numba_times, openmp_times, mpi_times, max_threads):
+    """
+    Line plots to show the speedup from using more threads.
+
+    Arguments:
+        numba_times (list): Time taken for program for different numbers of threads
+        openmp_times (list): Time taken for program for different numbers of threads
+        mpi_times (list): Time taken for program for different numbers of threads
+    """
     threads = np.arange(1, max_threads+1)
 
     # Plotting the results
     plt.figure(figsize=(10, 6))
-    plt.plot(threads, numba_times, label="Numba", marker="o")
-    plt.plot(threads, openmp_times, label="OpenMP", marker="s")
-    plt.plot(threads, mpi_times, label="MPI", marker="^")
-    plt.xlabel("Number of Threads")
-    plt.ylabel("Minimum Execution Time (seconds)")
-    plt.title("Minimum Execution Time vs Number of Threads (Logarithmic Scale)")
+    plt.plot(threads, numba_times, label="Numba", linewidth=1.2, marker="o", markersize = 4)
+    plt.plot(threads, openmp_times, label="OpenMP", linewidth=1.2, marker="s", markersize = 4)
+    plt.plot(threads, mpi_times, label="MPI", linewidth=1.2, marker="^", markersize = 4)
+    plt.xlabel("Workers", fontweight='bold', fontsize=12)
+    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
+    plt.title("Mulithreading Speed Up", fontsize=14, fontweight='bold')
     plt.yscale('log')  # Set y-axis to logarithmic scale
+    plt.xscale('log')
+
+    # Set integer formatting for both axes
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+
     plt.legend()
-    plt.grid(True, which="both", linewidth=0.8)  # Grid for both major and minor ticks
+    plt.grid(True, which="both", linewidth=0.5)  # Grid for both major and minor ticks
     plt.tight_layout()
     plt.savefig("line_plots.png", dpi=300)
     plt.close()
@@ -130,9 +152,9 @@ def bar_plot(standard_time, vectorised_time, cython_time):
     Creates a bar plot comparing the execution times of standard, vectorized, and Cython implementations.
 
     Args:
-        standard_time (float): Execution time for the standard Python implementation.
-        vectorised_time (float): Execution time for the vectorized Python implementation.
-        cython_time (float): Execution time for the Cython implementation.
+        standard_time (float): Execution time for standard Python program
+        vectorised_time (float): Execution time for vectorized Python program
+        cython_time (float): Execution time for Cython program
     """
     # Labels and times
     labels = ['Standard Python', 'Vectorized Python', 'Cython']
@@ -145,8 +167,8 @@ def bar_plot(standard_time, vectorised_time, cython_time):
     plt.grid(axis='y', zorder=0, linewidth=1)
     plt.yscale('log')  # Logarithmic scale for the y-axis
     plt.ylim(1, 10**5)  # Adjust the starting and ending values of the y-axis
-    plt.ylabel("Execution Time (seconds)")
-    plt.title("Execution Time Comparison")
+    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
+    plt.title("Blue Crystal Timings", fontweight='bold', fontsize=14)
 
     # Add the values inside the bars
     for bar, time in zip(bars, times):
@@ -155,7 +177,7 @@ def bar_plot(standard_time, vectorised_time, cython_time):
                  f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, fontweight='bold', rotation='vertical')
         
     plt.tight_layout()
-
+    
     # Save the plot
     plt.savefig("bar_plot.png", dpi=300)
     plt.close()
@@ -170,7 +192,6 @@ def main():
     standard_time = single_thread_times(filepath='standard_python/loop_timings.txt', num_runs=1)
     vectorised_time = single_thread_times(filepath='vectorised_python/loop_timings.txt', num_runs=10)
     cython_time = single_thread_times(filepath='cython/loop_timings.txt', num_runs=10)
-
 
     multi_threading_plot(numba_times, openmp_times, mpi_times, 28)
     bar_plot(standard_time, vectorised_time, cython_time)

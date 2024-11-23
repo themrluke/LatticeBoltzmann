@@ -15,7 +15,7 @@
 NUM_RUNS=1  # Number of runs per thread count
 
 # Remove leftover timings data
-rm -rf *.txt
+rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
