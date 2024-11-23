@@ -27,7 +27,7 @@ def main():
     if rank == size - 1:
         local_num_x += sim.num_x % size  # Last process takes the remainder rows
 
-    local_start_x = rank * (local_num_x)
+    local_start_x = rank * (sim.num_x // size)
     local_end_x = local_start_x + local_num_x
 
     # Initialise the simulation, obstacle and density & velocity fields
