@@ -64,14 +64,14 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     # *origin = 'lower'* in the code below.
 
     # Center on grid points
-    x = np.arange(sim.num_x) + 0.5
+    x = np.arange(sim.num_x//3) + 0.5
     y = np.arange(sim.num_y) + 0.5
 
     # Needed to make the length of system longer to avoid interference from voertices because of periodic boundaries
     # Cutoff value allows the graph to remain focused on the interesting part of the vortex near the cars
     # Cutoff limits how far the graphs are plotted along x-direction. 
     # Cutoff = sim.num_x for true scale of simulated fluid
-    cutoff = 1300
+    cutoff = int(sim.num_x//3)
 
 
 
@@ -127,7 +127,7 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
 
     # TEST VORTICITY PLOT
     # To check if vortices are interfering with front of car due to going off graph at back
-    c = plt.imshow(vor.transpose(), origin='lower', extent=[0,sim.num_x,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
+    c = plt.imshow(vor.transpose()//3, origin='lower', extent=[0,sim.num_x,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
     bar2 = plt.colorbar(c)
     bar2.set_label('$v$')
     plt.title(r'Vorticity with Streamlines $v$', fontsize = '8')
