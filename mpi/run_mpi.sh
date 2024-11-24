@@ -10,7 +10,7 @@
 #SBATCH --ntasks-per-node=28          # Use 28 task per node
 #SBATCH --cpus-per-task=1             # Use 1 CPU per task
 #SBATCH --time=10:30:00               # Wall time
-#SBATCH --mem=5G                      # Memory allocation
+#SBATCH --mem=10G                      # Memory allocation
 
 # Parameters (set these variables)
 MAX_PROCESSES=28         # Maximum number of MPI processes to test
