@@ -184,13 +184,13 @@ def bar_plot(standard_time, vectorised_time, cython_time):
 
 def main():
     
-    numba_times = find_min_times(filepath='numba/loop_timings.txt', num_runs=5, max_threads=28)
-    openmp_times = find_min_times(filepath='openmp/loop_timings.txt', num_runs=5, max_threads=28)
-    mpi_times = find_min_times_mpi(filepath='mpi/loop_timings.txt', num_runs=5, max_threads=28)
+    numba_times = find_min_times(filepath='numba/loop_timings_3200.txt', num_runs=5, max_threads=28)
+    openmp_times = find_min_times(filepath='openmp/loop_timings_3200.txt', num_runs=5, max_threads=28)
+    mpi_times = find_min_times_mpi(filepath='mpi/loop_timings_3200.txt', num_runs=5, max_threads=28)
 
     standard_time = single_thread_times(filepath='standard_python/loop_timings.txt', num_runs=1)
     vectorised_time = single_thread_times(filepath='vectorised_python/loop_timings.txt', num_runs=10)
-    cython_time = single_thread_times(filepath='cython/loop_timings.txt', num_runs=10)
+    cython_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
 
     multi_threading_plot(numba_times, openmp_times, mpi_times, 28)
     bar_plot(standard_time, vectorised_time, cython_time)
