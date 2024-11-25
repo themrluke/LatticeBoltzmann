@@ -119,7 +119,7 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
     Returns:
         force_array (np.ndarray): Total transverse force on obstacle for each timestep
     """
-    
+
     # Preallocate arrays on the GPU
     f_new_device = cuda.device_array_like(f_device)
     momentum_point_device = cuda.device_array((sim.num_x, sim.num_y, sim.num_v), dtype=np.float64)
@@ -153,13 +153,13 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
             num_x, num_y, num_v, f_device, f_new_device, momentum_point_device, u_device, mask_device, mask2_device, reflection_device, c_device, momentum_partial_device
         )
 
-        total_momentum_device[0] = 0.0  # Reset the total momentum accumulator
-        global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](
-            momentum_partial_device, total_momentum_device
-        )
-        cuda.synchronize()
+        # total_momentum_device[0] = 0.0  # Reset the total momentum accumulator
+        # global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](
+        #     momentum_partial_device, total_momentum_device
+        # )
+        # cuda.synchronize()
 
-        force_array[t - 1] = total_momentum_device.copy_to_host()[0] # Calculate the force at current timestep
+        # force_array[t - 1] = total_momentum_device.copy_to_host()[0] # Calculate the force at current timestep
 
         # Swap buffers
         f_device, f_new_device = f_new_device, f_device

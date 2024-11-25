@@ -214,7 +214,7 @@ def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, 
     plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
     plt.title("Multithreading Speed Up with Error Bars", fontsize=14, fontweight='bold')
     plt.yscale('log')
-    plt.xscale('log')
+    #plt.xscale('log')
 
     # Set integer formatting for both axes
     ax = plt.gca()
@@ -228,7 +228,7 @@ def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, 
     plt.close()
 
 
-def bar_plot(standard_time, vectorised_time, cython_time):
+def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time):
     """
     Creates a bar plot comparing the execution times of standard, vectorized, and Cython implementations.
 
@@ -237,23 +237,50 @@ def bar_plot(standard_time, vectorised_time, cython_time):
         vectorised_time (float): Execution time for vectorized Python program
         cython_time (float): Execution time for Cython program
     """
-    # Labels and times
-    labels = ['Standard Python', 'Vectorized Python', 'Cython']
-    times = [standard_time, vectorised_time, cython_time]
 
-    
+    openmp_1thread = openmp_times[0]
+    openmp_8threads = openmp_times[7]
+    openmp_28threads = openmp_times[27]
+
+    numba_1thread = numba_times[0]
+    numba_8threads = numba_times[7]
+    numba_28threads = numba_times[27]
+
+    mpi_1process = mpi_times[0]
+    mpi_8processes = mpi_times[7]
+    mpi_28processes = mpi_times[27]
+
+    # Labels and times
+    labels = [
+        'Standard Python', 'Vectorized Python', 'Cython',
+        'OpenMP 1 Thread', 'Numba 1 Thread', ' MPI 1 Process',
+        'OpenMP 8 Threads', 'Numba 8 Threads', ' MPI 8 Processes',
+        'OpenMP 28 Threads', 'Numba 28 Threads', ' MPI 28 Processes',
+        'Numba GPU (4070TI)'
+    ]
+    times = [
+        standard_time, vectorised_time, cython_time,
+        openmp_1thread, numba_1thread, mpi_1process,
+        openmp_8threads, numba_8threads, mpi_8processes,
+        openmp_28threads, numba_28threads, mpi_28processes,
+        numba_gpu_time
+    ]
+
     # Create the bar plot
     plt.figure(figsize=(8, 6))
-    bars = plt.bar(labels, times, width=0.5, align='center', zorder=3)
+    bars = plt.bar(labels, times, width=0.75, align='center', zorder=3)
     plt.grid(axis='y', zorder=0, linewidth=1)
     plt.yscale('log')  # Logarithmic scale for the y-axis
-    plt.ylim(1, 10**5)  # Adjust the starting and ending values of the y-axis
+    plt.ylim(0.1, 10**5)  # Adjust the starting and ending values of the y-axis
     plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
     plt.title("Blue Crystal Timings", fontweight='bold', fontsize=14)
 
+    # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45, ha='right', fontsize=10)  # Rotate 45 degrees and align to the right
+
     # Add the values inside the bars
     for bar, time in zip(bars, times):
-        plt.text(bar.get_x() + bar.get_width() / 2.0, 3,  # Position inside the bar
+        plt.text(bar.get_x() + bar.get_width() / 2.0, 0.4,  # Position inside the bar
                  f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, fontweight='bold', rotation='vertical')
         
     plt.tight_layout()
@@ -276,9 +303,10 @@ def main():
     standard_time = single_thread_times(filepath='standard_python/loop_timings.txt', num_runs=1)
     vectorised_time = single_thread_times(filepath='vectorised_python/loop_timings.txt', num_runs=10)
     cython_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
+    numba_gpu_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
 
     multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
-    bar_plot(standard_time, vectorised_time, cython_time)
+    bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time)
 
 if __name__ == "__main__":
     main()
