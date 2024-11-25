@@ -113,26 +113,107 @@ def single_thread_times(filepath, num_runs):
 
     return min_time
 
-def multi_threading_plot(numba_times, openmp_times, mpi_times, max_threads):
+
+def find_avg_times(filepath, num_runs, max_threads):
+    """
+    Finds the average run time and standard deviation for each repeat of each number of threads.
+
+    Arguments:
+        filepath (str): Path to the text file containing timing data
+        num_runs (int): number of repeats for each number of threads
+        max_threads (int): Maximum number of threads used
+
+    Returns:
+        avg_times (list): List of average times for each thread count
+        std_errors (list): List of standard deviations of the mean for each thread count
+    """
+    avg_times = []  # Holds the average run times
+    std_errors = []  # Holds the standard deviations of the mean
+
+    # Read data from text file
+    with open(filepath, "r") as file:
+        lines = file.readlines()
+
+    # Check to ensure expected number of lines in file
+    if len(lines) != num_runs * max_threads:
+        raise ValueError(f"Expected {num_runs * max_threads} lines, but found {len(lines)} in {filepath}")
+    
+    # Calculate average and standard deviation for each thread count
+    for thread in range(max_threads):
+        start_idx = thread * num_runs
+        end_idx = start_idx + num_runs
+
+        thread_times = [float(lines[i].strip()) for i in range(start_idx, end_idx)]
+
+        avg_times.append(np.mean(thread_times))  # Average time
+        std_errors.append(np.std(thread_times) / np.sqrt(num_runs))  # Standard deviation of the mean
+
+    return avg_times, std_errors
+
+
+def find_avg_times_mpi(filepath, num_runs, max_threads):
+    """
+    Finds the average run time and standard deviation for MPI.
+
+    Arguments:
+        filepath (str): Path to the text file containing timing data
+        num_runs (int): Number of repeats for each number of threads
+        max_threads (int): Maximum number of threads used
+
+    Returns:
+        avg_times (list): List of average times for each thread count
+        std_errors (list): List of standard deviations of the mean for each thread count
+    """
+    avg_times = []  # Holds the average run times
+    std_errors = []  # Holds the standard deviations of the mean
+
+    # Read data from text file
+    with open(filepath, "r") as file:
+        lines = file.readlines()
+
+    current_index = 0
+
+    for threads in range(1, max_threads + 1):
+        run_times = []  # Stores the time for the slowest process in each run
+
+        for run in range(num_runs):
+            run_timings = [
+                float(lines[current_index + i].strip()) for i in range(threads)
+            ]
+            current_index += threads
+            run_times.append(max(run_timings))  # Use the slowest process time
+
+        avg_times.append(np.mean(run_times))
+        std_errors.append(np.std(run_times) / np.sqrt(num_runs))
+
+    return avg_times, std_errors
+
+
+def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, max_threads):
     """
     Line plots to show the speedup from using more threads.
 
     Arguments:
-        numba_times (list): Time taken for program for different numbers of threads
-        openmp_times (list): Time taken for program for different numbers of threads
-        mpi_times (list): Time taken for program for different numbers of threads
+        numba_avg (list): Average time taken for program for different numbers of threads
+        numba_err (list): Standard errors for Numba times
+        openmp_times (list): Average time taken for program for different numbers of threads
+        openmp_err (list): Standard errors for OpenMP times
+        mpi_times (list): Average time taken for program for different numbers of threads
+        mpi_err (list): Standard errors for MPI times
+        max_threads (int): Maximum number of threads used
     """
-    threads = np.arange(1, max_threads+1)
+
+    threads = np.arange(1, max_threads + 1)
 
     # Plotting the results
     plt.figure(figsize=(10, 6))
-    plt.plot(threads, numba_times, label="Numba", linewidth=1.2, marker="o", markersize = 4)
-    plt.plot(threads, openmp_times, label="OpenMP", linewidth=1.2, marker="s", markersize = 4)
-    plt.plot(threads, mpi_times, label="MPI", linewidth=1.2, marker="^", markersize = 4)
+    plt.errorbar(threads, numba_avg, yerr=numba_err, label="Numba", linewidth=1.2, marker="o", markersize=4, capsize=3)
+    plt.errorbar(threads, openmp_avg, yerr=openmp_err, label="OpenMP", linewidth=1.2, marker="s", markersize=4, capsize=3)
+    plt.errorbar(threads, mpi_avg, yerr=mpi_err, label="MPI", linewidth=1.2, marker="^", markersize=4, capsize=3)
     plt.xlabel("Workers", fontweight='bold', fontsize=12)
     plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
-    plt.title("Mulithreading Speed Up", fontsize=14, fontweight='bold')
-    plt.yscale('log')  # Set y-axis to logarithmic scale
+    plt.title("Multithreading Speed Up with Error Bars", fontsize=14, fontweight='bold')
+    plt.yscale('log')
     plt.xscale('log')
 
     # Set integer formatting for both axes
@@ -188,11 +269,15 @@ def main():
     openmp_times = find_min_times(filepath='openmp/loop_timings_3200.txt', num_runs=5, max_threads=28)
     mpi_times = find_min_times_mpi(filepath='mpi/loop_timings_3200.txt', num_runs=5, max_threads=28)
 
+    numba_avg, numba_err = find_avg_times(filepath='numba/loop_timings_3200.txt', num_runs=5, max_threads=28)
+    openmp_avg, openmp_err = find_avg_times(filepath='openmp/loop_timings_3200.txt', num_runs=5, max_threads=28)
+    mpi_avg, mpi_err = find_avg_times_mpi(filepath='mpi/loop_timings_3200.txt', num_runs=5, max_threads=28)
+
     standard_time = single_thread_times(filepath='standard_python/loop_timings.txt', num_runs=1)
     vectorised_time = single_thread_times(filepath='vectorised_python/loop_timings.txt', num_runs=10)
     cython_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
 
-    multi_threading_plot(numba_times, openmp_times, mpi_times, 28)
+    multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
     bar_plot(standard_time, vectorised_time, cython_time)
 
 if __name__ == "__main__":
