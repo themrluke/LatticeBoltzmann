@@ -19,7 +19,6 @@ NUM_X_VALUES=(120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4
 MODE="num_x"           # Options: "threads" or "num_x"
 
 # Remove leftover timings data
-rm -rf *.out
 rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available

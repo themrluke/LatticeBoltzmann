@@ -20,7 +20,6 @@ MODE="num_x"           # Options: "threads" or "num_x"
 
 
 # Remove leftover timings data
-rm -rf *.out
 rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available
