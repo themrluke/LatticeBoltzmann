@@ -189,6 +189,95 @@ def find_avg_times_mpi(filepath, num_runs, max_threads):
     return avg_times, std_errors
 
 
+def find_avg_times_system_sizes(filepath, num_runs, system_sizes):
+    """
+    Finds the average run time and standard deviation for each system size.
+
+    Arguments:
+        filepath (str): Path to the text file containing timing data
+        num_runs (int): Number of repeats for each system size
+        system_sizes (list): List of system sizes
+
+    Returns:
+        avg_times (list): List of average times for each system size
+        std_errors (list): List of standard deviations of the mean for each system size
+    """
+    avg_times = []  # Holds the average run times for each system size
+    std_errors = []  # Holds the standard deviation of the mean for each system size
+
+    # Read data from text file
+    with open(filepath, "r") as file:
+        lines = file.readlines()
+
+    # Check to ensure expected number of lines in file
+    if len(lines) != num_runs * len(system_sizes):
+        raise ValueError(f"Expected {num_runs * len(system_sizes)} lines, but found {len(lines)} in {filepath}")
+
+    # Calculate average and standard deviation for each system size
+    for i, size in enumerate(system_sizes):
+        start_idx = i * num_runs
+        end_idx = start_idx + num_runs
+
+        size_times = [float(lines[j].strip()) for j in range(start_idx, end_idx)]
+
+        avg_times.append(np.mean(size_times))  # Average time
+        std_errors.append(np.std(size_times) / np.sqrt(num_runs))  # Standard deviation of the mean
+
+    return avg_times, std_errors
+
+
+def find_avg_times_system_sizes_mpi(filepath, num_runs, system_sizes, num_processes):
+    """
+    Finds the average run time and standard deviation for each system size for MPI runs.
+
+    For MPI runs, where there are `num_processes` outputs per run, we consider only the slowest
+    time (representing the last process to finish) for the average calculation.
+
+    Arguments:
+        filepath (str): Path to the text file containing timing data
+        num_runs (int): Number of repeats for each system size
+        system_sizes (list): List of system sizes
+        num_processes (int): Number of processes used in the MPI runs
+
+    Returns:
+        avg_times (list): List of average times for each system size
+        std_errors (list): List of standard deviations of the mean for each system size
+    """
+    avg_times = []  # Holds the average run times for each system size
+    std_errors = []  # Holds the standard deviation of the mean for each system size
+
+    # Read data from text file
+    with open(filepath, "r") as file:
+        lines = file.readlines()
+
+    # Check to ensure expected number of lines in file
+    expected_lines = num_runs * len(system_sizes) * num_processes
+    if len(lines) != expected_lines:
+        raise ValueError(f"Expected {expected_lines} lines, but found {len(lines)} in {filepath}")
+
+    current_index = 0
+
+    # Calculate average and standard deviation for each system size
+    for i, size in enumerate(system_sizes):
+        size_times = []  # Store the slowest time for each run of the current system size
+
+        for run in range(num_runs):
+            # Extract times for the current run (one value per process)
+            run_timings = [
+                float(lines[current_index + process].strip()) for process in range(num_processes)
+            ]
+            current_index += num_processes
+
+            # Append the slowest time (last process to finish)
+            size_times.append(max(run_timings))
+
+        # Calculate average and standard deviation of the slowest times
+        avg_times.append(np.mean(size_times))
+        std_errors.append(np.std(size_times) / np.sqrt(num_runs))
+
+    return avg_times, std_errors
+
+
 def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, max_threads):
     """
     Line plots to show the speedup from using more threads.
@@ -205,16 +294,27 @@ def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, 
 
     threads = np.arange(1, max_threads + 1)
 
+    # Calculate speedup: Speedup = T(1 worker) / T(n workers)
+    numba_speedup = [numba_avg[0] / t for t in numba_avg]
+    numba_speedup_err = [numba_err[0] / t for t in numba_avg]  # Propagate error (approximation)
+
+    openmp_speedup = [openmp_avg[0] / t for t in openmp_avg]
+    openmp_speedup_err = [openmp_err[0] / t for t in openmp_avg]  # Propagate error (approximation)
+
+    mpi_speedup = [mpi_avg[0] / t for t in mpi_avg]
+    mpi_speedup_err = [mpi_err[0] / t for t in mpi_avg]  # Propagate error (approximation)
+
     # Plotting the results
     plt.figure(figsize=(10, 6))
-    plt.errorbar(threads, numba_avg, yerr=numba_err, label="Numba", linewidth=1.2, marker="o", markersize=4, capsize=3)
-    plt.errorbar(threads, openmp_avg, yerr=openmp_err, label="OpenMP", linewidth=1.2, marker="s", markersize=4, capsize=3)
-    plt.errorbar(threads, mpi_avg, yerr=mpi_err, label="MPI", linewidth=1.2, marker="^", markersize=4, capsize=3)
+    plt.errorbar(threads, numba_speedup, yerr=numba_speedup_err, label="Numba", linewidth=1.2, marker="o", markersize=4, capsize=3)
+    plt.errorbar(threads, openmp_speedup, yerr=openmp_speedup_err, label="OpenMP", linewidth=1.2, marker="s", markersize=4, capsize=3)
+    plt.errorbar(threads, mpi_speedup, yerr=mpi_speedup_err, label="MPI", linewidth=1.2, marker="^", markersize=4, capsize=3)
+
     plt.xlabel("Workers", fontweight='bold', fontsize=12)
-    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
-    plt.title("Multithreading Speed Up with Error Bars", fontsize=14, fontweight='bold')
-    plt.yscale('log')
-    #plt.xscale('log')
+    plt.ylabel("Speedup", fontweight='bold', fontsize=12)
+    plt.title("Speedup vs. Workers", fontsize=14, fontweight='bold')
+    plt.yscale('linear')  # Speedup is typically displayed on a linear scale
+    plt.xscale('linear')
 
     # Set integer formatting for both axes
     ax = plt.gca()
@@ -224,7 +324,40 @@ def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, 
     plt.legend()
     plt.grid(True, which="both", linewidth=0.5)  # Grid for both major and minor ticks
     plt.tight_layout()
-    plt.savefig("line_plots.png", dpi=300)
+    plt.savefig("speedup_plot.png", dpi=300)
+    plt.close()
+
+
+def system_size_plot(system_sizes, avg_times, std_errors, implementation_name):
+    """
+    Line plot to show execution time vs. system size for a given implementation.
+
+    Arguments:
+        system_sizes (list): List of system sizes (e.g., num_x values).
+        avg_times (list): List of average execution times corresponding to the system sizes.
+        std_errors (list): List of standard deviations of the mean for the execution times.
+        implementation_name (str): Name of the implementation (e.g., "OpenMP").
+    """
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(
+        system_sizes, avg_times, yerr=std_errors, label=implementation_name,
+        linewidth=1.2, marker="o", markersize=4, capsize=3
+    )
+    plt.xlabel("System Size (num_x)", fontweight='bold', fontsize=12)
+    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
+    plt.title(f"{implementation_name}: Execution Time vs. System Size", fontsize=14, fontweight='bold')
+    #plt.yscale('log')  # Log scale for execution time
+    #plt.xscale('log')  # Log scale for system size
+
+    # Set integer formatting for both axes
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+
+    plt.legend()
+    plt.grid(True, which="both", linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{implementation_name}_system_size_plot.png", dpi=300)
     plt.close()
 
 
@@ -282,31 +415,62 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     for bar, time in zip(bars, times):
         plt.text(bar.get_x() + bar.get_width() / 2.0, 0.4,  # Position inside the bar
                  f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, fontweight='bold', rotation='vertical')
-        
+
     plt.tight_layout()
-    
+
     # Save the plot
     plt.savefig("bar_plot.png", dpi=300)
     plt.close()
 
 
 def main():
-    
-    numba_times = find_min_times(filepath='numba/loop_timings_3200.txt', num_runs=5, max_threads=28)
-    openmp_times = find_min_times(filepath='openmp/loop_timings_3200.txt', num_runs=5, max_threads=28)
-    mpi_times = find_min_times_mpi(filepath='mpi/loop_timings_3200.txt', num_runs=5, max_threads=28)
 
-    numba_avg, numba_err = find_avg_times(filepath='numba/loop_timings_3200.txt', num_runs=5, max_threads=28)
-    openmp_avg, openmp_err = find_avg_times(filepath='openmp/loop_timings_3200.txt', num_runs=5, max_threads=28)
-    mpi_avg, mpi_err = find_avg_times_mpi(filepath='mpi/loop_timings_3200.txt', num_runs=5, max_threads=28)
+    # Minimum times across all runs for each thread count
+    numba_min_threads = find_min_times(filepath='numba/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    openmp_min_threads = find_min_times(filepath='openmp/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    mpi_min_threads = find_min_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
 
-    standard_time = single_thread_times(filepath='standard_python/loop_timings.txt', num_runs=1)
-    vectorised_time = single_thread_times(filepath='vectorised_python/loop_timings.txt', num_runs=10)
-    cython_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
-    numba_gpu_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
+    # Average times across all runs for each thread count
+    numba_avg, numba_err = find_avg_times(filepath='numba/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    openmp_avg, openmp_err = find_avg_times(filepath='openmp/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    mpi_avg, mpi_err = find_avg_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+
+    # Minimum time across all runs for single threaded programs
+    standard_min_time = single_thread_times(filepath='standard_python/loop_timings_3200.txt', num_runs=1)
+    vectorised_min_time = single_thread_times(filepath='vectorised_python/loop_timings_3200.txt', num_runs=10)
+    cython_min_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
+    numbagpu_min_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
 
     multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
-    bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time)
+    bar_plot(standard_min_time, vectorised_min_time, cython_min_time, mpi_min_threads, openmp_min_threads, numba_min_threads, numbagpu_min_time)
+
+
+    system_sizes = [ # System sizes
+        120, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
+    ]
+
+    num_runs = 1  # Number of repeats for each system size
+
+    # # Parse timing data for system sizes
+    # numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
+    #     filepath='numba/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes
+    # )
+    # openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
+    #     filepath='openmp/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes
+    # )
+    # mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
+    #     filepath='mpi/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes, num_processes=8
+    # )
+    numbagpu_avg_sizes, numbagpu_err_sizes = find_avg_times_system_sizes(
+        filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
+
+    # # Generate system size scaling plots
+    # system_size_plot(system_sizes, numba_avg_sizes, numba_err_sizes, "Numba")
+    # system_size_plot(system_sizes, openmp_avg_sizes, openmp_err_sizes, "OpenMP")
+    # system_size_plot(system_sizes, mpi_avg_sizes, mpi_err_sizes, "MPI")
+    system_size_plot(system_sizes, numbagpu_avg_sizes, numbagpu_err_sizes, "Numba_GPU")
+
 
 if __name__ == "__main__":
     main()

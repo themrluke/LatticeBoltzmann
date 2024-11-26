@@ -1,5 +1,6 @@
 # main.py
 
+import argparse
 import os
 import time
 import numpy as np
@@ -31,7 +32,7 @@ print("Threads per warp:", device.WARP_SIZE)
 print("Shared memory per block:", device.MAX_SHARED_MEMORY_PER_BLOCK)
 print("Registers per block:", device.MAX_REGISTERS_PER_BLOCK)
 
-def simulation_setup():
+def simulation_setup(num_x):
     """
     Setup the Lattice Boltzmann parameters, initialise the obstacle and fields
 
@@ -46,11 +47,11 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=10000)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=10000)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='d')
 
     # Set up plot directories
     directories = setup_plot_directories()
@@ -199,14 +200,14 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
     return force_array
 
 
-def main():
+def main(num_x):
 
     # Setup simulation
     (
     sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
     threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
     threads_per_block_2d, blocks_per_grid_2d
-    ) = simulation_setup()
+    ) = simulation_setup(num_x)
 
     # # Visualise setup
     # fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](
@@ -237,9 +238,13 @@ def main():
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description="Simulation with adjustable grid size.")
+    parser.add_argument("--num_x", type=int, required=True, help="Number of grid points in the x direction.")
+    args = parser.parse_args()
+
     profiler = cProfile.Profile()
     profiler.enable()
-    main()
+    main(args.num_x)
     profiler.disable()
 
     # Print the top 20 functions by cumulative time spent

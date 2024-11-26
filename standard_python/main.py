@@ -1,5 +1,6 @@
 # main.py
 
+import argparse
 import os
 import time
 import numpy as np
@@ -12,7 +13,7 @@ from fluid_dynamics import equilibrium, collision, stream_and_reflect, fluid_den
 from plotting import plot_solution, setup_plot_directories
 
 
-def simulation_setup():
+def simulation_setup(num_x):
     """
     Setup the Lattice Boltzmann parameters, initialise the obstacle and fields
 
@@ -26,11 +27,11 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='d')
 
     # Set up plot directories
     directories = setup_plot_directories()
@@ -64,7 +65,6 @@ def timestep_loop(sim, rho, u, f, feq, directories):
     # Finally evolve the distribution in time
     time_start = time.time()
     for t in range(1, sim.t_steps + 1):
-        print('Step: ', t)
 
         # Perform collision step, using the calculated density and velocity data
         f = collision(sim, f, feq)
@@ -96,10 +96,10 @@ def timestep_loop(sim, rho, u, f, feq, directories):
     return force_array
 
 
-def main():
+def main(num_x):
 
     # Setup simulation
-    sim, rho, u, f, feq, directories = simulation_setup()
+    sim, rho, u, f, feq, directories = simulation_setup(num_x)
 
     # vor = fluid_vorticity(u)
     # plot_solution(sim, 0, rho, u, vor, *directories) # Visualise setup
@@ -115,9 +115,13 @@ def main():
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description="Simulation with adjustable grid size.")
+    parser.add_argument("--num_x", type=int, required=True, help="Number of grid points in the x direction.")
+    args = parser.parse_args()
+
     profiler = cProfile.Profile()
     profiler.enable()
-    main()
+    main(args.num_x)
     profiler.disable()
 
     # Print the top 20 functions by cumulative time spent
