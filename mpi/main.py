@@ -33,7 +33,7 @@ def main(num_x):
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m', start_x=local_start_x, end_x=local_end_x)
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='d', start_x=local_start_x, end_x=local_end_x)
 
     # Evolve simulation over time
     local_force_array = timestep_loop(

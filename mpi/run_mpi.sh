@@ -9,7 +9,7 @@
 #SBATCH --nodes=1                     # Use 1 node
 #SBATCH --ntasks-per-node=28          # Use 28 task per node
 #SBATCH --cpus-per-task=1             # Use 1 CPU per task
-#SBATCH --time=10:30:00               # Wall time
+#SBATCH --time=1:30:00               # Wall time
 #SBATCH --mem=10G                      # Memory allocation
 
 # Parameters (set these variables)
@@ -17,7 +17,7 @@ MAX_PROCESSES=28         # Maximum number of MPI processes to test
 NUM_RUNS_PER_PROCESS=5   # Number of runs per process count
 PROCESSES=28               # Default number of threads if looping over num_x
 NUM_X_VALUES=(120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
-MODE="threads"           # Options: "threads" or "num_x"
+MODE="num_x"           # Options: "threads" or "num_x"
 
 # Remove leftover timings data
 rm -rf loop_timings.txt

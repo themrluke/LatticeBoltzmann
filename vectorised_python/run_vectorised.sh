@@ -4,7 +4,7 @@
 # ======================
 
 #SBATCH --job-name=vectorised_job     # Name of the job
-#SBATCH --partition=teach_cpu         # Use the teaching CPU partition
+#SBATCH --partition=cpu         # Use the teaching CPU partition
 #SBATCH --account=PHYS033184          # Account for Advanced Computational Physics
 #SBATCH --nodes=1                     # Use 1 node
 #SBATCH --ntasks-per-node=1           # Use 1 task per node
