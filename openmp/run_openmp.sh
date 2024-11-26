@@ -15,7 +15,7 @@
 MAX_THREADS=28          # Maximum number of threads to test
 NUM_RUNS_PER_THREAD=5  # Number of runs per thread count
 THREADS=28               # Default number of threads if looping over num_x
-NUM_X_VALUES=(120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
+NUM_X_VALUES=(2 4 6 8 10 20 40 60 80 120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
 MODE="num_x"           # Options: "threads" or "num_x"
 
 

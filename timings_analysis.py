@@ -27,7 +27,7 @@ def find_min_times(filepath, num_runs, max_threads):
     # Check to ensure expected number of lines in file
     if len(lines) !=num_runs * max_threads:
         raise ValueError(f"Expected {num_runs * max_threads} lines, but found {len(lines)} in {filepath}")
-    
+
     # Find the fastest run for each thread count
     for thread in range(max_threads):
         start_idx = thread * num_runs
@@ -356,25 +356,30 @@ def speedup_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err,
     plt.close()
 
 
-def system_size_plot(system_sizes, avg_times, std_errors, implementation_name):
+def system_size_combined_plot(system_sizes, implementations):
     """
-    Line plot to show execution time vs. system size for a given implementation.
+    Line plot to show execution time vs. system size for multiple implementations.
 
     Arguments:
         system_sizes (list): List of system sizes (e.g., num_x values).
-        avg_times (list): List of average execution times corresponding to the system sizes.
-        std_errors (list): List of standard deviations of the mean for the execution times.
-        implementation_name (str): Name of the implementation (e.g., "OpenMP").
+        implementations (list of tuples): Each tuple contains:
+            - avg_times (list): Average execution times.
+            - std_errors (list): Standard errors for the execution times.
+            - implementation_name (str): Name of the implementation.
     """
-    plt.figure(figsize=(10, 6))
-    plt.errorbar(
-        system_sizes, avg_times, yerr=std_errors, label=implementation_name,
-        linewidth=1.2, marker="o", markersize=4, capsize=3
-    )
+    plt.figure(figsize=(10, 8))
+
+    for avg_times, std_errors, implementation_name, color in implementations:
+        plt.errorbar(
+            system_sizes, avg_times, yerr=std_errors, label=implementation_name,
+            linewidth=1, color=color, marker="o", markersize=2, capsize=3
+        )
+
     plt.xlabel("System Size (num_x)", fontsize=12)
     plt.ylabel("Time (s)", fontsize=12)
-    plt.title(f"{implementation_name}: Execution Time vs. System Size", fontsize=14, fontweight='bold')
     plt.yscale('log')  # Log scale for execution time
+    plt.xscale('log')
+    plt.ylim(0.01, 100)
 
     # Set integer formatting for both axes
     ax = plt.gca()
@@ -384,7 +389,7 @@ def system_size_plot(system_sizes, avg_times, std_errors, implementation_name):
     plt.legend()
     plt.grid(True, which="both", linewidth=0.5)
     plt.tight_layout()
-    plt.savefig(f"{implementation_name}_system_size_plot.png", dpi=300)
+    plt.savefig("combined_system_size_plot.png", dpi=300)
     plt.close()
 
 
@@ -413,9 +418,9 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     # Labels and times
     labels = [
         'Standard Python', 'Vectorized Python', 'Cython',
-        'OpenMP 1 Thread', 'Numba 1 Thread', ' MPI 1 Process',
-        'OpenMP 8 Threads', 'Numba 8 Threads', ' MPI 8 Processes',
-        'OpenMP 28 Threads', 'Numba 28 Threads', ' MPI 28 Processes',
+        'OpenMP (1 Thread)', 'Numba (1 Thread)', ' MPI (1 Process)',
+        'OpenMP (8 Threads)', 'Numba (8 Threads)', ' MPI (8 Processes)',
+        'OpenMP (28 Threads)', 'Numba (28 Threads)', ' MPI (28 Processes)',
         'Numba GPU (4070TI)'
     ]
     times = [
@@ -427,21 +432,39 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     ]
 
     # Create the bar plot
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(10, 8))
     bars = plt.bar(labels, times, width=0.75, align='center', zorder=3)
+
+    # Set all bars to blue initially
+    for bar in bars:
+        bar.set_color('#1f77b4')
+
+    # Set the last bar to orange
+    bars[-1].set_color('orange')
+
+    # Add a legend for the bar colors
+    plt.legend(
+        ['BC4 (Blue Crystal 4)', 'GPU (4070TI)'],
+        loc='upper right', fontsize=14, frameon=True,
+        handles=[
+            plt.Line2D([0], [0], color='#1f77b4', lw=6, label='CPU (Blue Crystal 4)'),
+            plt.Line2D([0], [0], color='orange', lw=6, label='GPU')
+        ]
+    )
+
     plt.grid(axis='y', zorder=0, linewidth=1)
     plt.yscale('log')  # Logarithmic scale for the y-axis
     plt.ylim(0.1, 10**5)  # Adjust the starting and ending values of the y-axis
-    plt.ylabel("Time (s)", fontsize=12)
-    plt.title("Blue Crystal Timings", fontsize=14)
+    plt.ylabel("Time (s)", fontsize=14)
+    plt.yticks(fontsize=12)
 
     # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha='right', fontsize=10)  # Rotate 45 degrees and align to the right
+    plt.xticks(rotation=45, ha='right', fontsize=12)  # Rotate 45 degrees and align to the right
 
     # Add the values inside the bars
     for bar, time in zip(bars, times):
         plt.text(bar.get_x() + bar.get_width() / 2.0, 0.4,  # Position inside the bar
-                 f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, rotation='vertical')
+                 f"{time:.2f}", ha='center', va='center', color='white', fontsize=12, fontweight='bold', rotation='vertical')
 
     plt.tight_layout()
 
@@ -472,31 +495,41 @@ def main():
     bar_plot(standard_min_time, vectorised_min_time, cython_min_time, mpi_min_threads, openmp_min_threads, numba_min_threads, numbagpu_min_time)
 
 
+    # system_sizes = [ # System sizes
+    #     120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
+    # ]
     system_sizes = [ # System sizes
-        120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
-    ]
+        2, 4, 6, 8, 10, 20, 40, 60, 80, 120,] # 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400]
 
-    num_runs = 5  # Number of repeats for each system size
+    num_runs = 1  # Number of repeats for each system size
 
     # Parse timing data for system sizes
-    numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
-        filepath='numba/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    )
-    openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
-        filepath='openmp/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    )
-    # mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
-    #     filepath='mpi/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes, num_processes=8
+    # numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
+    #     filepath='numba/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     # )
-    numbagpu_avg_sizes, numbagpu_err_sizes = find_avg_times_system_sizes(
-        filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    # openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
+    #     filepath='openmp/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    # )
+    mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
+        filepath='mpi/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes, num_processes=8
     )
+    # numbagpu_avg_sizes, numbagpu_err_sizes = find_avg_times_system_sizes(
+    #     filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    # )
+    # cython_avg_sizes, cython_err_sizes = find_avg_times_system_sizes(
+    #     filepath='cython/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    # )
 
-    # Generate system size scaling plots
-    system_size_plot(system_sizes, numba_avg_sizes, numba_err_sizes, "Numba")
-    system_size_plot(system_sizes, openmp_avg_sizes, openmp_err_sizes, "OpenMP")
-    # system_size_plot(system_sizes, mpi_avg_sizes, mpi_err_sizes, "MPI")
-    system_size_plot(system_sizes, numbagpu_avg_sizes, numbagpu_err_sizes, "Numba_GPU")
+    implementations = [
+        #(numba_avg_sizes, numba_err_sizes, "Numba", 'red'),
+        #(openmp_avg_sizes, openmp_err_sizes, "OpenMP", 'blue'),
+        (mpi_avg_sizes, mpi_err_sizes, "MPI", 'limegreen'),
+        #(numbagpu_avg_sizes, numbagpu_err_sizes, "Numba_GPU", 'orange'),
+        #(cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
+    ]
+
+    # Generate the combined plot
+    system_size_combined_plot(system_sizes, implementations)
 
 
 if __name__ == "__main__":

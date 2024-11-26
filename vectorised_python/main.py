@@ -31,7 +31,7 @@ def simulation_setup(num_x):
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='d')
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='n')
 
     # Set up plot directories
     directories = setup_plot_directories()

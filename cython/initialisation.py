@@ -22,6 +22,7 @@ class InitialiseSimulation:
             'c': {"file": "cybertruck mask with spaces.txt", "random": (-1, 1), "placement": (50, 250, 75, 0)},
             'd': {"file": "circle mask with spaces.txt", "random": (-1, 1), "placement": (84, 116, 116, 84)},
             'e': {"file": "circle mask with spaces.txt", "random": (-1, 1), "placement": (84, 116, 116, 84)},
+            'n': {"file": None, "random": (-1, 1), "placement": (0, 0, 0, 0)},  # Empty lattice
             **{ch: {"file": "cybertruck mask with spaces.txt", "random": (-1, 1), "placement": (50, 250, 75, 0), # Front car setup for slipstreaming cars
                     "offset": offset} for ch, offset in zip('fghijklm', [1, 300, 257, 214, 171, 128, 85, 42])},
         }
@@ -121,13 +122,18 @@ class InitialiseSimulation:
         random_range = obstacle["random"]
 
         # Load and apply the mask
-        mask_data = self.load_mask(choice)
-        placement = obstacle["placement"]
-        xleft, xright, ytop, ybottom = placement
-        sim.mask[xleft:xright, ybottom:ytop] = mask_data
+        if choice == 'n':
+            sim.mask[:, :] = 0
+            sim.mask2[:, :] = 0
 
-        # Apply additional mask modifications for specific obstacles
-        self.special_conditions(choice, mask_data, placement)
+        else:
+            mask_data = self.load_mask(choice)
+            placement = obstacle["placement"]
+            xleft, xright, ytop, ybottom = placement
+            sim.mask[xleft:xright, ybottom:ytop] = mask_data
+
+            # Apply additional mask modifications for specific obstacles
+            self.special_conditions(choice, mask_data, placement)
 
         # Initialise velocity field
         ux_initial = np.full((sim.num_x, sim.num_y), sim.u0)
