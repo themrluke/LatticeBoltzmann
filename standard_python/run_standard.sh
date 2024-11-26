@@ -9,7 +9,7 @@
 #SBATCH --nodes=1                     # Use 1 node
 #SBATCH --ntasks-per-node=1           # Use 1 task per node
 #SBATCH --cpus-per-task=1             # Use 1 CPU per task
-#SBATCH --time=3-12:30:00             # Wall time
+#SBATCH --time=6-12:30:00             # Wall time
 #SBATCH --mem=5G                      # Memory allocation
 
 NUM_RUNS=1  # Number of runs per thread count
