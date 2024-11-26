@@ -278,7 +278,7 @@ def find_avg_times_system_sizes_mpi(filepath, num_runs, system_sizes, num_proces
     return avg_times, std_errors
 
 
-def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, max_threads):
+def speedup_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, max_threads):
     """
     Line plots to show the speedup from using more threads.
 
@@ -304,25 +304,53 @@ def multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, 
     mpi_speedup = [mpi_avg[0] / t for t in mpi_avg]
     mpi_speedup_err = [mpi_err[0] / t for t in mpi_avg]  # Propagate error (approximation)
 
-    # Plotting the results
-    plt.figure(figsize=(10, 6))
-    plt.errorbar(threads, numba_speedup, yerr=numba_speedup_err, label="Numba", linewidth=1.2, marker="o", markersize=4, capsize=3)
-    plt.errorbar(threads, openmp_speedup, yerr=openmp_speedup_err, label="OpenMP", linewidth=1.2, marker="s", markersize=4, capsize=3)
-    plt.errorbar(threads, mpi_speedup, yerr=mpi_speedup_err, label="MPI", linewidth=1.2, marker="^", markersize=4, capsize=3)
+    # Calculate efficiency
+    numba_efficiency = [s / w for s, w in zip(numba_speedup, threads)]
+    numba_efficiency_err = [se / w for se, w in zip(numba_speedup_err, threads)]
 
-    plt.xlabel("Workers", fontweight='bold', fontsize=12)
-    plt.ylabel("Speedup", fontweight='bold', fontsize=12)
-    plt.title("Speedup vs. Workers", fontsize=14, fontweight='bold')
-    plt.yscale('linear')  # Speedup is typically displayed on a linear scale
-    plt.xscale('linear')
+    openmp_efficiency = [s / w for s, w in zip(openmp_speedup, threads)]
+    openmp_efficiency_err = [se / w for se, w in zip(openmp_speedup_err, threads)]
+
+    mpi_efficiency = [s / w for s, w in zip(mpi_speedup, threads)]
+    mpi_efficiency_err = [se / w for se, w in zip(mpi_speedup_err, threads)]
+
+    # Plotting the results
+    fig, ax1 = plt.subplots(figsize=(10, 8))
+
+    # Speedup plot (primary y-axis)
+    ax1.errorbar(threads, numba_speedup, yerr=numba_speedup_err, label="Numba Speedup", color='red', linewidth=1, marker="o", markersize=2, capsize=3)
+    ax1.errorbar(threads, openmp_speedup, yerr=openmp_speedup_err, label="OpenMP Speedup", color='blue', linewidth=1, marker="o", markersize=2, capsize=3)
+    ax1.errorbar(threads, mpi_speedup, yerr=mpi_speedup_err, label="MPI Speedup", color='limegreen', linewidth=1, marker="o", markersize=2, capsize=3)
+
+    ax1.set_xlabel("Workers", fontsize=16)
+    ax1.set_ylabel("Speedup", fontsize=16)
+    ax1.set_xscale('linear')
+    ax1.set_yscale('linear')
 
     # Set integer formatting for both axes
-    ax = plt.gca()
-    ax.yaxis.set_major_formatter(ScalarFormatter())
-    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax1.yaxis.set_major_formatter(ScalarFormatter())
+    ax1.xaxis.set_major_formatter(ScalarFormatter())
 
-    plt.legend()
-    plt.grid(True, which="both", linewidth=0.5)  # Grid for both major and minor ticks
+    # Efficiency plot (secondary y-axis)
+    ax2 = ax1.twinx()
+    ax2.errorbar(threads, numba_efficiency, yerr=numba_efficiency_err, linestyle='dashed', color='red', label="Numba Efficiency", linewidth=1.2, alpha=0.4 ,marker="o", markersize=2, capsize=3)
+    ax2.errorbar(threads, openmp_efficiency, yerr=openmp_efficiency_err, linestyle='dashed', color='blue', label="OpenMP Efficiency", linewidth=1.2, alpha=0.4, marker="o", markersize=2, capsize=3)
+    ax2.errorbar(threads, mpi_efficiency, yerr=mpi_efficiency_err, linestyle='dashed', color='limegreen', label="MPI Efficiency", linewidth=1.2, alpha=0.4, marker="o", markersize=2, capsize=3)
+
+    ax2.set_ylabel("Efficiency", fontsize=16)
+    ax2.set_yscale('linear')
+    ax2.yaxis.set_major_formatter(ScalarFormatter())
+
+    ax1.tick_params(axis='both', which='major', labelsize=14)  # Primary y-axis (Speedup) and X-axis
+    ax2.tick_params(axis='y', which='major', labelsize=14)    # Secondary y-axis (Efficiency)
+
+    # Combine legends
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='center right', fontsize=14)
+
+    # Grid and layout
+    ax1.grid(True, which="both", linewidth=0.5)  # Grid for both major and minor ticks
     plt.tight_layout()
     plt.savefig("speedup_plot.png", dpi=300)
     plt.close()
@@ -343,11 +371,10 @@ def system_size_plot(system_sizes, avg_times, std_errors, implementation_name):
         system_sizes, avg_times, yerr=std_errors, label=implementation_name,
         linewidth=1.2, marker="o", markersize=4, capsize=3
     )
-    plt.xlabel("System Size (num_x)", fontweight='bold', fontsize=12)
-    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
+    plt.xlabel("System Size (num_x)", fontsize=12)
+    plt.ylabel("Time (s)", fontsize=12)
     plt.title(f"{implementation_name}: Execution Time vs. System Size", fontsize=14, fontweight='bold')
-    #plt.yscale('log')  # Log scale for execution time
-    #plt.xscale('log')  # Log scale for system size
+    plt.yscale('log')  # Log scale for execution time
 
     # Set integer formatting for both axes
     ax = plt.gca()
@@ -405,8 +432,8 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     plt.grid(axis='y', zorder=0, linewidth=1)
     plt.yscale('log')  # Logarithmic scale for the y-axis
     plt.ylim(0.1, 10**5)  # Adjust the starting and ending values of the y-axis
-    plt.ylabel("Time (s)", fontweight='bold', fontsize=12)
-    plt.title("Blue Crystal Timings", fontweight='bold', fontsize=14)
+    plt.ylabel("Time (s)", fontsize=12)
+    plt.title("Blue Crystal Timings", fontsize=14)
 
     # Rotate x-axis labels for better readability
     plt.xticks(rotation=45, ha='right', fontsize=10)  # Rotate 45 degrees and align to the right
@@ -414,7 +441,7 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     # Add the values inside the bars
     for bar, time in zip(bars, times):
         plt.text(bar.get_x() + bar.get_width() / 2.0, 0.4,  # Position inside the bar
-                 f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, fontweight='bold', rotation='vertical')
+                 f"{time:.2f}", ha='center', va='center', color='white', fontsize=10, rotation='vertical')
 
     plt.tight_layout()
 
@@ -441,23 +468,23 @@ def main():
     cython_min_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
     numbagpu_min_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
 
-    multi_threading_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
+    speedup_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
     bar_plot(standard_min_time, vectorised_min_time, cython_min_time, mpi_min_threads, openmp_min_threads, numba_min_threads, numbagpu_min_time)
 
 
     system_sizes = [ # System sizes
-        120, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
+        120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
     ]
 
-    num_runs = 1  # Number of repeats for each system size
+    num_runs = 5  # Number of repeats for each system size
 
-    # # Parse timing data for system sizes
-    # numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
-    #     filepath='numba/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
-    # openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
-    #     filepath='openmp/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
+    # Parse timing data for system sizes
+    numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
+        filepath='numba/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
+    openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
+        filepath='openmp/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
     # mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
     #     filepath='mpi/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes, num_processes=8
     # )
@@ -465,9 +492,9 @@ def main():
         filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     )
 
-    # # Generate system size scaling plots
-    # system_size_plot(system_sizes, numba_avg_sizes, numba_err_sizes, "Numba")
-    # system_size_plot(system_sizes, openmp_avg_sizes, openmp_err_sizes, "OpenMP")
+    # Generate system size scaling plots
+    system_size_plot(system_sizes, numba_avg_sizes, numba_err_sizes, "Numba")
+    system_size_plot(system_sizes, openmp_avg_sizes, openmp_err_sizes, "OpenMP")
     # system_size_plot(system_sizes, mpi_avg_sizes, mpi_err_sizes, "MPI")
     system_size_plot(system_sizes, numbagpu_avg_sizes, numbagpu_err_sizes, "Numba_GPU")
 
