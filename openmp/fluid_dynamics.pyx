@@ -152,7 +152,7 @@ def equilibrium(int num_x,
 
     feq[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]  # Magnitude squared of velocity
             for k in range(num_v):
@@ -188,7 +188,7 @@ def fluid_density(int num_x,
 
     rho[:, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             if mask[i, j] == 1:  # Set fluid density inside the obstacle
                 rho[i, j] = 0.0001 # To avoid divisions by 0
@@ -232,7 +232,7 @@ def fluid_velocity(int num_x,
 
     u[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             if mask[i, j] == 1:
                 u[i, j, :] = 0.0 # Set velocity to 0 in the obstacle
@@ -288,7 +288,7 @@ def collision(int num_x,
 
     cdef int i, j, k
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             for k in range(num_v):
                 f[i, j, k] = (f[i, j, k] * (1 - tau_inv)) + (feq[i, j, k] * tau_inv)
@@ -332,7 +332,7 @@ def stream_and_reflect(int num_x,
     cdef double momentum_total = 0.0
     f_new[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             for k in range(num_v):
 
