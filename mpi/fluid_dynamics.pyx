@@ -19,7 +19,8 @@ def timestep_loop(Parameters sim,
                   int local_num_x,
                   int start_x,
                   int rank,
-                  int size):
+                  int size
+                  int run_repeat):
     """
     Evolves the simulation over time
 
@@ -139,9 +140,9 @@ def timestep_loop(Parameters sim,
     execution_time = time_end - time_start
     print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
 
-    # Append the result to a text file
-    with open("loop_timings.txt", "a") as file:
-        file.write(f"{execution_time}\n")
+    # Append the result to a CSV file
+    with open("loop_timings.csv", "a") as csv_file:
+        csv_file.write(f"{execution_time},{rank},{sim.num_x},{run_repeat}\n")  # Write data as a row
 
     return local_force_array
 

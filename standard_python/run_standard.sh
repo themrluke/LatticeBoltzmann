@@ -13,11 +13,12 @@
 #SBATCH --mem=5G                      # Memory allocation
 
 NUM_RUNS=1  # Number of runs per thread count
-NUM_X_VALUES=(2 4 6 8 10 20 40 60 80 120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
+# NUM_X_VALUES=(2 4 6 8 10 20 40 60 80 120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
+NUM_X_VALUES=(4000 4800 5600 6400)  # Values of num_x to test
 MODE="num_x"           # Options: "one_size" or "num_x"
 
-# Remove leftover timings data
-rm -rf loop_timings.txt
+# # Remove leftover timings data
+# rm -rf loop_timings.txt
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh

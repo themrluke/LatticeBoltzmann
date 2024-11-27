@@ -45,7 +45,7 @@ if [ "$MODE" == "threads" ]; then
         # Run the file NUM_RUNS_PER_PROCESS times for each process count
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i for $processes MPI process(es)"
-            mpiexec -n $processes python $run_file --num_x 3200
+            mpiexec -n $processes python $run_file --num_x 3200 --run_repeat $i
         done
     done
 
@@ -57,7 +57,7 @@ elif [ "$MODE" == "num_x" ]; then
         # Run the file NUM_RUNS_PER_PROCESS times for each num_x value
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i with num_x=$num_x and $PROCESSES MPI process(es)"
-            mpiexec -n $PROCESSES python $run_file --num_x $num_x
+            mpiexec -n $PROCESSES python $run_file --num_x $num_x --run_repeat $i
         done
     done
 
