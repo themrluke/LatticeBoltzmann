@@ -19,7 +19,7 @@ def timestep_loop(Parameters sim,
                   int local_num_x,
                   int start_x,
                   int rank,
-                  int size
+                  int size,
                   int run_repeat):
     """
     Evolves the simulation over time
