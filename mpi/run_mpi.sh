@@ -9,7 +9,7 @@
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=28
 #SBATCH --cpus-per-task=1
-#SBATCH --time=2:58:00
+#SBATCH --time=4:58:00
 #SBATCH --mem=10G
 
 # Parameters (set these variables)
