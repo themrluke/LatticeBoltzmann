@@ -6,18 +6,18 @@
 #SBATCH --job-name=mpi_job            # Name of the job
 #SBATCH --partition=cpu
 #SBATCH --account=PHYS033184          # Account for Advanced Computational Physics
-#SBATCH --nodes=1                     # Use 1 node
-#SBATCH --ntasks-per-node=28          # Use 28 task per node
-#SBATCH --cpus-per-task=1             # Use 1 CPU per task
-#SBATCH --time=1:30:00               # Wall time
-#SBATCH --mem=10G                      # Memory allocation
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=28
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:58:00
+#SBATCH --mem=10G
 
 # Parameters (set these variables)
-MAX_PROCESSES=28         # Maximum number of MPI processes to test
+MAX_PROCESSES=56        # Maximum number of MPI processes to test
 NUM_RUNS_PER_PROCESS=5   # Number of runs per process count
 PROCESSES=28               # Default number of threads if looping over num_x
 NUM_X_VALUES=(2 4 6 8 10 20 40 60 80 120 250 400 600 800 1000 1200 1400 1600 2000 2400 2800 3200 4000 4800 5600 6400)  # Values of num_x to test
-MODE="num_x"           # Options: "threads" or "num_x"
+MODE="threads"           # Options: "threads" or "num_x"
 
 
 # Remove leftover timings data
@@ -54,7 +54,7 @@ elif [ "$MODE" == "num_x" ]; then
     for num_x in "${NUM_X_VALUES[@]}"; do
         echo "Running with num_x=$num_x"
 
-        # Run the file NUM_RUNS_PER_THREAD times for each num_x value
+        # Run the file NUM_RUNS_PER_PROCESS times for each num_x value
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i with num_x=$num_x and $PROCESSES MPI process(es)"
             mpiexec -n $PROCESSES python $run_file --num_x $num_x
