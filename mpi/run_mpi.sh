@@ -21,7 +21,7 @@ MODE="threads"           # Options: "threads" or "num_x"
 
 
 # Remove leftover timings data
-rm -rf loop_timings.txt
+rm -rf loop_timings.csv
 
 # Source the conda script to make conda command available
 source ~/miniconda3/etc/profile.d/conda.sh
@@ -45,7 +45,7 @@ if [ "$MODE" == "threads" ]; then
         # Run the file NUM_RUNS_PER_PROCESS times for each process count
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i for $processes MPI process(es)"
-            mpiexec -n $processes python $run_file --num_x 3200 --run_repeat $i
+            mpiexec -n $processes python $run_file --num_x 3200 --num_processes $processes --run_repeat $i
         done
     done
 
@@ -57,7 +57,7 @@ elif [ "$MODE" == "num_x" ]; then
         # Run the file NUM_RUNS_PER_PROCESS times for each num_x value
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i with num_x=$num_x and $PROCESSES MPI process(es)"
-            mpiexec -n $PROCESSES python $run_file --num_x $num_x --run_repeat $i
+            mpiexec -n $PROCESSES python $run_file --num_x $num_x --num_processes $processes --run_repeat $i
         done
     done
 

@@ -13,7 +13,7 @@ from initialisation import InitialiseSimulation
 from fluid_dynamics import timestep_loop
 
 
-def main(num_x, run_repeat):
+def main(num_x, num_processes, run_repeat):
 
     # Initialize MPI
     rank = MPI.COMM_WORLD.Get_rank()
@@ -37,7 +37,7 @@ def main(num_x, run_repeat):
 
     # Evolve simulation over time
     local_force_array = timestep_loop(
-        sim, initial_rho, initial_u, local_num_x, local_start_x, rank, size, run_repeat
+        sim, initial_rho, initial_u, local_num_x, local_start_x, rank, size, num_processes, run_repeat
     )
 
     global_force_array = np.empty((sim.t_steps), dtype=np.float64) # Initialise array to hold force data
@@ -59,14 +59,15 @@ def main(num_x, run_repeat):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Simulation with adjustable grid size.")
+    parser = argparse.ArgumentParser(description="Simulation with adjustable grid size/ processes")
     parser.add_argument("--num_x", type=int, required=True, help="Number of grid points in the x direction.")
+    parser.add_argument("--num_processes", type=int, required=True, help="Number of processes identifier")
     parser.add_argument("--run_repeat", type=int, required=True, help="Run repeat identifier")
     args = parser.parse_args()
 
     profiler = cProfile.Profile()
     profiler.enable()
-    main(args.num_x, args.run_repeat)
+    main(args.num_x, args.num_processes, args.run_repeat)
     profiler.disable()
 
     # Print the top 20 functions by cumulative time spent
