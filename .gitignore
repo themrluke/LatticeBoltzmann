@@ -4,8 +4,8 @@
 # Ignore all PNG files
 *.png
 
-# Ignore all CSV files
-*.csv
+# # Ignore all CSV files
+# *.csv
 
 # Ignore all C, so, o files (compiled from Cython)
 *.c
