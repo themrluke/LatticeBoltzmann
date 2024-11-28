@@ -57,7 +57,7 @@ elif [ "$MODE" == "num_x" ]; then
         # Run the file NUM_RUNS_PER_PROCESS times for each num_x value
         for i in $(seq 1 $NUM_RUNS_PER_PROCESS); do
             echo "Run $i with num_x=$num_x and $PROCESSES MPI process(es)"
-            mpiexec -n $PROCESSES python $run_file --num_x $num_x --num_processes $processes --run_repeat $i
+            mpiexec -n $PROCESSES python $run_file --num_x $num_x --num_processes $PROCESSES --run_repeat $i
         done
     done
 
