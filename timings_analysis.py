@@ -46,7 +46,7 @@ def find_min_times_mpi(filepath, num_runs, max_threads):
     We need a different function here because MPI will print N timing values for N threads,
     we want only the slowest value (thread that finishes last) to be considered when calculating
     the fasted repeat at each number of threads.
-    
+
     Arguments:
         filepath (str): Path to the text file containing timing data
         num_runs (int): number of repeats for each number of threads
@@ -106,7 +106,7 @@ def single_thread_times(filepath, num_runs):
     # Quick check to ensure expected number of lines in file
     if len(lines) !=num_runs:
         raise ValueError(f"Expected {num_runs} lines, but found {len(lines)} in {filepath}")
-    
+
     # Convert the lines to float and find the minimum value
     times = [float(line.strip()) for line in lines]
     min_time = min(times)
@@ -127,6 +127,7 @@ def find_avg_times(filepath, num_runs, max_threads):
         avg_times (list): List of average times for each thread count
         std_errors (list): List of standard deviations of the mean for each thread count
     """
+
     avg_times = []  # Holds the average run times
     std_errors = []  # Holds the standard deviations of the mean
 
@@ -137,7 +138,7 @@ def find_avg_times(filepath, num_runs, max_threads):
     # Check to ensure expected number of lines in file
     if len(lines) != num_runs * max_threads:
         raise ValueError(f"Expected {num_runs * max_threads} lines, but found {len(lines)} in {filepath}")
-    
+
     # Calculate average and standard deviation for each thread count
     for thread in range(max_threads):
         start_idx = thread * num_runs
@@ -164,12 +165,18 @@ def find_avg_times_mpi(filepath, num_runs, max_threads):
         avg_times (list): List of average times for each thread count
         std_errors (list): List of standard deviations of the mean for each thread count
     """
+
     avg_times = []  # Holds the average run times
     std_errors = []  # Holds the standard deviations of the mean
 
     # Read data from text file
     with open(filepath, "r") as file:
         lines = file.readlines()
+
+    expected_lines = sum(range(1, max_threads + 1)) * num_runs
+    if len(lines) < expected_lines:
+        raise ValueError(f"File contains {len(lines)} lines, but {expected_lines} are expected.")
+
 
     current_index = 0
 
@@ -189,6 +196,69 @@ def find_avg_times_mpi(filepath, num_runs, max_threads):
     return avg_times, std_errors
 
 
+def find_avg_times_mpi_csv(filepath, num_runs, max_threads):
+    """
+    Finds the average run time and standard deviation for MPI from a CSV file.
+
+    Arguments:
+        filepath (str): Path to the CSV file containing timing data
+        num_runs (int): Number of repeats for each number of threads
+        max_threads (int): Maximum number of threads used
+
+    Returns:
+        avg_times (list): List of average times for each thread count
+        std_errors (list): List of standard deviations of the mean for each thread count
+    """
+
+    # Initialize data structures
+    data = {}  # Dictionary to store execution times grouped by threads and run_repeat
+
+    # Read the CSV file
+    with open(filepath, "r") as file:
+        for line in file:
+            # Split the line into columns
+            cols = line.strip().split(",")
+            execution_time = float(cols[0])
+            rank = int(cols[1])
+            num_x = int(cols[2])
+            num_processes = int(cols[3])
+            run_repeat = int(cols[4])
+
+            # Group data by num_processes and run_repeat
+            if num_processes not in data:
+                data[num_processes] = {}
+            if run_repeat not in data[num_processes]:
+                data[num_processes][run_repeat] = []
+            data[num_processes][run_repeat].append(execution_time)
+
+    avg_times = []  # Holds the average run times
+    std_errors = []  # Holds the standard deviations of the mean
+
+    # Process data for each thread count
+    for threads in range(1, max_threads + 1):
+        if threads not in data:
+            raise ValueError(f"No data found for {threads} threads.")
+
+        run_times = []
+        for run_repeat, timings in data[threads].items():
+            if len(timings) != threads:
+                raise ValueError(
+                    f"Expected {threads} entries for run_repeat {run_repeat}, but found {len(timings)}."
+                )
+            run_times.append(max(timings))  # Take the slowest time for each repeat
+
+        if len(run_times) != num_runs:
+            raise ValueError(
+                f"Expected {num_runs} run repeats for {threads} threads, but found {len(run_times)}."
+            )
+
+        avg_times.append(np.mean(run_times))  # Calculate mean for the thread count
+        std_errors.append(np.std(run_times) / np.sqrt(num_runs))  # Standard error
+
+    return avg_times, std_errors
+
+
+
 def find_avg_times_system_sizes(filepath, num_runs, system_sizes):
     """
     Finds the average run time and standard deviation for each system size.
@@ -202,6 +272,7 @@ def find_avg_times_system_sizes(filepath, num_runs, system_sizes):
         avg_times (list): List of average times for each system size
         std_errors (list): List of standard deviations of the mean for each system size
     """
+
     avg_times = []  # Holds the average run times for each system size
     std_errors = []  # Holds the standard deviation of the mean for each system size
 
@@ -243,33 +314,43 @@ def find_avg_times_system_sizes_mpi(filepath, num_runs, system_sizes, num_proces
         avg_times (list): List of average times for each system size
         std_errors (list): List of standard deviations of the mean for each system size
     """
+
     avg_times = []  # Holds the average run times for each system size
     std_errors = []  # Holds the standard deviation of the mean for each system size
 
-    # Read data from text file
+    # Read and parse the CSV data
+    data = []
     with open(filepath, "r") as file:
-        lines = file.readlines()
+        for line in file:
+            cols = line.strip().split(",")
+            execution_time = float(cols[0])
+            rank = int(cols[1])
+            num_x = int(cols[2])
+            num_processes = int(cols[3])
+            run_repeat = int(cols[4])
+            data.append((execution_time, rank, num_x, num_processes, run_repeat))
 
-    # Check to ensure expected number of lines in file
-    expected_lines = num_runs * len(system_sizes) * num_processes
-    if len(lines) != expected_lines:
-        raise ValueError(f"Expected {expected_lines} lines, but found {len(lines)} in {filepath}")
+    # Filter the data to ensure it matches the given number of processes
+    data = [row for row in data if row[3] == num_processes]
 
-    current_index = 0
+    # Validate the number of runs and system sizes
+    for size in system_sizes:
+        size_data = [row for row in data if row[2] == size]
+        if len(size_data) != num_runs * num_processes:
+            raise ValueError(f"Expected {num_runs * num_processes} entries for system size {size}, but found {len(size_data)}.")
 
-    # Calculate average and standard deviation for each system size
-    for i, size in enumerate(system_sizes):
+    # Process data for each system size
+    for size in system_sizes:
         size_times = []  # Store the slowest time for each run of the current system size
 
-        for run in range(num_runs):
-            # Extract times for the current run (one value per process)
-            run_timings = [
-                float(lines[current_index + process].strip()) for process in range(num_processes)
-            ]
-            current_index += num_processes
+        for run in range(1, num_runs + 1):
+            # Extract times for the current system size and run repeat
+            run_data = [row[0] for row in data if row[2] == size and row[4] == run]
+            if len(run_data) != num_processes:
+                raise ValueError(f"Expected {num_processes} entries for system size {size} and run {run}, but found {len(run_data)}.")
 
             # Append the slowest time (last process to finish)
-            size_times.append(max(run_timings))
+            size_times.append(max(run_data))
 
         # Calculate average and standard deviation of the slowest times
         avg_times.append(np.mean(size_times))
@@ -278,82 +359,150 @@ def find_avg_times_system_sizes_mpi(filepath, num_runs, system_sizes, num_proces
     return avg_times, std_errors
 
 
-def speedup_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, max_threads):
+def speedup_plot(implementations, max_threads, name, overlays=None):
     """
-    Line plots to show the speedup from using more threads.
+    Dynamically plots speedup and efficiency for multiple implementations
 
     Arguments:
-        numba_avg (list): Average time taken for program for different numbers of threads
-        numba_err (list): Standard errors for Numba times
-        openmp_times (list): Average time taken for program for different numbers of threads
-        openmp_err (list): Standard errors for OpenMP times
-        mpi_times (list): Average time taken for program for different numbers of threads
-        mpi_err (list): Standard errors for MPI times
+        implementations (list of tuples): Each tuple contains:
+            - avg_times (list): Average execution times
+            - std_errors (list): Standard errors for the execution times
+            - label (str): Label for the implementation
+            - color (str): Color for the plot
         max_threads (int): Maximum number of threads used
+        name (str): Filename to save plot as
+        overlays (list of tuples): Additional functions to plot for comparison
+    """
+    threads = np.arange(1, max_threads + 1)
+
+    fig, ax1 = plt.subplots(figsize=(10, 8))
+
+    # Lists to store efficiency data for the secondary y-axis
+    efficiency_lines = []
+
+    # Loop through implementations
+    for avg_times, std_errors, label, color in implementations:
+        # Calculate speedup
+        speedup = [avg_times[0] / t for t in avg_times]
+        speedup_err = [std_errors[0] / t for t in avg_times]  # Propagate error (approximation)
+
+        # Calculate efficiency
+        efficiency = [s / w for s, w in zip(speedup, threads)]
+        efficiency_err = [se / w for se, w in zip(speedup_err, threads)]
+
+        # Plot speedup
+        ax1.errorbar(
+            threads, speedup, yerr=speedup_err, label=f"{label} Speedup",
+            color=color, linewidth=1.5, marker="o", markersize=3, capsize=3
+        )
+
+        # Store efficiency data for the secondary y-axis
+        efficiency_lines.append((efficiency, efficiency_err, f"{label} Efficiency", color))
+
+    # Overlay raw data (e.g., remainder line)
+    if overlays:
+        for x_values, y_values, label, color in overlays:
+            ax1.plot(x_values, y_values, label=label, color=color, linewidth=1.5)
+
+
+    # Configure the speedup axis
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax1.spines['left'].set_linewidth(2)  # Thicken left spine
+    ax1.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
+    ax1.set_xlabel("Workers", fontsize=30)
+    ax1.set_ylabel("Speedup", fontsize=30)
+    ax1.set_xscale('linear')
+    ax1.set_yscale('linear')
+    ax1.yaxis.set_major_formatter(ScalarFormatter())
+    ax1.xaxis.set_major_formatter(ScalarFormatter())
+    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
+    ax1.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=20)
+
+    # Create secondary axis for efficiency
+    ax2 = ax1.twinx()
+
+    for efficiency, efficiency_err, label, color in efficiency_lines:
+        ax2.errorbar(
+            threads, efficiency, yerr=efficiency_err, linestyle='dashed', label=label,
+            color=color, linewidth=1.5, alpha=0.3, marker="o", markersize=2, capsize=3
+        )
+
+    # Configure the efficiency axis
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['left'].set_visible(False)
+    ax2.spines['right'].set_linewidth(2)
+    ax2.spines['bottom'].set_linewidth(2)
+    ax2.set_ylabel("Efficiency", fontsize=30)
+    ax2.set_yscale('linear')
+    ax2.yaxis.set_major_formatter(ScalarFormatter())
+    ax2.tick_params(axis='both', which='major', width=2, length=8,  labelsize=25)  # Adjust tick length too
+    ax2.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=25)
+
+    # Combine legends from both axes
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='center right', fontsize=25)
+
+    # Add grid and layout adjustments
+    ax1.grid(True, which="both", linewidth=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{name}.png", dpi=300)
+    plt.close()
+
+
+def times_plot(implementations, max_threads, name, overlays=None):
+    """
+    Dynamically plots raw execution times for multiple implementations.
+
+    Arguments:
+        implementations (list of tuples): Each tuple contains:
+            - avg_times (list): Average execution times
+            - std_errors (list): Standard errors for the execution times
+            - label (str): Label for the implementation
+            - color (str): Color for the plot
+        max_threads (int): Maximum number of threads used
+        name (str): Filename to save plot as
+        overlays (list of tuples): Additional functions to plot for comparison
     """
 
     threads = np.arange(1, max_threads + 1)
 
-    # Calculate speedup: Speedup = T(1 worker) / T(n workers)
-    numba_speedup = [numba_avg[0] / t for t in numba_avg]
-    numba_speedup_err = [numba_err[0] / t for t in numba_avg]  # Propagate error (approximation)
-
-    openmp_speedup = [openmp_avg[0] / t for t in openmp_avg]
-    openmp_speedup_err = [openmp_err[0] / t for t in openmp_avg]  # Propagate error (approximation)
-
-    mpi_speedup = [mpi_avg[0] / t for t in mpi_avg]
-    mpi_speedup_err = [mpi_err[0] / t for t in mpi_avg]  # Propagate error (approximation)
-
-    # Calculate efficiency
-    numba_efficiency = [s / w for s, w in zip(numba_speedup, threads)]
-    numba_efficiency_err = [se / w for se, w in zip(numba_speedup_err, threads)]
-
-    openmp_efficiency = [s / w for s, w in zip(openmp_speedup, threads)]
-    openmp_efficiency_err = [se / w for se, w in zip(openmp_speedup_err, threads)]
-
-    mpi_efficiency = [s / w for s, w in zip(mpi_speedup, threads)]
-    mpi_efficiency_err = [se / w for se, w in zip(mpi_speedup_err, threads)]
-
-    # Plotting the results
     fig, ax1 = plt.subplots(figsize=(10, 8))
 
-    # Speedup plot (primary y-axis)
-    ax1.errorbar(threads, numba_speedup, yerr=numba_speedup_err, label="Numba Speedup", color='red', linewidth=1, marker="o", markersize=2, capsize=3)
-    ax1.errorbar(threads, openmp_speedup, yerr=openmp_speedup_err, label="OpenMP Speedup", color='blue', linewidth=1, marker="o", markersize=2, capsize=3)
-    ax1.errorbar(threads, mpi_speedup, yerr=mpi_speedup_err, label="MPI Speedup", color='limegreen', linewidth=1, marker="o", markersize=2, capsize=3)
+    # Plot raw times for each implementation
+    for avg_times, std_errors, label, color in implementations:
+        ax1.errorbar(
+            threads, avg_times, yerr=std_errors, label=label,
+            color=color, linewidth=1.5, marker="o", markersize=3, capsize=3,
+        )
 
-    ax1.set_xlabel("Workers", fontsize=16)
-    ax1.set_ylabel("Speedup", fontsize=16)
+    # Overlay raw data (e.g., remainder line)
+    if overlays:
+        for x_values, y_values, label, color in overlays:
+            ax1.plot(x_values, y_values, label=label, color=color, linewidth=1.5)
+
+    # Configure the axes
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax1.spines['left'].set_linewidth(2)  # Thicken left spine
+    ax1.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
+    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=25)  # Adjust tick length too
+    ax1.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=25)
+    ax1.set_xlabel("Workers", fontsize=35)
+    ax1.set_ylabel("Time (s)", fontsize=35)
     ax1.set_xscale('linear')
-    ax1.set_yscale('linear')
+    ax1.set_yscale('log')
 
-    # Set integer formatting for both axes
-    ax1.yaxis.set_major_formatter(ScalarFormatter())
-    ax1.xaxis.set_major_formatter(ScalarFormatter())
-
-    # Efficiency plot (secondary y-axis)
-    ax2 = ax1.twinx()
-    ax2.errorbar(threads, numba_efficiency, yerr=numba_efficiency_err, linestyle='dashed', color='red', label="Numba Efficiency", linewidth=1.2, alpha=0.4 ,marker="o", markersize=2, capsize=3)
-    ax2.errorbar(threads, openmp_efficiency, yerr=openmp_efficiency_err, linestyle='dashed', color='blue', label="OpenMP Efficiency", linewidth=1.2, alpha=0.4, marker="o", markersize=2, capsize=3)
-    ax2.errorbar(threads, mpi_efficiency, yerr=mpi_efficiency_err, linestyle='dashed', color='limegreen', label="MPI Efficiency", linewidth=1.2, alpha=0.4, marker="o", markersize=2, capsize=3)
-
-    ax2.set_ylabel("Efficiency", fontsize=16)
-    ax2.set_yscale('linear')
-    ax2.yaxis.set_major_formatter(ScalarFormatter())
-
-    ax1.tick_params(axis='both', which='major', labelsize=14)  # Primary y-axis (Speedup) and X-axis
-    ax2.tick_params(axis='y', which='major', labelsize=14)    # Secondary y-axis (Efficiency)
-
-    # Combine legends
+    # Combine legends for raw times and overlays
     lines1, labels1 = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc='center right', fontsize=14)
+    ax1.legend(lines1, labels1, loc='upper right', fontsize=20)
 
-    # Grid and layout
-    ax1.grid(True, which="both", linewidth=0.5)  # Grid for both major and minor ticks
+    # Add layout adjustments
     plt.tight_layout()
-    plt.savefig("speedup_plot.png", dpi=300)
+    plt.savefig(f"{name}.png", dpi=300)
     plt.close()
+
 
 
 def system_size_combined_plot(system_sizes, implementations):
@@ -367,6 +516,7 @@ def system_size_combined_plot(system_sizes, implementations):
             - std_errors (list): Standard errors for the execution times.
             - implementation_name (str): Name of the implementation.
     """
+
     plt.figure(figsize=(10, 8))
 
     for avg_times, std_errors, implementation_name, color in implementations:
@@ -377,29 +527,28 @@ def system_size_combined_plot(system_sizes, implementations):
 
     plt.xlabel("System Size (num_x)", fontsize=12)
     plt.ylabel("Time (s)", fontsize=12)
-    plt.yscale('log')  # Log scale for execution time
+    plt.yscale('log')
     plt.xscale('log')
-    plt.ylim(0.01, 100)
 
     # Set integer formatting for both axes
     ax = plt.gca()
-    ax.yaxis.set_major_formatter(ScalarFormatter())
-    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.ylim = (0.1, 1000)
+    ax.xlim = (1, 1000)
 
     plt.legend()
-    plt.grid(True, which="both", linewidth=0.5)
+    #plt.grid(axis='y', zorder=0, linewidth=1)
     plt.tight_layout()
-    plt.savefig("combined_system_size_plot.png", dpi=300)
+    plt.savefig("system_sizes.png", dpi=300)
     plt.close()
 
 
-def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time):
+def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time, numba_intel_min_time):
     """
-    Creates a bar plot comparing the execution times of standard, vectorized, and Cython implementations.
+    Creates a bar plot comparing the execution times of standard, vectorised, and Cython implementations.
 
     Args:
         standard_time (float): Execution time for standard Python program
-        vectorised_time (float): Execution time for vectorized Python program
+        vectorised_time (float): Execution time for vectorised Python program
         cython_time (float): Execution time for Cython program
     """
 
@@ -417,16 +566,16 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
 
     # Labels and times
     labels = [
-        'Standard Python', 'Vectorized Python', 'Cython',
+        'Standard Python', 'vectorised Python', 'Cython',
         'OpenMP (1 Thread)', 'Numba (1 Thread)', ' MPI (1 Process)',
-        'OpenMP (8 Threads)', 'Numba (8 Threads)', ' MPI (8 Processes)',
+        'OpenMP (8 Threads)', 'Numba (8 Threads)', ' Numba (8 Threads)', ' MPI (8 Processes)',
         'OpenMP (28 Threads)', 'Numba (28 Threads)', ' MPI (28 Processes)',
         'Numba GPU (4070TI)'
     ]
     times = [
         standard_time, vectorised_time, cython_time,
         openmp_1thread, numba_1thread, mpi_1process,
-        openmp_8threads, numba_8threads, mpi_8processes,
+        openmp_8threads, numba_8threads, numba_intel_min_time, mpi_8processes,
         openmp_28threads, numba_28threads, mpi_28processes,
         numba_gpu_time
     ]
@@ -440,6 +589,7 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
         bar.set_color('#1f77b4')
 
     # Set the last bar to orange
+    bars[8].set_color('purple')
     bars[-1].set_color('orange')
 
     # Add a legend for the bar colors
@@ -448,23 +598,24 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
         loc='upper right', fontsize=14, frameon=True,
         handles=[
             plt.Line2D([0], [0], color='#1f77b4', lw=6, label='CPU (Blue Crystal 4)'),
-            plt.Line2D([0], [0], color='orange', lw=6, label='GPU')
+            plt.Line2D([0], [0], color='purple', lw=6, label='CPU (Intel i7 13700K)'),
+            plt.Line2D([0], [0], color='orange', lw=6, label='GPU (RTX 4070Ti)')
         ]
     )
 
     plt.grid(axis='y', zorder=0, linewidth=1)
     plt.yscale('log')  # Logarithmic scale for the y-axis
-    plt.ylim(0.1, 10**5)  # Adjust the starting and ending values of the y-axis
+    plt.ylim(0.5, 10**5)  # Adjust the starting and ending values of the y-axis
     plt.ylabel("Time (s)", fontsize=14)
     plt.yticks(fontsize=12)
 
     # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha='right', fontsize=12)  # Rotate 45 degrees and align to the right
+    plt.xticks(rotation=45, ha='right', fontsize=10)  # Rotate 45 degrees and align to the right
 
     # Add the values inside the bars
     for bar, time in zip(bars, times):
-        plt.text(bar.get_x() + bar.get_width() / 2.0, 0.4,  # Position inside the bar
-                 f"{time:.2f}", ha='center', va='center', color='white', fontsize=12, fontweight='bold', rotation='vertical')
+        plt.text(bar.get_x() + bar.get_width() / 2.0, 0.7,  # Position inside the bar
+                 f"{time:.2f}", ha='center', va='baseline', color='white', fontsize=12, fontweight='bold', rotation='vertical')
 
     plt.tight_layout()
 
@@ -475,61 +626,104 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
 
 def main():
 
-    # Minimum times across all runs for each thread count
-    numba_min_threads = find_min_times(filepath='numba/loop_timings_speedup.txt', num_runs=5, max_threads=28)
-    openmp_min_threads = find_min_times(filepath='openmp/loop_timings_speedup.txt', num_runs=5, max_threads=28)
-    mpi_min_threads = find_min_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
-
     # Average times across all runs for each thread count
     numba_avg, numba_err = find_avg_times(filepath='numba/loop_timings_speedup.txt', num_runs=5, max_threads=28)
-    openmp_avg, openmp_err = find_avg_times(filepath='openmp/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    openmp_avg_static, openmp_err_static = find_avg_times(filepath='openmp/loop_timings_speedup_static.txt', num_runs=5, max_threads=28)
+    openmp_avg_dynamic, openmp_err_dynamic = find_avg_times(filepath='openmp/loop_timings_speedup_dynamic.txt', num_runs=5, max_threads=28)
+    openmp_avg_guided, openmp_err_guided = find_avg_times(filepath='openmp/loop_timings_speedup_guided.txt', num_runs=5, max_threads=28)
     mpi_avg, mpi_err = find_avg_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    mpi_avg_2nodes, mpi_err_2nodes = find_avg_times_mpi_csv(filepath='mpi/loop_timings_speedup_2nodes.csv', num_runs=5, max_threads=56)
 
-    # Minimum time across all runs for single threaded programs
+    # Implementations for speedup plotting
+    implementations_speedup = [
+        (numba_avg, numba_err, "Numba", 'red'),
+        (openmp_avg_guided, openmp_err_guided, "OpenMP guided", 'blue'),
+        (mpi_avg, mpi_err, "MPI", 'limegreen')
+    ]
+
+    speedup_plot(implementations_speedup, max_threads=28, name='speedup')
+    times_plot(implementations_speedup, max_threads=28, name='times')
+
+    # Make a plot of the MPI speedup across 2 nodes
+    mpi_speedup_2nodes = [
+        (mpi_avg_2nodes, mpi_err_2nodes, "MPI 2 Nodes", 'green')
+    ]
+
+    # Overlay the remainder contribution for each amount of workers
+    remainder_line = -0.01 * np.arange(1, 57, 1) * np.array([3200 % N for N in range(1, 57)]) + np.arange(1, 57, 1)
+    overlays = [
+        (np.arange(1, 57), remainder_line, "Remainder Contribution", 'orange')
+    ]
+
+    speedup_plot(mpi_speedup_2nodes, max_threads=56, name='mpi_2_nodes_speedup', overlays=overlays)
+
+    # Compare the speedups of different OpenMP schedules
+    implementations_openmp = [
+        (openmp_avg_static, openmp_err_static, "OpenMP static", 'orange'),
+        (openmp_avg_dynamic, openmp_err_dynamic, "OpenMP dynamic", 'purple'),
+        (openmp_avg_guided, openmp_err_guided, "OpenMP guided", 'blue'),
+    ]
+
+    speedup_plot(implementations_openmp, max_threads=28, name='openmp_schedules')
+
+
+    # Minimum times for bar plot
+    numba_min_threads = find_min_times(filepath='numba/loop_timings_speedup.txt', num_runs=5, max_threads=28)
+    openmp_min_threads = find_min_times(filepath='openmp/loop_timings_speedup_guided.txt', num_runs=5, max_threads=28)
+    mpi_min_threads = find_min_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
     standard_min_time = single_thread_times(filepath='standard_python/loop_timings_3200.txt', num_runs=1)
     vectorised_min_time = single_thread_times(filepath='vectorised_python/loop_timings_3200.txt', num_runs=10)
     cython_min_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
     numbagpu_min_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
 
-    speedup_plot(numba_avg, numba_err, openmp_avg, openmp_err, mpi_avg, mpi_err, 28)
-    bar_plot(standard_min_time, vectorised_min_time, cython_min_time, mpi_min_threads, openmp_min_threads, numba_min_threads, numbagpu_min_time)
+    # Minimum time across all runs on Intel
+    numba_intel_min_time = single_thread_times(filepath='numba/loop_timings_intel.txt', num_runs=5)
+
+    bar_plot(
+        standard_min_time, vectorised_min_time, cython_min_time,
+        mpi_min_threads, openmp_min_threads, numba_min_threads,
+        numbagpu_min_time, numba_intel_min_time
+    )
 
 
-    # system_sizes = [ # System sizes
-    #     120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
-    # ]
-    system_sizes = [ # System sizes
-        2, 4, 6, 8, 10, 20, 40, 60, 80, 120,] # 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400]
+    # Below is plot for changing sytem sizes
+    system_sizes = [ # x-sizes of lattice
+        2, 4, 6, 8, 10, 20, 40, 60, 80, 120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
+    ]
 
-    num_runs = 1  # Number of repeats for each system size
+    num_runs = 5  # Number of repeats for each system size
 
     # Parse timing data for system sizes
-    # numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
-    #     filepath='numba/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
-    # openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
-    #     filepath='openmp/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
-    mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
-        filepath='mpi/loop_timings.txt', num_runs=num_runs, system_sizes=system_sizes, num_processes=8
+    numba_avg_sizes, numba_err_sizes = find_avg_times_system_sizes(
+        filepath='numba/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     )
-    # numbagpu_avg_sizes, numbagpu_err_sizes = find_avg_times_system_sizes(
-    #     filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
-    # cython_avg_sizes, cython_err_sizes = find_avg_times_system_sizes(
-    #     filepath='cython/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
-    # )
+    openmp_avg_sizes, openmp_err_sizes = find_avg_times_system_sizes(
+        filepath='openmp/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
+    mpi_avg_sizes, mpi_err_sizes = find_avg_times_system_sizes_mpi(
+        filepath='mpi/loop_timings_sizes.csv', num_runs=num_runs, system_sizes=system_sizes, num_processes=28
+    )
+    numbagpu_avg_sizes, numbagpu_err_sizes = find_avg_times_system_sizes(
+        filepath='numba_gpu/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
+    cython_avg_sizes, cython_err_sizes = find_avg_times_system_sizes(
+        filepath='cython/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
+    vectorized_avg_sizes, vectorized_err_sizes = find_avg_times_system_sizes(
+        filepath='vectorised_python/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+    )
 
-    implementations = [
-        #(numba_avg_sizes, numba_err_sizes, "Numba", 'red'),
-        #(openmp_avg_sizes, openmp_err_sizes, "OpenMP", 'blue'),
-        (mpi_avg_sizes, mpi_err_sizes, "MPI", 'limegreen'),
-        #(numbagpu_avg_sizes, numbagpu_err_sizes, "Numba_GPU", 'orange'),
-        #(cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
+    implementations_sizes = [
+        (numba_avg_sizes, numba_err_sizes, "Numba (28 Threads)", 'red'),
+        (openmp_avg_sizes, openmp_err_sizes, "OpenMP (28 Threads)", 'blue'),
+        (mpi_avg_sizes, mpi_err_sizes, "MPI (28 Processes)", 'limegreen'),
+        (numbagpu_avg_sizes, numbagpu_err_sizes, "Numba GPU (4070TI)", 'orange'),
+        (cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
+        (vectorized_avg_sizes, vectorized_err_sizes, "Vectorized Python", 'turquoise'),
     ]
 
     # Generate the combined plot
-    system_size_combined_plot(system_sizes, implementations)
+    system_size_combined_plot(system_sizes, implementations_sizes)
 
 
 if __name__ == "__main__":
