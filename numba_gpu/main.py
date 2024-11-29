@@ -32,7 +32,8 @@ print("Threads per warp:", device.WARP_SIZE)
 print("Shared memory per block:", device.MAX_SHARED_MEMORY_PER_BLOCK)
 print("Registers per block:", device.MAX_REGISTERS_PER_BLOCK)
 
-def simulation_setup(num_x):
+
+def main(num_x):
     """
     Setup the Lattice Boltzmann parameters, initialise the obstacle and fields
 
@@ -47,11 +48,11 @@ def simulation_setup(num_x):
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=10000)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=1000)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='n')
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
     # Set up plot directories
     directories = setup_plot_directories()
@@ -95,31 +96,14 @@ def simulation_setup(num_x):
         sim.num_x, sim.num_y, sim.num_v, rho_device, u_device, feq_device, c_device, w_device, sim.cs
     )
 
-    return (
-        sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
-        threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-        threads_per_block_2d, blocks_per_grid_2d
-    )
-
-
-def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
-                  threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-                  threads_per_block_2d, blocks_per_grid_2d
-                  ):
-    """
-    Evolves the simulation over time
-
-    Arguments:
-        sim: Parameters object
-        rho (np.ndarray): 2D array of the fluid density at each lattice point
-        u (np.ndarray): 3D array of the fluid x & y velocity at each lattice point
-        feq (np.ndarray): Equilibrium distribution array
-        reusable_arrays (Tuple): Reusable arrays (initialise_feq, initialise_rho, initialise_u, initialise_momentum_point, initialise_f_new)
-        directories (Tuple): Directories for different plot types
-
-    Returns:
-        force_array (np.ndarray): Total transverse force on obstacle for each timestep
-    """
+    # # Visualise setup
+    # fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](
+    #     u_device, vor_device
+    # )
+    # rho = rho_device.copy_to_host()
+    # u = u_device.copy_to_host()
+    # vor = vor_device.copy_to_host()
+    # plot_solution(sim, 0, rho, u, vor, *directories)
 
     # Preallocate arrays on the GPU
     f_new_device = cuda.device_array_like(f_device)
@@ -179,15 +163,15 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
         num_x, num_y, num_v, rho_device, u_device, feq_device, c_device, w_device, cs
         )
 
-        # if (t % sim.t_plot == 0): # Visualise the simulation
-        #     fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](
-        #         u_device, vor_device
-        #     )
-        #     rho = rho_device.copy_to_host()
-        #     u = u_device.copy_to_host()
-        #     vor = vor_device.copy_to_host()
-        #     plot_solution(sim, t, rho, u, vor, *directories)
-        #     print(f'PLOT {t} complete')
+        if (t % sim.t_plot == 0): # Visualise the simulation
+            fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](
+                u_device, vor_device
+            )
+            rho = rho_device.copy_to_host()
+            u = u_device.copy_to_host()
+            vor = vor_device.copy_to_host()
+            plot_solution(sim, t, rho, u, vor, *directories)
+            print(f'PLOT {t} complete')
 
     time_end = time.time()
     execution_time = time_end - time_start
@@ -196,34 +180,6 @@ def timestep_loop(sim, f_device, feq_device, rho_device, u_device, c_device, w_d
     # Append the result to a text file
     with open("loop_timings.txt", "a") as file:
         file.write(f"{execution_time}\n")
-
-    return force_array
-
-
-def main(num_x):
-
-    # Setup simulation
-    (
-    sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
-    threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-    threads_per_block_2d, blocks_per_grid_2d
-    ) = simulation_setup(num_x)
-
-    # # Visualise setup
-    # fluid_vorticity_kernel[blocks_per_grid_2d, threads_per_block_2d](
-    #     u_device, vor_device
-    # )
-    # rho = rho_device.copy_to_host()
-    # u = u_device.copy_to_host()
-    # vor = vor_device.copy_to_host()
-    # plot_solution(sim, 0, rho, u, vor, *directories)
-
-    # Evolve simulation over time
-    force_array = timestep_loop(
-        sim, f_device, feq_device, rho_device, u_device, c_device, w_device, mask_device, vor_device, directories,
-        threads_per_block, blocks_per_grid_x, blocks_per_grid_y, blocks_per_grid_v, blocks_per_grid,
-        threads_per_block_2d, blocks_per_grid_2d
-        )
 
     # # Plot the force over time to make sure consistent between methods
     # plt.plot(np.arange(100, 1000, 1), np.asarray(force_array[100:]))

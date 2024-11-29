@@ -27,11 +27,11 @@ def simulation_setup(num_x):
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=1000)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
-    initial_rho, initial_u = initialiser.initialise_turbulence(choice='n')
+    initial_rho, initial_u = initialiser.initialise_turbulence(choice='m')
 
     # Set up plot directories
     directories = setup_plot_directories()
@@ -81,9 +81,10 @@ def timestep_loop(sim, rho, u, f, feq, directories):
         # Recalculate equilibrium
         feq = equilibrium(sim, rho, u)
 
-        # if (t % sim.t_plot == 0): # Visualise the simulation
-        #     vor = fluid_vorticity(u)
-        #     plot_solution(sim, t, rho, u, vor, *directories)
+        if (t % sim.t_plot == 0): # Visualise the simulation
+            vor = fluid_vorticity(u)
+            plot_solution(sim, t, rho, u, vor, *directories)
+            print(f'PLOT {t} complete')
 
     time_end = time.time()
     execution_time = time_end - time_start

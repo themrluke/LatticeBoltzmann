@@ -539,7 +539,7 @@ def system_size_plot(system_sizes, implementations):
             linewidth=1.5, color=color, marker="o", markersize=3, capsize=3
         )
 
-    plt.xlabel("System Size (num_x)", fontsize=25)
+    plt.xlabel(r"System Size ($\mathbf{x}$)", fontsize=25)
     plt.ylabel("Time (s)", fontsize=25)
     plt.yscale('log')
     plt.xscale('log')
@@ -552,10 +552,10 @@ def system_size_plot(system_sizes, implementations):
     ax.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
     ax.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
     ax.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=20)
-    ax.ylim = (0.1, 1000)
-    ax.xlim = (1, 1000)
+    ax.set_ylim(0.03, 10000)
+    ax.set_xlim(1, 7000)
 
-    plt.legend(fontsize=20)
+    plt.legend(fontsize=17)
     plt.grid(axis='y', zorder=0, linewidth=0.5)
     plt.tight_layout()
     plt.savefig("system_sizes.png", dpi=300)
@@ -739,14 +739,18 @@ def main():
     vectorized_avg_sizes, vectorized_err_sizes = find_avg_times_system_sizes(
         filepath='vectorised_python/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     )
+    standard_avg_sizes, standard_err_sizes = find_avg_times_system_sizes(
+        filepath='standard_python/loop_timings_sizes.txt', num_runs=1, system_sizes=system_sizes
+    )
 
     implementations_sizes = [
-        (numba_avg_sizes, numba_err_sizes, "Numba", 'red'),
-        (openmp_avg_sizes, openmp_err_sizes, "OpenMP", 'blue'),
-        (mpi_avg_sizes, mpi_err_sizes, "MPI", 'limegreen'),
-        (numbagpu_avg_sizes, numbagpu_err_sizes, "GPU (4070TI)", 'orange'),
-        (cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
+        (standard_avg_sizes, standard_err_sizes, "Python", 'Crimson'),
         (vectorized_avg_sizes, vectorized_err_sizes, "Vectorized Python", 'turquoise'),
+        (cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
+        (openmp_avg_sizes, openmp_err_sizes, "OpenMP", 'blue'),
+        (numba_avg_sizes, numba_err_sizes, "Numba", 'red'),
+        (mpi_avg_sizes, mpi_err_sizes, "MPI", 'limegreen'),
+        (numbagpu_avg_sizes, numbagpu_err_sizes, "GPU", 'orange')
     ]
 
     # Generate the combined plot

@@ -99,14 +99,14 @@ def timestep_loop(Parameters sim,
         # Recalculate equilibrium
         feq = equilibrium(num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-        # if (t % sim.t_plot == 0): # Visualise the simulation
-        #     vor = fluid_vorticity(u, num_x, num_y)
-        #     plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-        #                   dvv_dir=dvv_dir,
-        #                   streamlines_dir=streamlines_dir, 
-        #                   test_streamlines_dir=test_streamlines_dir,
-        #                   test_mask_dir=test_mask_dir)
-        #     print(f'PLOT {t} complete')
+        if (t % sim.t_plot == 0): # Visualise the simulation
+            vor = fluid_vorticity(u, num_x, num_y)
+            plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+                          dvv_dir=dvv_dir,
+                          streamlines_dir=streamlines_dir, 
+                          test_streamlines_dir=test_streamlines_dir,
+                          test_mask_dir=test_mask_dir)
+            print(f'PLOT {t} complete')
 
     time_end = time.time()
     execution_time = time_end - time_start
