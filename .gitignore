@@ -1,8 +1,6 @@
-# Ignore all PDF files
-*.pdf
-
-# Ignore all PNG files
-*.png
+# Ignore PNG files in subdirectories only
+**/*.png
+!/*.png
 
 # # Ignore all CSV files
 # *.csv
