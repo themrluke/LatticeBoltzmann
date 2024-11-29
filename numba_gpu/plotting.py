@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import gc
 
 
 plt.rcParams['figure.dpi'] = 300
@@ -114,12 +115,13 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     # VORTICITY FIELD WITH STREAMLINES PLOT
     # Colourmaps that work well: twilight, terrain, nipy_spectral, gist_ncar
     c = plt.imshow(vor[:cutoff, :].transpose(), origin='lower', extent=[0,cutoff,0,sim.num_y], cmap='gist_ncar', vmin=sim.scalemin, vmax=sim.scalemax)
-    bar2 = plt.colorbar(c)
-    bar2.set_label('$v$')
+    #bar2 = plt.colorbar(c)
+    #bar2.set_label('$v$')
     plt.title(r'Vorticity with Streamlines $v$', fontsize = '8')
     plt.xlabel('$X$')
     plt.ylabel('$Y$')
-    plt.streamplot(x[:cutoff], y, u[:cutoff, :, 0].transpose(), u[:cutoff,:,1].transpose(), color=[1,1,1], density = 0.87, linewidth = 0.4, arrowsize = 0.4)
+    #plt.streamplot(x[:cutoff], y, u[:cutoff, :, 0].transpose(), u[:cutoff,:,1].transpose(), color=[1,1,1], density = 0.87, linewidth = 0.4, arrowsize = 0.4)
+    plt.tight_layout()
     plt.savefig(f"{streamlines_dir}/streamlines_{t}.png", dpi=300)
     plt.close()
 
@@ -151,3 +153,9 @@ def plot_solution(sim, t, rho, u, vor, dvv_dir, streamlines_dir, test_streamline
     plt.ylabel('Y')
     plt.savefig(f"{test_mask_dir}/Test_mask_{t}.png", dpi=300)
     plt.close()
+
+
+    fig.clear()  # Clear the figure
+    del fig, ax  # Delete references to objects
+    plt.close('all')  # Close all figures
+    gc.collect()  # Explicit garbage collection

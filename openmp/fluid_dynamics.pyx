@@ -2,7 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, initializedcheck=False
 
 import time
 import numpy as np
@@ -39,6 +39,7 @@ def timestep_loop(Parameters sim,
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
     cdef double momentum_total
+    cdef double time_start, time_end, execution_time
 
     cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
 
@@ -66,13 +67,13 @@ def timestep_loop(Parameters sim,
     u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
     feq = equilibrium(num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-    vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
-    plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                  dvv_dir=dvv_dir,
-                  streamlines_dir=streamlines_dir, 
-                  test_streamlines_dir=test_streamlines_dir,
-                  test_mask_dir=test_mask_dir,
-                  )
+    # vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
+    # plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+    #               dvv_dir=dvv_dir,
+    #               streamlines_dir=streamlines_dir, 
+    #               test_streamlines_dir=test_streamlines_dir,
+    #               test_mask_dir=test_mask_dir,
+    #               )
 
     # Finally evolve the distribution in time
     time_start = time.time()
@@ -108,7 +109,12 @@ def timestep_loop(Parameters sim,
             print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 
@@ -146,7 +152,7 @@ def equilibrium(int num_x,
 
     feq[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             u_dot_u = u[i, j, 0] * u[i, j, 0] + u[i, j, 1] * u[i, j, 1]  # Magnitude squared of velocity
             for k in range(num_v):
@@ -182,7 +188,7 @@ def fluid_density(int num_x,
 
     rho[:, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             if mask[i, j] == 1:  # Set fluid density inside the obstacle
                 rho[i, j] = 0.0001 # To avoid divisions by 0
@@ -226,7 +232,7 @@ def fluid_velocity(int num_x,
 
     u[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             if mask[i, j] == 1:
                 u[i, j, :] = 0.0 # Set velocity to 0 in the obstacle
@@ -282,7 +288,7 @@ def collision(int num_x,
 
     cdef int i, j, k
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             for k in range(num_v):
                 f[i, j, k] = (f[i, j, k] * (1 - tau_inv)) + (feq[i, j, k] * tau_inv)
@@ -326,7 +332,7 @@ def stream_and_reflect(int num_x,
     cdef double momentum_total = 0.0
     f_new[:, :, :] = 0.0
 
-    for i in prange(num_x, nogil=True, schedule="static"): # Parallelize over x
+    for i in prange(num_x, nogil=True, schedule="guided"): # Parallelize over x
         for j in range(num_y):
             for k in range(num_v):
 

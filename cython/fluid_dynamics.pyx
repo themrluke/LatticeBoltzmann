@@ -2,7 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, initializedcheck=False
 
 import time
 import numpy as np
@@ -38,6 +38,7 @@ def timestep_loop(Parameters sim,
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
     cdef double momentum_total
+    cdef double time_start, time_end, execution_time
 
     cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
 
@@ -65,13 +66,13 @@ def timestep_loop(Parameters sim,
     u = fluid_velocity(num_x, num_y, num_v, c, mask, f, rho, u)
     feq = equilibrium(num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-    vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
-    plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                  dvv_dir=dvv_dir,
-                  streamlines_dir=streamlines_dir, 
-                  test_streamlines_dir=test_streamlines_dir,
-                  test_mask_dir=test_mask_dir,
-                  )
+    # vor = fluid_vorticity(u, num_x, num_y) # Visualise the setup
+    # plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+    #               dvv_dir=dvv_dir,
+    #               streamlines_dir=streamlines_dir, 
+    #               test_streamlines_dir=test_streamlines_dir,
+    #               test_mask_dir=test_mask_dir,
+    #               )
 
     # Finally evolve the distribution in time
     time_start = time.time()
@@ -107,7 +108,12 @@ def timestep_loop(Parameters sim,
             print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 

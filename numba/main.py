@@ -1,10 +1,11 @@
 # main.py
 
+import argparse
 import os 
 import time 
 import numpy as np
 import numba
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import cProfile
 import pstats
 
@@ -15,12 +16,10 @@ from plotting import plot_solution, setup_plot_directories
 
 
 # Verify the threads
-print(f"Max available threads: {numba.config.NUMBA_DEFAULT_NUM_THREADS}")
-numba.set_num_threads(8) # Set number of threads
 print(f"Using {numba.get_num_threads()} threads for Numba parallelization.")
 
 
-def simulation_setup():
+def simulation_setup(num_x):
     """
     Setup the Lattice Boltzmann parameters, initialise the obstacle and fields
 
@@ -35,7 +34,7 @@ def simulation_setup():
 
     # Initialise parameters
     # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=3200, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -120,19 +119,23 @@ def timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories):
             print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a text file
+    with open("loop_timings.txt", "a") as file:
+        file.write(f"{execution_time}\n")
 
     return force_array
 
 
-def main():
+def main(num_x):
 
     # Setup simulation
-    sim, rho, u, f, feq, reusable_arrays, directories = simulation_setup()
+    sim, rho, u, f, feq, reusable_arrays, directories = simulation_setup(num_x)
 
-    # Visualise setup
-    vor = fluid_vorticity(u)
-    plot_solution(sim, 0, rho, u, vor, *directories)
+    # vor = fluid_vorticity(u)
+    # plot_solution(sim, 0, rho, u, vor, *directories) # Visualise setup
 
     # Evolve simulation over time
     force_array = timestep_loop(sim, rho, u, f, feq, reusable_arrays, directories)
@@ -149,10 +152,13 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Simulation with adjustable grid size.")
+    parser.add_argument("--num_x", type=int, required=True, help="Number of grid points in the x direction.")
+    args = parser.parse_args()
 
     profiler = cProfile.Profile()
     profiler.enable()
-    main()
+    main(args.num_x)
     profiler.disable()
 
     # Print the top 20 functions by cumulative time spent

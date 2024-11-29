@@ -2,7 +2,7 @@
 
 # distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION
 
-# cython: boundscheck=True, wraparound=False, cdivision=True, initializedcheck=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, initializedcheck=False
 
 import time
 import numpy as np
@@ -19,7 +19,9 @@ def timestep_loop(Parameters sim,
                   int local_num_x,
                   int start_x,
                   int rank,
-                  int size):
+                  int size,
+                  int num_processes,
+                  int run_repeat):
     """
     Evolves the simulation over time
 
@@ -47,6 +49,7 @@ def timestep_loop(Parameters sim,
     cdef double cs4 = cs2*cs2
     cdef double tau_inv = sim.inv_tau
     cdef double momentum_total
+    cdef double time_start, time_end, execution_time
 
     cdef str dvv_dir, streamlines_dir, test_streamlines_dir, test_mask_dir
 
@@ -78,14 +81,14 @@ def timestep_loop(Parameters sim,
     u = fluid_velocity(local_num_x, num_y, num_v, c, mask, start_x, f, rho, u)
     feq = equilibrium(local_num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-    if rank == 0: # Visualise setup
-        vor = fluid_vorticity(u, local_num_x, num_y)
-        plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                    dvv_dir=dvv_dir,
-                    streamlines_dir=streamlines_dir, 
-                    test_streamlines_dir=test_streamlines_dir,
-                    test_mask_dir=test_mask_dir,
-                    )
+    # if rank == 0: # Visualise setup
+    #     vor = fluid_vorticity(u, local_num_x, num_y)
+    #     plot_solution(sim, t=0, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+    #                 dvv_dir=dvv_dir,
+    #                 streamlines_dir=streamlines_dir, 
+    #                 test_streamlines_dir=test_streamlines_dir,
+    #                 test_mask_dir=test_mask_dir,
+    #                 )
 
     # Work out the rank to the left and right
     left_neighbor = rank - 1 if rank > 0 else size - 1
@@ -124,18 +127,23 @@ def timestep_loop(Parameters sim,
         # Recalculate equilibrium
         feq = equilibrium(local_num_x, num_y, num_v, c, w, cs2, cs4, rho, u, feq)
 
-        if rank == 0: # Visualise the simulation
-            if (t % sim.t_plot == 0):
-                vor = fluid_vorticity(u, local_num_x, num_y)
-                plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
-                            dvv_dir=dvv_dir,
-                            streamlines_dir=streamlines_dir, 
-                            test_streamlines_dir=test_streamlines_dir,
-                            test_mask_dir=test_mask_dir)
-                print(f'PLOT {t} complete')
+        # if rank == 0: # Visualise the simulation
+        #     if (t % sim.t_plot == 0):
+        #         vor = fluid_vorticity(u, local_num_x, num_y)
+        #         plot_solution(sim, t=t, rho=np.asarray(rho), u=np.asarray(u), vor=vor,
+        #                     dvv_dir=dvv_dir,
+        #                     streamlines_dir=streamlines_dir, 
+        #                     test_streamlines_dir=test_streamlines_dir,
+        #                     test_mask_dir=test_mask_dir)
+        #         print(f'PLOT {t} complete')
 
     time_end = time.time()
-    print('TIME FOR TIMESTEP_LOOP FUNCTION: ', time_end - time_start)
+    execution_time = time_end - time_start
+    print(f'TIME FOR TIMESTEP_LOOP FUNCTION: {execution_time}')
+
+    # Append the result to a CSV file
+    with open("loop_timings.csv", "a") as csv_file:
+        csv_file.write(f"{execution_time},{rank},{sim.num_x},{num_processes},{run_repeat}\n")  # Write data as a row
 
     return local_force_array
 
