@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
+from matplotlib.lines import Line2D
 
 
 def find_min_times(filepath, num_runs, max_threads):
@@ -35,7 +36,7 @@ def find_min_times(filepath, num_runs, max_threads):
 
         thread_times = [float(lines[i].strip()) for i in range(start_idx, end_idx)]
 
-        min_times.append(min(thread_times)) # List now only inclues fastest run for each thread count
+        min_times.append(min(thread_times)) # List now only includes fastest run for each thread count
 
     return min_times
 
@@ -45,7 +46,7 @@ def find_min_times_mpi(filepath, num_runs, max_threads):
     Finds the minimum run time for each repeat for each number of threads for MPI.
     We need a different function here because MPI will print N timing values for N threads,
     we want only the slowest value (thread that finishes last) to be considered when calculating
-    the fasted repeat at each number of threads.
+    the fastest repeat at each number of threads.
 
     Arguments:
         filepath (str): Path to the text file containing timing data
@@ -392,12 +393,12 @@ def speedup_plot(implementations, max_threads, name, overlays=None):
 
         # Plot speedup
         ax1.errorbar(
-            threads, speedup, yerr=speedup_err, label=f"{label} Speedup",
+            threads, speedup, yerr=speedup_err, label=f"{label}",
             color=color, linewidth=1.5, marker="o", markersize=3, capsize=3
         )
 
         # Store efficiency data for the secondary y-axis
-        efficiency_lines.append((efficiency, efficiency_err, f"{label} Efficiency", color))
+        efficiency_lines.append((efficiency, efficiency_err, color))
 
     # Overlay raw data (e.g., remainder line)
     if overlays:
@@ -410,22 +411,21 @@ def speedup_plot(implementations, max_threads, name, overlays=None):
     ax1.spines['right'].set_visible(False)
     ax1.spines['left'].set_linewidth(2)  # Thicken left spine
     ax1.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
-    ax1.set_xlabel("Workers", fontsize=30)
-    ax1.set_ylabel("Speedup", fontsize=30)
+    ax1.set_xlabel("Workers", fontsize=25)
+    ax1.set_ylabel("Speedup", fontsize=25)
     ax1.set_xscale('linear')
     ax1.set_yscale('linear')
     ax1.yaxis.set_major_formatter(ScalarFormatter())
     ax1.xaxis.set_major_formatter(ScalarFormatter())
-    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
-    ax1.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=20)
+    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)
 
     # Create secondary axis for efficiency
     ax2 = ax1.twinx()
 
-    for efficiency, efficiency_err, label, color in efficiency_lines:
+    for efficiency, efficiency_err, color in efficiency_lines:
         ax2.errorbar(
-            threads, efficiency, yerr=efficiency_err, linestyle='dashed', label=label,
-            color=color, linewidth=1.5, alpha=0.3, marker="o", markersize=2, capsize=3
+            threads, efficiency, yerr=efficiency_err, linestyle='dashed',
+            color=color, linewidth=2, alpha=0.4, marker="o", markersize=2, capsize=3
         )
 
     # Configure the efficiency axis
@@ -433,19 +433,33 @@ def speedup_plot(implementations, max_threads, name, overlays=None):
     ax2.spines['left'].set_visible(False)
     ax2.spines['right'].set_linewidth(2)
     ax2.spines['bottom'].set_linewidth(2)
-    ax2.set_ylabel("Efficiency", fontsize=30)
+    ax2.set_ylabel("Efficiency", fontsize=25)
     ax2.set_yscale('linear')
+    ax2.set_ylim(0, 1)
     ax2.yaxis.set_major_formatter(ScalarFormatter())
-    ax2.tick_params(axis='both', which='major', width=2, length=8,  labelsize=25)  # Adjust tick length too
-    ax2.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=25)
+    ax2.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)
 
     # Combine legends from both axes
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc='center right', fontsize=25)
+
+    # Create custom legend entries for line styles
+    custom_lines = [
+        Line2D([0], [0], color='black', linestyle='-', linewidth=2, label='Speedup'),
+        Line2D([0], [0], color='black', linestyle='--', linewidth=2, label='Efficiency')
+    ]
+
+    # Combine all legend entries
+    ax1.legend(
+        custom_lines + lines1 + lines2,
+        [line.get_label() for line in custom_lines] + labels1 + labels2,
+        loc='center right',
+        #loc='lower right',
+        fontsize=20
+    )
 
     # Add grid and layout adjustments
-    ax1.grid(True, which="both", linewidth=0.5)
+    #ax1.grid(True, which="both", linewidth=0.5)
     plt.tight_layout()
     plt.savefig(f"{name}.png", dpi=300)
     plt.close()
@@ -487,10 +501,10 @@ def times_plot(implementations, max_threads, name, overlays=None):
     ax1.spines['right'].set_visible(False)
     ax1.spines['left'].set_linewidth(2)  # Thicken left spine
     ax1.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
-    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=25)  # Adjust tick length too
-    ax1.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=25)
-    ax1.set_xlabel("Workers", fontsize=35)
-    ax1.set_ylabel("Time (s)", fontsize=35)
+    ax1.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
+    ax1.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=20)
+    ax1.set_xlabel("Workers", fontsize=25)
+    ax1.set_ylabel("Time (s)", fontsize=25)
     ax1.set_xscale('linear')
     ax1.set_yscale('log')
 
@@ -505,7 +519,7 @@ def times_plot(implementations, max_threads, name, overlays=None):
 
 
 
-def system_size_combined_plot(system_sizes, implementations):
+def system_size_plot(system_sizes, implementations):
     """
     Line plot to show execution time vs. system size for multiple implementations.
 
@@ -522,21 +536,27 @@ def system_size_combined_plot(system_sizes, implementations):
     for avg_times, std_errors, implementation_name, color in implementations:
         plt.errorbar(
             system_sizes, avg_times, yerr=std_errors, label=implementation_name,
-            linewidth=1, color=color, marker="o", markersize=2, capsize=3
+            linewidth=1.5, color=color, marker="o", markersize=3, capsize=3
         )
 
-    plt.xlabel("System Size (num_x)", fontsize=12)
-    plt.ylabel("Time (s)", fontsize=12)
+    plt.xlabel("System Size (num_x)", fontsize=25)
+    plt.ylabel("Time (s)", fontsize=25)
     plt.yscale('log')
     plt.xscale('log')
 
     # Set integer formatting for both axes
     ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_linewidth(2)  # Thicken left spine
+    ax.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
+    ax.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
+    ax.tick_params(axis='both', which='minor', width=1.5, length=4,  labelsize=20)
     ax.ylim = (0.1, 1000)
     ax.xlim = (1, 1000)
 
-    plt.legend()
-    #plt.grid(axis='y', zorder=0, linewidth=1)
+    plt.legend(fontsize=20)
+    plt.grid(axis='y', zorder=0, linewidth=0.5)
     plt.tight_layout()
     plt.savefig("system_sizes.png", dpi=300)
     plt.close()
@@ -594,28 +614,35 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
 
     # Add a legend for the bar colors
     plt.legend(
-        ['BC4 (Blue Crystal 4)', 'GPU (4070TI)'],
-        loc='upper right', fontsize=14, frameon=True,
+        ['BC4 (BlueCrystal 4)', 'GPU (4070TI)'],
+        loc='upper right', fontsize=20, frameon=True,
         handles=[
-            plt.Line2D([0], [0], color='#1f77b4', lw=6, label='CPU (Blue Crystal 4)'),
+            plt.Line2D([0], [0], color='#1f77b4', lw=6, label='CPU (BlueCrystal 4)'),
             plt.Line2D([0], [0], color='purple', lw=6, label='CPU (Intel i7 13700K)'),
-            plt.Line2D([0], [0], color='orange', lw=6, label='GPU (RTX 4070Ti)')
+            plt.Line2D([0], [0], color='orange', lw=6, label='GPU (4070Ti)')
         ]
     )
 
-    plt.grid(axis='y', zorder=0, linewidth=1)
+    ax = plt.gca()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_linewidth(2)  # Thicken left spine
+    ax.spines['bottom'].set_linewidth(2)  # Thicken bottom spine
+    ax.tick_params(axis='both', which='major', width=2, length=8,  labelsize=20)  # Adjust tick length too
+    ax.tick_params(axis='y', which='minor', width=1.5, length=4,  labelsize=20)
+
+    plt.grid(axis='y', zorder=0, linewidth=0.5)
     plt.yscale('log')  # Logarithmic scale for the y-axis
-    plt.ylim(0.5, 10**5)  # Adjust the starting and ending values of the y-axis
-    plt.ylabel("Time (s)", fontsize=14)
-    plt.yticks(fontsize=12)
+    plt.ylim(0.5, 2.4 * 10**4)  # Adjust the starting and ending values of the y-axis
+    plt.ylabel("Time (s)", fontsize=25)
 
     # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha='right', fontsize=10)  # Rotate 45 degrees and align to the right
+    plt.xticks(rotation=45, ha='right', fontsize=15)  # Rotate 45 degrees and align to the right
 
     # Add the values inside the bars
     for bar, time in zip(bars, times):
-        plt.text(bar.get_x() + bar.get_width() / 2.0, 0.7,  # Position inside the bar
-                 f"{time:.2f}", ha='center', va='baseline', color='white', fontsize=12, fontweight='bold', rotation='vertical')
+        plt.text(bar.get_x() + bar.get_width() / 2.0, 0.62,  # Position inside the bar
+                 f"{time:.2f}", ha='center', va='baseline', color='white', fontsize=22, fontweight='bold', rotation='vertical')
 
     plt.tight_layout()
 
@@ -637,7 +664,7 @@ def main():
     # Implementations for speedup plotting
     implementations_speedup = [
         (numba_avg, numba_err, "Numba", 'red'),
-        (openmp_avg_guided, openmp_err_guided, "OpenMP guided", 'blue'),
+        (openmp_avg_guided, openmp_err_guided, "OpenMP", 'blue'),
         (mpi_avg, mpi_err, "MPI", 'limegreen')
     ]
 
@@ -646,20 +673,20 @@ def main():
 
     # Make a plot of the MPI speedup across 2 nodes
     mpi_speedup_2nodes = [
-        (mpi_avg_2nodes, mpi_err_2nodes, "MPI 2 Nodes", 'green')
+        (mpi_avg_2nodes, mpi_err_2nodes, "MPI (2 Nodes)", 'crimson')
     ]
 
     # Overlay the remainder contribution for each amount of workers
     remainder_line = -0.01 * np.arange(1, 57, 1) * np.array([3200 % N for N in range(1, 57)]) + np.arange(1, 57, 1)
     overlays = [
-        (np.arange(1, 57), remainder_line, "Remainder Contribution", 'orange')
+        (np.arange(1, 57), remainder_line, "Load Imbalance", 'grey')
     ]
 
     speedup_plot(mpi_speedup_2nodes, max_threads=56, name='mpi_2_nodes_speedup', overlays=overlays)
 
     # Compare the speedups of different OpenMP schedules
     implementations_openmp = [
-        (openmp_avg_static, openmp_err_static, "OpenMP static", 'orange'),
+        (openmp_avg_static, openmp_err_static, "OpenMP static", 'magenta'),
         (openmp_avg_dynamic, openmp_err_dynamic, "OpenMP dynamic", 'purple'),
         (openmp_avg_guided, openmp_err_guided, "OpenMP guided", 'blue'),
     ]
@@ -686,7 +713,7 @@ def main():
     )
 
 
-    # Below is plot for changing sytem sizes
+    # Below is plot for changing system sizes
     system_sizes = [ # x-sizes of lattice
         2, 4, 6, 8, 10, 20, 40, 60, 80, 120, 250, 400, 600, 800, 1000, 1200, 1400, 1600, 2000, 2400, 2800, 3200, 4000, 4800, 5600, 6400
     ]
@@ -714,16 +741,16 @@ def main():
     )
 
     implementations_sizes = [
-        (numba_avg_sizes, numba_err_sizes, "Numba (28 Threads)", 'red'),
-        (openmp_avg_sizes, openmp_err_sizes, "OpenMP (28 Threads)", 'blue'),
-        (mpi_avg_sizes, mpi_err_sizes, "MPI (28 Processes)", 'limegreen'),
-        (numbagpu_avg_sizes, numbagpu_err_sizes, "Numba GPU (4070TI)", 'orange'),
+        (numba_avg_sizes, numba_err_sizes, "Numba", 'red'),
+        (openmp_avg_sizes, openmp_err_sizes, "OpenMP", 'blue'),
+        (mpi_avg_sizes, mpi_err_sizes, "MPI", 'limegreen'),
+        (numbagpu_avg_sizes, numbagpu_err_sizes, "GPU (4070TI)", 'orange'),
         (cython_avg_sizes, cython_err_sizes, "Cython", 'purple'),
         (vectorized_avg_sizes, vectorized_err_sizes, "Vectorized Python", 'turquoise'),
     ]
 
     # Generate the combined plot
-    system_size_combined_plot(system_sizes, implementations_sizes)
+    system_size_plot(system_sizes, implementations_sizes)
 
 
 if __name__ == "__main__":

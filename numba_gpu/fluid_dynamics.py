@@ -20,7 +20,7 @@ def equilibrium_kernel(num_x, num_y, num_v, rho, u, feq, c, w, cs):
         w (array): Weight coefficients for velocity directions
         cs (float): Lattice speed of sound
     """
-    
+
     # Pre-compute the speed of sound squared & to power of 4
     cs2 = cs * cs
     cs4 = cs2 * cs2
