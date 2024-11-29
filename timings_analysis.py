@@ -461,7 +461,7 @@ def speedup_plot(implementations, max_threads, name, overlays=None):
     # Add grid and layout adjustments
     #ax1.grid(True, which="both", linewidth=0.5)
     plt.tight_layout()
-    plt.savefig(f"speedup_PLOTS/{name}.png", dpi=300)
+    plt.savefig(f"GRAPHS/{name}.png", dpi=300)
     plt.close()
 
 
@@ -514,7 +514,7 @@ def times_plot(implementations, max_threads, name, overlays=None):
 
     # Add layout adjustments
     plt.tight_layout()
-    plt.savefig(f"speedup_PLOTS/{name}.png", dpi=300)
+    plt.savefig(f"GRAPHS/{name}.png", dpi=300)
     plt.close()
 
 
@@ -558,7 +558,7 @@ def system_size_plot(system_sizes, implementations):
     plt.legend(fontsize=17)
     plt.grid(axis='y', zorder=0, linewidth=0.5)
     plt.tight_layout()
-    plt.savefig("speedup_PLOTS/system_sizes.png", dpi=300)
+    plt.savefig("GRAPHS/system_sizes.png", dpi=300)
     plt.close()
 
 
@@ -647,7 +647,7 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
     plt.tight_layout()
 
     # Save the plot
-    plt.savefig("speedup_PLOTS/bar_plot.png", dpi=300)
+    plt.savefig("GRAPHS/bar_plot.png", dpi=300)
     plt.close()
 
 

@@ -1,7 +1,7 @@
 # Ignore PNG files in subdirectories only
 **/*.png
 !/*.png
-!speedup_PLOTS/*.png
+!GRAPHS/*.png
 
 # # Ignore all CSV files
 # *.csv
