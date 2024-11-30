@@ -562,13 +562,13 @@ def system_size_plot(system_sizes, implementations):
     plt.close()
 
 
-def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time, numba_intel_min_time):
+def bar_plot(standard_time, vectorized_time, cython_time, mpi_times, openmp_times, numba_times, numba_gpu_time, numba_intel_min_time):
     """
-    Creates a bar plot comparing the execution times of standard, vectorised, and Cython implementations.
+    Creates a bar plot comparing the execution times of standard, vectorized, and Cython implementations.
 
     Args:
         standard_time (float): Execution time for standard Python program
-        vectorised_time (float): Execution time for vectorised Python program
+        vectorized_time (float): Execution time for vectorized Python program
         cython_time (float): Execution time for Cython program
     """
 
@@ -586,14 +586,14 @@ def bar_plot(standard_time, vectorised_time, cython_time, mpi_times, openmp_time
 
     # Labels and times
     labels = [
-        'Standard Python', 'vectorised Python', 'Cython',
+        'Standard Python', 'vectorized Python', 'Cython',
         'OpenMP (1 Thread)', 'Numba (1 Thread)', ' MPI (1 Process)',
         'OpenMP (8 Threads)', 'Numba (8 Threads)', ' Numba (8 Threads)', ' MPI (8 Processes)',
         'OpenMP (28 Threads)', 'Numba (28 Threads)', ' MPI (28 Processes)',
         'Numba GPU (4070TI)'
     ]
     times = [
-        standard_time, vectorised_time, cython_time,
+        standard_time, vectorized_time, cython_time,
         openmp_1thread, numba_1thread, mpi_1process,
         openmp_8threads, numba_8threads, numba_intel_min_time, mpi_8processes,
         openmp_28threads, numba_28threads, mpi_28processes,
@@ -699,7 +699,7 @@ def main():
     openmp_min_threads = find_min_times(filepath='openmp/loop_timings_speedup_guided.txt', num_runs=5, max_threads=28)
     mpi_min_threads = find_min_times_mpi(filepath='mpi/loop_timings_speedup.txt', num_runs=5, max_threads=28)
     standard_min_time = single_thread_times(filepath='standard_python/loop_timings_3200.txt', num_runs=1)
-    vectorised_min_time = single_thread_times(filepath='vectorised_python/loop_timings_3200.txt', num_runs=10)
+    vectorized_min_time = single_thread_times(filepath='vectorized_python/loop_timings_3200.txt', num_runs=10)
     cython_min_time = single_thread_times(filepath='cython/loop_timings_3200.txt', num_runs=10)
     numbagpu_min_time = single_thread_times(filepath='numba_gpu/loop_timings_3200.txt', num_runs=5)
 
@@ -707,7 +707,7 @@ def main():
     numba_intel_min_time = single_thread_times(filepath='numba/loop_timings_intel.txt', num_runs=5)
 
     bar_plot(
-        standard_min_time, vectorised_min_time, cython_min_time,
+        standard_min_time, vectorized_min_time, cython_min_time,
         mpi_min_threads, openmp_min_threads, numba_min_threads,
         numbagpu_min_time, numba_intel_min_time
     )
@@ -737,7 +737,7 @@ def main():
         filepath='cython/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     )
     vectorized_avg_sizes, vectorized_err_sizes = find_avg_times_system_sizes(
-        filepath='vectorised_python/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
+        filepath='vectorized_python/loop_timings_sizes.txt', num_runs=num_runs, system_sizes=system_sizes
     )
     standard_avg_sizes, standard_err_sizes = find_avg_times_system_sizes(
         filepath='standard_python/loop_timings_sizes.txt', num_runs=1, system_sizes=system_sizes
