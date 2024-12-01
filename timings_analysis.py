@@ -453,8 +453,7 @@ def speedup_plot(implementations, max_threads, name, overlays=None):
     ax1.legend(
         custom_lines + lines1 + lines2,
         [line.get_label() for line in custom_lines] + labels1 + labels2,
-        loc='center right',
-        #loc='lower right',
+        loc = 'lower right' if overlays else 'center right',
         fontsize=20
     )
 
@@ -536,7 +535,7 @@ def system_size_plot(system_sizes, implementations):
     for avg_times, std_errors, implementation_name, color in implementations:
         plt.errorbar(
             system_sizes, avg_times, yerr=std_errors, label=implementation_name,
-            linewidth=1.5, color=color, marker="o", markersize=3, capsize=3
+            linewidth=1.5, color=color, marker="o", markersize=3, capsize=3, zorder=3
         )
 
     plt.xlabel(r"System Size ($\mathbf{x}$)", fontsize=25)
@@ -555,7 +554,8 @@ def system_size_plot(system_sizes, implementations):
     ax.set_ylim(0.03, 10000)
     ax.set_xlim(1, 7000)
 
-    plt.legend(fontsize=17)
+    legend = plt.legend(fontsize=17)
+    legend.set_zorder(2)
     plt.grid(axis='y', zorder=0, linewidth=0.5)
     plt.tight_layout()
     plt.savefig("GRAPHS/system_sizes.png", dpi=300)
