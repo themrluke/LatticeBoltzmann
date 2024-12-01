@@ -1,10 +1,9 @@
 # Ignore PNG files in subdirectories only
 **/*.png
-!/*.png
 !GRAPHS/*.png
 
 # # Ignore all CSV files
-# *.csv
+**/Data/*.csv
 
 # Ignore all C, so, o files (compiled from Cython)
 *.c
