@@ -47,8 +47,7 @@ def main(num_x):
     """
 
     # Initialise parameters
-    # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
-    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=1000)
+    sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
     initialiser = InitialiseSimulation(sim)
@@ -138,13 +137,13 @@ def main(num_x):
             num_x, num_y, num_v, f_device, f_new_device, momentum_point_device, u_device, mask_device, mask2_device, reflection_device, c_device, momentum_partial_device
         )
 
-        # total_momentum_device[0] = 0.0  # Reset the total momentum accumulator
-        # global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](
-        #     momentum_partial_device, total_momentum_device
-        # )
-        # cuda.synchronize()
+        total_momentum_device[0] = 0.0  # Reset the total momentum accumulator
+        global_reduce_kernel[blocks_per_grid_x, threads_per_block[0]](
+            momentum_partial_device, total_momentum_device
+        )
+        cuda.synchronize()
 
-        # force_array[t - 1] = total_momentum_device.copy_to_host()[0] # Calculate the force at current timestep
+        force_array[t - 1] = total_momentum_device.copy_to_host()[0] # Calculate the force at current timestep
 
         # Swap buffers
         f_device, f_new_device = f_new_device, f_device

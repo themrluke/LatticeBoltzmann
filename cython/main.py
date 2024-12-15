@@ -15,7 +15,6 @@ from fluid_dynamics import timestep_loop
 def main(num_x):
 
     # Initialise parameters
-    # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
     sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=100)
 
     # Initialise the simulation, obstacle and density & velocity fields
