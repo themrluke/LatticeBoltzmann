@@ -45,15 +45,15 @@ Many different libraries were used for parallelization and compiling Python code
 - Execution time for a variety of system sizes
 - Vortices plots were not included in repo but can be seen by:
     1. Creating new ones by running the simulation and adjusting the `t_plot` interval
-    2. Looking at example plot [here](GRAPHS/streamlines128_24.png)
+    2. Looking at an example plot [here](GRAPHS/streamlines128_24.png)
 
 <br>
 
 **[masks](masks/)**
 - Binary `.txt` files containing obstacle data
 - 1 = obstacle, 0 = empty lattice site
-- This method allows visual feedback for users to draw complex mask shapes
-- Mask data read into Python scripts and overalyed on a custom region of lattice
+- This method allows visual feedback for users while drawing complex mask shapes
+- Mask data is read into Python scripts and overalyed on a custom region of lattice
 
 <br>
 
