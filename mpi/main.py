@@ -20,7 +20,6 @@ def main(num_x, num_processes, run_repeat):
     size = MPI.COMM_WORLD.Get_size()
 
     # Initialise parameters
-    # num_x=3200, num_y=200, tau=0.500001, u0=0.18, scalemax=0.015, t_steps = 24000, t_plot=500
     sim = Parameters(num_x=num_x, num_y=200, tau=0.7, u0=0.18, scalemax=0.015, t_steps = 500, t_plot=10000)
 
     # Divide the domain along the x-dimension

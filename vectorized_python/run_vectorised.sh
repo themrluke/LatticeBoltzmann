@@ -1,9 +1,9 @@
 #!/bin/bash
 # ======================
-# run_vectorised.sh
+# run_vectorized.sh
 # ======================
 
-#SBATCH --job-name=vectorised_job     # Name of the job
+#SBATCH --job-name=vectorized_job     # Name of the job
 #SBATCH --partition=cpu         # Use the teaching CPU partition
 #SBATCH --account=PHYS033184          # Account for Advanced Computational Physics
 #SBATCH --nodes=1                     # Use 1 node
