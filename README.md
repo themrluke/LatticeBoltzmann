@@ -113,7 +113,14 @@ The different implementations are:
 6. [MPI](mpi/)
 7. [GPU](numba_gpu/)
 
-Each of these folders will contain the following files:
+**&#9733; To run the code, navigate to one of these folders and type: `./run_<implementation>.sh`,
+<br>
+making the `.sh` file is configured to the correct threads/repeats/lattice size etc.
+<br>
+<br>
+&#9733; If using a job scheduler like Slurm, then use: `sbatch run_<implementation>.sh` instead**
+
+&#9642; Each of these folders will contain the following files:
 
 
 ## 1. Shell Script
@@ -157,9 +164,9 @@ Each of these folders will contain the following files:
 
 - Saves plots in specified intervals
 
-- Gathers simulation force data and saves to CSV file
+- Gathers simulation force data and saves to `.csv` file
 
-**NOTE:** In the [MPI version](mpi/main.py) it sets up the ranks and divides workload. The [GPU version](numba_gpu/main.py) also configures the threads per block, blocks per grid, and  launches the CUDA kernels.
+**NOTE:** In the [MPI version](mpi/main.py), it also sets up the ranks and divides workload. The [GPU version](numba_gpu/main.py) configures the threads per block, blocks per grid, and  launches the CUDA kernels.
 
 
 ## 4. Parameters File
