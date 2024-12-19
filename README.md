@@ -24,7 +24,7 @@ Many different libraries were used for parallelization and compiling Python code
 1. Clone this repository
 2. The environment [file](env.yaml) contains all necessary libraries
 3. Create the Conda environment with `conda env create -f env.yaml`
-4. The preferred method of interaction with this repository is via [VSCode](https://code.visualstudio.com/download). Download any extensions required as prompted.
+4. The preferred method of interaction with this repository is via [VScode](https://code.visualstudio.com/download). Download any extensions required as prompted.
 
 <br>
 
@@ -78,7 +78,7 @@ Many different libraries were used for parallelization and compiling Python code
     apt-get download git-lfs
     dpkg-deb -x git-lfs_* ~/bin
     ```
-    - and add it your $PATH with:
+    - and add it to your $PATH with:
     ```bash
     export PATH="$HOME/bin/usr/local/git-lfs/bin:$PATH"
     ```
@@ -87,6 +87,39 @@ Many different libraries were used for parallelization and compiling Python code
 ```git lfs install```
 
 Then you can use the standard git commands.
+
+<br>
+
+# Getting Numba GPU to Work
+
+- To run code on the GPU with Numba, your system needs to have a compatible version of CUDA toolkit and drivers.
+
+- Your can check your CUDA version by typing `nvidia-smi` in the terminal. This code definately works with 12.5 and later
+
+- By default, your system will likely not be able to find the CUDA toolkit installation
+
+- To fix this, first edit your bash script by typing: `nano ~/.bashrc`
+
+- Now we can set environment variables related to the CUDA Toolkit and NVIDIA GPU drivers 
+
+**For WSL add the following lines to the bottom of your bash script:**
+```bash
+export LD_LIBRARY_PATH="/usr/lib/wsl/lib/"
+export NUMBA_CUDA_DRIVER="/usr/lib/wsl/lib/libcuda.so.1"
+export PATH=/usr/local/cuda-12.6/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-12.6/lib64:$LD_LIBRARY_PATH
+```
+
+**On a remote host like Bristol `gpu04.dice.priv` use:**
+```bash
+export CUDA_HOME=/usr/local/cuda-12.5
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$CUDA_HOME/nvvm/lib64:$LD_LIBRARY_PATH
+export NUMBA_CUDA_NVVM=$CUDA_HOME/nvvm/libdevice
+export NUMBA_CUDA_LIBDEVICE=$CUDA_HOME/nvvm/libdevice
+```
+
+Be sure to tailor these paths to your system
 
 <br>
 <br>
@@ -156,7 +189,12 @@ making the `.sh` file is configured to the correct threads/repeats/lattice size 
 
 - Imports pre-coded Python modules
 
-- Sets up simulation parameters
+- Sets up simulation parameters. Here you can alter the:
+  - Length of simulation
+  - Lattice size
+  - Obstacle type
+  - Fluid speed
+  - Decay timescale etc.
 
 - Runs the initialisation step
 
@@ -196,3 +234,18 @@ making the `.sh` file is configured to the correct threads/repeats/lattice size 
 - The Cythonized versions of this file will include the timestep loop to evolve fluid properties over time
 
 - Includes functions for: collision, streaming & boundary reflection, fluid density, velocity, vorticity, and equilibrium distribution
+
+## 7. Plotting File
+
+- Responsible for creating, saving, and visualising plots of the simulation
+
+- Creates subdirectories:
+  - `plots` - The main subdirectory to store all images.
+  - `DVV` - Visualises the density, velocity and vorticity fields.
+  - `streamlines` - Combines the vorticity field with streamlines at each timestep. This plot zooms in on the interesting part near the obstacles and doesn't show the whole lattice.
+  - `test mask` - A test plot to ensure the correct mask has been initialised to measure the force data.
+  - `test streamlines` - Similar to the `streamlines` plots, but shows the whole lattice for diagnostic purposes.
+
+**&#9733; NOTE:** These images haven't been included in this repo, but an example can be seen [here](GRAPHS/streamlines128_24.png).
+
+Alternatively, new plots can be created at timestep intervals specified in the `main` file.
