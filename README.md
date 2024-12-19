@@ -148,7 +148,7 @@ The different implementations are:
 
 **&#9733; To run the code, navigate to one of these folders and type: `./run_<implementation>.sh`,
 <br>
-making the `.sh` file is configured to the correct threads/repeats/lattice size etc.
+making sure the `.sh` file is configured to the correct threads/repeats/lattice size etc.
 <br>
 <br>
 &#9733; If using a job scheduler like Slurm, then use: `sbatch run_<implementation>.sh` instead**
